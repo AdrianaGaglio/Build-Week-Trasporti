@@ -40,44 +40,62 @@ public class MainInsert {
         List<Utente> utenti = new ArrayList<>();
 
         for (int i = 0; i < 10; i++) {
-            Utente utente = new Utente();
-            utente.setNome(faker.name().firstName());
-            utente.setCognome(faker.name().lastName());
-            utente.setDataNascita(faker.date().past(1000, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
-            utente.setEmail(faker.internet().emailAddress());
-            utenti.add(utente);
+            try {
+                Utente utente = new Utente();
+                utente.setNome(faker.name().firstName());
+                utente.setCognome(faker.name().lastName());
+                utente.setDataNascita(faker.date().past(1000, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+                utente.setEmail(faker.internet().emailAddress());
+                utenti.add(utente);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         utenteDAO.saveAll(utenti);
 
         for (int i = 0; i < 10; i++) {
-            Tessera tessera = new Tessera();
-            tessera.setValidita(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate().plusYears(1));
-            tesseraDAO.save(tessera);
-            Utente utente = utenteDAO.getById((long) (i + 1));
-            utente.setTessera(tessera);
-            utenteDAO.update(utente);
+            try {
+                Tessera tessera = new Tessera();
+                tessera.setValidita(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate().plusYears(1));
+                tesseraDAO.save(tessera);
+                Utente utente = utenteDAO.getById((long) (i + 1));
+                utente.setTessera(tessera);
+                utenteDAO.update(utente);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
 
         String city = faker.address().city();
 
         for (int i = 0; i < 50; i++) {
-            Tratta tratta = new Tratta();
-            tratta.setPartenza(city + " " + faker.address().streetAddress());
-            tratta.setCapolinea(city + " " + faker.address().streetAddress());
-            tratta.setDurata(LocalTime.of(faker.random().nextInt(0,2), faker.random().nextInt(10,45)));
-            trattaDAO.save(tratta);
+            try {
+                Tratta tratta = new Tratta();
+                tratta.setPartenza(city + " " + faker.address().streetAddress());
+                tratta.setCapolinea(city + " " + faker.address().streetAddress());
+                tratta.setDurata(LocalTime.of(faker.random().nextInt(0, 2), faker.random().nextInt(10, 45)));
+                trattaDAO.save(tratta);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         for (int i = 0; i < 150; i++) {
-            Percorrenza percorrenza = new Percorrenza();
-            percorrenza.setData(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
-            percorrenza.setDurata_effettiva(LocalTime.of(faker.random().nextInt(0,2), faker.random().nextInt(10,45)));
-            percorrenza.setTratta(trattaDAO.getById(parseLong(faker.random().nextInt(1, 51).toString())));
-            percorrenzaDAO.save(percorrenza);
+            try {
+                Percorrenza percorrenza = new Percorrenza();
+                percorrenza.setData(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+                percorrenza.setDurata_effettiva(LocalTime.of(faker.random().nextInt(0, 2), faker.random().nextInt(10, 45)));
+                percorrenza.setTratta(trattaDAO.getById(parseLong(faker.random().nextInt(1, 51).toString())));
+                percorrenzaDAO.save(percorrenza);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            em.close();
         }
 
-        em.close();
     }
 
 }

@@ -1,6 +1,7 @@
 package epicode.it.dao.percorrenza;
 
 import epicode.it.entities.percorrenza.Percorrenza;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 
