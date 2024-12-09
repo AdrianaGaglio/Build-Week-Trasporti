@@ -1,9 +1,7 @@
 package epicode.it.entities.biglietto;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import epicode.it.utilities.StringGenerator;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -13,6 +11,10 @@ import java.time.LocalDate;
 public abstract class Biglietto {
 @Id
 @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    String codice;
-    LocalDate scadenza;
+    private Integer id;
+    private String codice = "B-" + StringGenerator.random(10);
+    private LocalDate scadenza;
+
+    //@ManyToOne
+    // Rivenditore rivenditore
 }
