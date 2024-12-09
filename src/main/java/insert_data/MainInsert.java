@@ -2,17 +2,25 @@
 package insert_data;
 
 import com.github.javafaker.Faker;
+import epicode.it.dao.percorrenza.PercorrenzaDAO;
 import epicode.it.dao.tessera.TesseraDAO;
+import epicode.it.dao.tratta.TrattaDAO;
 import epicode.it.dao.utente.UtenteDAO;
+import epicode.it.entities.percorrenza.Percorrenza;
 import epicode.it.entities.tessera.Tessera;
+import epicode.it.entities.tratta.Tratta;
 import epicode.it.entities.utente.Utente;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
+import java.sql.Time;
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Long.parseLong;
@@ -25,6 +33,9 @@ public class MainInsert {
 
         UtenteDAO utenteDAO = new UtenteDAO(em);
         TesseraDAO tesseraDAO = new TesseraDAO(em);
+
+        TrattaDAO trattaDAO = new TrattaDAO(em);
+        PercorrenzaDAO percorrenzaDAO = new PercorrenzaDAO(em);
 
         List<Utente> utenti = new ArrayList<>();
 
@@ -47,6 +58,26 @@ public class MainInsert {
             utente.setTessera(tessera);
             utenteDAO.update(utente);
         }
+
+        String city = faker.address().city();
+
+        for (int i = 0; i < 50; i++) {
+            Tratta tratta = new Tratta();
+            tratta.setPartenza(city + " " + faker.address().streetAddress());
+            tratta.setCapolinea(city + " " + faker.address().streetAddress());
+            tratta.setDurata(LocalTime.of(faker.random().nextInt(0,2), faker.random().nextInt(10,45)));
+            trattaDAO.save(tratta);
+        }
+
+        for (int i = 0; i < 150; i++) {
+            Percorrenza percorrenza = new Percorrenza();
+            percorrenza.setData(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+            percorrenza.setDurata_effettiva(LocalTime.of(faker.random().nextInt(0,2), faker.random().nextInt(10,45)));
+            percorrenza.setTratta(trattaDAO.getById(parseLong(faker.random().nextInt(1, 51).toString())));
+            percorrenzaDAO.save(percorrenza);
+        }
+
+        em.close();
     }
 
 }

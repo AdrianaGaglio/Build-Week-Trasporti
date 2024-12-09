@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 @Data
 @Entity
-@NamedQuery(name = "findAll", query = "SELECT a FROM Utente a")
+@NamedQuery(name = "findAll_Utente", query = "SELECT a FROM Utente a")
 @NamedQuery(name = "findByCard", query = "SELECT a FROM Utente a WHERE a.tessera.codice = :codice")
 @Table(name="utenti")
 public class Utente {
