@@ -4,8 +4,10 @@ import epicode.it.entities.biglietto.Abbonamento;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.util.List;
+
 
 @AllArgsConstructor
 public class AbbonamentoDAO {
