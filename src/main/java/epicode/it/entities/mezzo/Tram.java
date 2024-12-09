@@ -10,4 +10,9 @@ public class Tram extends Mezzo{
     public Tram() {
         setCapienza(75);
     }
+
+    @Override
+    public String toString() {
+        return "Tram{"+ getManutenzioni() +"}";
+    }
 }

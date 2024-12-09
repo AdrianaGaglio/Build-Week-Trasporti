@@ -1,5 +1,6 @@
 package epicode.it.entities.tratta;
 
+import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.percorrenza.Percorrenza;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -23,6 +24,6 @@ public class Tratta {
 
     private LocalTime durata;
 
-    @OneToMany(mappedBy = "tratta")
-    private List<Percorrenza> percorrenze;
+
+
 }

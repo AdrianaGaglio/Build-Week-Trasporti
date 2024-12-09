@@ -5,15 +5,19 @@ import epicode.it.dao.mezzo.AutobusDAO;
 import epicode.it.dao.mezzo.MezzoDAO;
 import epicode.it.dao.mezzo.TramDAO;
 import epicode.it.dao.stato_mezzo.ManutenzioneDAO;
+import epicode.it.dao.stato_mezzo.ServizioDAO;
 import epicode.it.entities.mezzo.Autobus;
 import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.mezzo.Stato;
 import epicode.it.entities.mezzo.Tram;
 import epicode.it.entities.stato_mezzo.Manutenzione;
+import epicode.it.entities.stato_mezzo.Servizio;
+import epicode.it.entities.tratta.Tratta;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Locale;
@@ -28,6 +32,7 @@ public class MainInsertServizioMezzi {
         AutobusDAO autobusDAO = new AutobusDAO(em);
         TramDAO tramDAO = new TramDAO(em);
         ManutenzioneDAO manutenzioneDAO = new ManutenzioneDAO(em);
+        ServizioDAO servizioDAO = new ServizioDAO(em);
 
 
         for (int i = 0; i < 10; i++) {
@@ -53,6 +58,13 @@ public class MainInsertServizioMezzi {
                 manutenzione.setMezzo(mezzo);
                 manutenzioneDAO.save(manutenzione);
                 mezzo.getManutenzioni().add(manutenzione);
+                mezzoDAO.update(mezzo);
+            } else {
+                Servizio servizio = new Servizio();
+                servizio.setDataInizio(LocalDate.now());
+                servizio.setMezzo(mezzo);
+                servizioDAO.save(servizio);
+                mezzo.getServizi().add(servizio);
                 mezzoDAO.update(mezzo);
             }
             System.out.println(mezzo);
