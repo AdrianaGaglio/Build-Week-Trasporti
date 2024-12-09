@@ -40,4 +40,20 @@ public class GiornalieroDAO {
     }
 
 
+    // RELAZIONE CON TRATTA
+    public List<Giornaliero> findByTratta(Long trattaId) {
+        return em.createQuery("SELECT g FROM Giornaliero g WHERE g.tratta.id = :trattaId", Giornaliero.class)
+                .setParameter("trattaId", trattaId)
+                .getResultList();
+    }
+
+    // RELAZIONE CON MEZZO
+
+    public List<Giornaliero> findByMezzo(Long mezzoId) {
+        return em.createQuery("SELECT g FROM Giornaliero g WHERE g.mezzo.id = :mezzoId", Giornaliero.class)
+                .setParameter("mezzoId", mezzoId)
+                .getResultList();
+    }
+
+
 }
