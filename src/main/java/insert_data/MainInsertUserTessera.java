@@ -90,7 +90,6 @@ public class MainInsertUserTessera {
                 e.printStackTrace();
             }
 
-            em.close();
         }
 
     }

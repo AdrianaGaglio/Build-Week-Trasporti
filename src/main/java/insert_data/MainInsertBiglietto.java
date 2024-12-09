@@ -41,13 +41,10 @@ public class MainInsertBiglietto {
             giornalieroDAO.save(giornaliero);
             abbonamentoDAO.save(abbonamento);
 
-            System.out.println("Biglietti inseriti madaffakka!");
+            System.out.println("Biglietti inseriti!");
 
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            em.close();
-            emf.close();
         }
     }
 }
