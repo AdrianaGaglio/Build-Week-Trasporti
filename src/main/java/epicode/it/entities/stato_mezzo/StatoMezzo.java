@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Data
 @Entity
 @NamedQuery(name = "Trova_tutto_StatoMezzo", query = "SELECT a FROM StatoMezzo a")
-@Inheritance(strategy = InheritanceType.JOINED)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Table(name = "stato_mezzo")
 public abstract class StatoMezzo {
     @Id
@@ -22,6 +22,7 @@ public abstract class StatoMezzo {
     @Column(name="data_fine")
     private LocalDate dataFine;
 
-   // private Mezzo mezzo;
+    @ManyToOne
+    private Mezzo mezzo;
 
 }

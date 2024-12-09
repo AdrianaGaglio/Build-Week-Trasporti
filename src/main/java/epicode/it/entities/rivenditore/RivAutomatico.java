@@ -1,4 +1,4 @@
-package epicode.it.entity;
+package epicode.it.entities.rivenditore;
 
 import jakarta.persistence.*;
 import lombok.Data;

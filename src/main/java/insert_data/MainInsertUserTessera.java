@@ -14,18 +14,15 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
-import java.sql.Time;
-import java.time.Duration;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Long.parseLong;
 
-public class MainInsert {
+public class MainInsertUserTessera {
     public static void main(String[] args) {
         Faker faker = new Faker(new Locale("it"));
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("unit-jpa");
@@ -68,7 +65,7 @@ public class MainInsert {
 
         }
 
-        String city = faker.address().city();
+        String city = faker.country().capital();
 
         for (int i = 0; i < 50; i++) {
             try {

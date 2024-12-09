@@ -28,7 +28,7 @@ public class MainInsertBiglietto {
             // CREO UN NUOVO BIGLIETTO GIORNALIERO
             Giornaliero giornaliero = new Giornaliero();
             giornaliero.setScadenza(LocalDate.now());
-            giornaliero.setDa_attivare(true);
+            giornaliero.setDaAttivare(true);
 
             // CREO UN NUOVO ABBONAMENTO
             Abbonamento abbonamento = new Abbonamento();

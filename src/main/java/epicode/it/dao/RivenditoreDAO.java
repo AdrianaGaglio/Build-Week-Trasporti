@@ -1,7 +1,6 @@
 package epicode.it.dao;
 
-import epicode.it.entity.Rivenditore;
-import jakarta.persistence.Entity;
+import epicode.it.entities.rivenditore.Rivenditore;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 

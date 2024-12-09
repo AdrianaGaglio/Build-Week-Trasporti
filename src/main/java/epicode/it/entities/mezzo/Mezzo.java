@@ -11,7 +11,7 @@ import java.util.List;
 @Entity
 @NamedQuery(name = "Trova_tutto_Mezzo", query = "SELECT a FROM Mezzo a")
 @Table(name = "mezzi")
-@Inheritance(strategy = InheritanceType.JOINED)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class Mezzo {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -19,7 +19,7 @@ public abstract class Mezzo {
 
     private Integer capienza;
 
-    @OneToMany
+    @OneToMany(mappedBy = "mezzo")
    private List<Manutenzione> manutenzioni = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)

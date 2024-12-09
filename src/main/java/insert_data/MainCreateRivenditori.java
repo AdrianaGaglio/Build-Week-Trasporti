@@ -1,8 +1,8 @@
-package epicode.it.main;
+package insert_data;
 
 import com.github.javafaker.Faker;
-import epicode.it.entity.RivFisico;
-import epicode.it.entity.RivAutomatico;
+import epicode.it.entities.rivenditore.RivFisico;
+import epicode.it.entities.rivenditore.RivAutomatico;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -10,7 +10,7 @@ import jakarta.persistence.Persistence;
 import java.sql.Time;
 import java.util.Locale;
 
-public class MainCreate {
+public class MainCreateRivenditori {
     public static void main(String[] args) {
         Faker faker = new Faker(new Locale("it"));
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("unit-jpa");
