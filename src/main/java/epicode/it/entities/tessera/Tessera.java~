@@ -15,7 +15,7 @@ public class Tessera {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    private String codice = "T-" + StringGenerator.random(10);
+    private String codice = "C-" + StringGenerator.random(10);
 
     private LocalDate validita;
 

@@ -1,3 +1,4 @@
+
 package insert_data;
 
 import com.github.javafaker.Faker;
@@ -13,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+
+import static java.lang.Long.parseLong;
 
 public class MainInsert {
     public static void main(String[] args) {
@@ -30,8 +33,20 @@ public class MainInsert {
             utente.setNome(faker.name().firstName());
             utente.setCognome(faker.name().lastName());
             utente.setDataNascita(faker.date().past(1000, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+            utente.setEmail(faker.internet().emailAddress());
+            utenti.add(utente);
         }
 
         utenteDAO.saveAll(utenti);
+
+        for (int i = 0; i < 10; i++) {
+            Tessera tessera = new Tessera();
+            tessera.setValidita(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate().plusYears(1));
+            tesseraDAO.save(tessera);
+            Utente utente = utenteDAO.getById((long) (i + 1));
+            utente.setTessera(tessera);
+            utenteDAO.update(utente);
+        }
     }
+
 }

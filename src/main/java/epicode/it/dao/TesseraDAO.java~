@@ -14,9 +14,11 @@ import java.util.List;
 public class TesseraDAO {
     private EntityManager em;
 
-    public void save(Tessera tessera) {
+    public void save(Tessera tessera, Utente utente) {
         em.getTransaction().begin();
         em.persist(tessera);
+        utente.setTessera(tessera);
+        em.merge(utente);
         em.getTransaction().commit();
     }
 

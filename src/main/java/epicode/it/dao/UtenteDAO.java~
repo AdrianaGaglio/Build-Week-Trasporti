@@ -50,6 +50,6 @@ public class UtenteDAO {
 
     public Utente findByCard(String codice) {
         return em.createNamedQuery("findByCard", Utente.class)
-                .setParameter("codice", codice).getResultStream().findFirst().orElse(null);
+                .setParameter("codice", codice).getSingleResult();
     }
 }
