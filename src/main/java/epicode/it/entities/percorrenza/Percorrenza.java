@@ -1,5 +1,6 @@
 package epicode.it.entities.percorrenza;
 
+import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.tratta.Tratta;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -7,6 +8,7 @@ import lombok.Data;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -20,8 +22,8 @@ public class Percorrenza {
     @JoinColumn(name = "tratta_id")
     private Tratta tratta;
 
-//    @ManyToMany
-//    private Mezzo mezzo;
+    @ManyToMany
+    private List<Mezzo> mezzi;
 
     private LocalTime durata_effettiva;
 
