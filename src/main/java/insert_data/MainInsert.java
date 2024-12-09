@@ -2,8 +2,8 @@
 package insert_data;
 
 import com.github.javafaker.Faker;
-import epicode.it.dao.TesseraDAO;
-import epicode.it.dao.UtenteDAO;
+import epicode.it.dao.tessera.TesseraDAO;
+import epicode.it.dao.utente.UtenteDAO;
 import epicode.it.entities.tessera.Tessera;
 import epicode.it.entities.utente.Utente;
 import jakarta.persistence.EntityManager;

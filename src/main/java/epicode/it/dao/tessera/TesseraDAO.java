@@ -1,8 +1,6 @@
-package epicode.it.dao;
+package epicode.it.dao.tessera;
 
 import epicode.it.entities.tessera.Tessera;
-import epicode.it.entities.utente.Utente;
-import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
