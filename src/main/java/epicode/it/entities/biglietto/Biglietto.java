@@ -1,5 +1,6 @@
 package epicode.it.entities.biglietto;
 
+import epicode.it.entities.rivenditore.Rivenditore;
 import epicode.it.utilities.StringGenerator;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -24,8 +25,7 @@ public abstract class Biglietto {
 
 
 
-    // @ManyToOne
-    // @JoinColumn(name = "rivenditore_id", referencedColumnName = "id", nullable = true)
-    // private Rivenditore rivenditore;
+    @ManyToOne
+    private Rivenditore rivenditore;
 
 }
