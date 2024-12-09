@@ -48,9 +48,6 @@ public class MainCreateRivenditori {
         } catch (Exception e) {
             em.getTransaction().rollback();
             e.printStackTrace();
-        } finally {
-            em.close();
-            emf.close();
         }
     }
 }

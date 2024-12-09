@@ -1,10 +1,12 @@
 package epicode.it.entities.tessera;
 
+import epicode.it.entities.biglietto.Abbonamento;
 import epicode.it.utilities.StringGenerator;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Entity
@@ -19,8 +21,8 @@ public class Tessera {
 
     private LocalDate validita;
 
-//    @OneToMany(mappedBy = "tessera")
-//    private List<Abbonamento> abbonamenti;
+    @OneToMany(mappedBy = "tessera")
+    private List<Abbonamento> abbonamenti;
 
 
 }

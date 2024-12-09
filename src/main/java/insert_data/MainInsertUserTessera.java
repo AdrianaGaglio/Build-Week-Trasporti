@@ -51,19 +51,21 @@ public class MainInsertUserTessera {
 
         utenteDAO.saveAll(utenti);
 
-        for (int i = 0; i < 10; i++) {
-            try {
-                Tessera tessera = new Tessera();
-                tessera.setValidita(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate().plusYears(1));
-                tesseraDAO.save(tessera);
-                Utente utente = utenteDAO.getById((long) (i + 1));
-                utente.setTessera(tessera);
-                utenteDAO.update(utente);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        Tessera tessera1 = new Tessera();
+        tessera1.setValidita(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate().plusYears(1));
+        tesseraDAO.save(tessera1);
+        Utente utente1 = utenteDAO.getById(10L);
+        utente1.setTessera(tessera1);
+        utenteDAO.update(utente1);
 
-        }
+        Tessera tessera2 = new Tessera();
+        tessera2.setValidita(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate().plusYears(1));
+        tesseraDAO.save(tessera2);
+        Utente utente2 = utenteDAO.getById(5L);
+        utente2.setTessera(tessera2);
+        utenteDAO.save(utente2);
+
+
 
         String city = faker.country().capital();
 
@@ -90,7 +92,7 @@ public class MainInsertUserTessera {
                 e.printStackTrace();
             }
 
-            em.close();
+
         }
 
     }

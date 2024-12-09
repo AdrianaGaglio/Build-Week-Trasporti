@@ -1,5 +1,6 @@
 package epicode.it.entities.biglietto;
 
+import epicode.it.entities.tratta.Tratta;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,8 +17,7 @@ public class Giornaliero extends Biglietto {
     // private Mezzo mezzo;
 
     // RELAZIONE CON TRATTA
-    // @ManyToOne
-    //@JoinColumn(name = "tratta_id", referencedColumnName = "id", nullable = true) // Foreign key verso Tratta
-    // private Tratta tratta;
+     @ManyToOne
+     private Tratta tratta;
 
 }

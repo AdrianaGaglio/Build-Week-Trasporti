@@ -30,24 +30,12 @@ public class MainInsertBiglietto {
             giornaliero.setScadenza(LocalDate.now());
             giornaliero.setDaAttivare(true);
 
-            // CREO UN NUOVO ABBONAMENTO
-            Abbonamento abbonamento = new Abbonamento();
-            abbonamento.setScadenza(LocalDate.now().plusMonths(1));
-            abbonamento.setPeriodicy(Periodicy.mensile);
-            abbonamento.setAttivo(true);
-            abbonamento.setTariffa("Standard");
-
             // SALVO
             giornalieroDAO.save(giornaliero);
-            abbonamentoDAO.save(abbonamento);
 
-            System.out.println("Biglietti inseriti madaffakka!");
 
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            em.close();
-            emf.close();
         }
     }
 }

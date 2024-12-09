@@ -55,7 +55,7 @@ public class MainInsertServizioMezzi {
                 mezzo.getManutenzioni().add(manutenzione);
                 mezzoDAO.update(mezzo);
             }
-            System.out.println(mezzo);
+
         }
 
 
