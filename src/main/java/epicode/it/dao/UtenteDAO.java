@@ -1,0 +1,49 @@
+package epicode.it.dao;
+
+import epicode.it.entities.utente.Utente;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@NoArgsConstructor
+@AllArgsConstructor
+public class UtenteDAO {
+    private EntityManager em;
+
+    public void save(Utente utente) {
+        em.getTransaction().begin();
+        em.persist(utente);
+        em.getTransaction().commit();
+    }
+
+    public void saveAll(List<Utente> list) {
+        em.getTransaction().begin();
+        for (Utente obj : list) {
+            em.persist(obj);
+        }
+        em.getTransaction().commit();
+    }
+
+    public List<Utente> getAll() {
+        return this.em.createNamedQuery("findAll_Utente", Utente.class).getResultList();
+    }
+
+    public Utente getById(Long id) {
+        return em.find(Utente.class, id);
+    }
+
+    public void update(Utente utente) {
+        em.getTransaction().begin();
+        em.merge(utente);
+        em.getTransaction().commit();
+    }
+
+    public void delete(Utente utente) {
+        em.getTransaction().begin();
+        em.remove(utente);
+        em.getTransaction().commit();
+    }
+}
