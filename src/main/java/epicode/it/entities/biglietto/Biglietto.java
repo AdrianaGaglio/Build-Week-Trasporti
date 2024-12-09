@@ -9,12 +9,19 @@ import java.time.LocalDate;
 @Data
 @Entity
 public abstract class Biglietto {
-@Id
-@GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Integer id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private long id;
+
+    @Column(nullable = false, unique = true)
     private String codice = "B-" + StringGenerator.random(10);
+
+    @Column(nullable = false)
     private LocalDate scadenza;
 
-    //@ManyToOne
-    // Rivenditore rivenditore
+
+    // @ManyToOne
+    // @JoinColumn(name = "rivenditore_id", referencedColumnName = "id", nullable = true)
+    // private Rivenditore rivenditore;
+
 }
