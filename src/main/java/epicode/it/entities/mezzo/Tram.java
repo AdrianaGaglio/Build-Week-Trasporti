@@ -5,8 +5,14 @@ import lombok.Data;
 
 @Data
 @Entity
+@DiscriminatorValue("TRAM")
 @NamedQuery(name = "Trova_tutto_Tram", query = "SELECT a FROM Tram a")
 public class Tram extends Mezzo{
+
+    public Tram() {
+
+    }
+
     public Tram(int codice) {
         setCodice(codice);
         setCapienza(75);

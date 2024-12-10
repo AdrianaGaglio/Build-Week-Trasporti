@@ -1,5 +1,6 @@
 package epicode.it.servizi;
 
+import epicode.it.dao.percorrenza.PercorrenzaDAO;
 import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.percorrenza.Percorrenza;
 import epicode.it.entities.tratta.Tratta;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-class GestorePercorrenze {
+public class GestorePercorrenze {
 
     private EntityManager em;
 
@@ -29,10 +30,18 @@ class GestorePercorrenze {
                 .orElse(null);
     }
 
-    public void percorri(Mezzo m, LocalDateTime data, Tratta tratta) {
-        em.getTransaction().begin();
-        // lo stesso mezzo non può percorrere più di una tratta alla volta
-        // più mezzi non possono percorrere contemporaneamente la stessa tratta
+    public void aggiungiPercorrenza(Mezzo m, LocalDateTime data, Tratta tratta) {
+        PercorrenzaDAO percorrenzaDAO = new PercorrenzaDAO(em);
+        Percorrenza foundPM = percorrenzaDAO.trovaPerMezzo(m, data);
+        Percorrenza foundPT = percorrenzaDAO.trovaPerTratta(tratta, data);
+        if (foundPM != null) {
+            System.out.println("Percorrenza già presente per il mezzo " + m);
+            return;
+        }
+        if (foundPT != null) {
+            System.out.println("Percorrenza già presente per la tratta " + tratta);
+            return;
+        }
         Percorrenza percorrenza = new Percorrenza();
         int random = ((int) (Math.random() * 2)) + 1;
         int randomPlus = ((int) (Math.random() * 30)) + 1;
@@ -42,10 +51,14 @@ class GestorePercorrenze {
         percorrenza.setMezzo(m);
         LocalTime durataPrevista = tratta.getDurata();
         percorrenza.setDurata_effettiva(random == 1 ? durataPrevista.plusMinutes(randomPlus) : durataPrevista.minusMinutes(randomMinus));
+        em.getTransaction().begin();
         em.persist(percorrenza);
         tratta.getPercorrenze().add(percorrenza);
         m.getPercorrenze().add(percorrenza);
         em.merge(tratta);
         em.getTransaction().commit();
+        System.out.println("Percorrenza inserita correttamente: " + percorrenza);
+
+
     }
 }

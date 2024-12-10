@@ -15,6 +15,7 @@ import java.util.List;
 @NamedQuery(name="trovaPerNumeroLinea", query ="SELECT a FROM Mezzo a WHERE codice = :codice")
 @Table(name = "mezzi")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "tipo_mezzo")
 public abstract class Mezzo {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
