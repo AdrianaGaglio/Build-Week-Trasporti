@@ -30,7 +30,7 @@ public class Tratta {
         nuovaPercorrenza.setTratta(this);
         nuovaPercorrenza.setMezzi(mezzi);
         nuovaPercorrenza.setData(data);
-        nuovaPercorrenza.setDurata_effettiva(this.durata);
+        nuovaPercorrenza.setDurata_effettiva(this.durata); //ciao//
 
         this.percorrenze.add(nuovaPercorrenza);
         return nuovaPercorrenza;
