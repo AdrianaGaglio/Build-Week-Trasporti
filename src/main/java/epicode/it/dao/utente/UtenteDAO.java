@@ -5,6 +5,11 @@ import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+<<<<<<< Updated upstream
+=======
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+>>>>>>> Stashed changes
 import java.util.List;
 
 @NoArgsConstructor
@@ -50,4 +55,24 @@ public class UtenteDAO {
         return em.createNamedQuery("findByCard", Utente.class)
                 .setParameter("codice", codice).getResultStream().findFirst().orElse(null);
     }
+<<<<<<< Updated upstream
+=======
+
+    // RICERCA PER EMAIL
+    public Utente findByEmail(String email) {
+        return em.createNamedQuery("findByEmail", Utente.class)
+                .setParameter("email", email).getResultStream().findFirst().orElse(null);
+    }
+
+    public Utente creazioneUtente(String nome, String cognome, LocalDate dataDiNascita, String email){
+        Utente utente = new Utente();
+        utente.setNome(nome);
+        utente.setCognome(cognome);
+        utente.setDataNascita(dataDiNascita);
+        utente.setEmail(email);
+        System.out.println("creato nuovo utente "+ utente);
+        save(utente);
+        return utente;
+    }
+>>>>>>> Stashed changes
 }
