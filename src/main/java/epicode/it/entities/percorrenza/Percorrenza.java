@@ -28,4 +28,20 @@ public class Percorrenza {
     private LocalTime durata_effettiva;
 
     private LocalDate data;
+
+    public void setTratta(Tratta tratta) {
+    }
+
+    public void setData(LocalDate data) {
+    }
+
+    public void setMezzi(List<Mezzo> mezzi) {
+    }
+
+    public void setDurata_effettiva(LocalTime durata) {
+    }
+
+    public Object getId() {
+        return null;
+    }
 }
