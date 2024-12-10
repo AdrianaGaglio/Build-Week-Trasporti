@@ -7,6 +7,7 @@ import lombok.Data;
 
 import java.sql.Time;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -22,24 +23,12 @@ public class Percorrenza {
     @JoinColumn(name = "tratta_id")
     private Tratta tratta;
 
-    @ManyToMany
-    private List<Mezzo> mezzi;
+    @OneToOne
+    private Mezzo mezzo;
 
     private LocalTime durata_effettiva;
 
-    private LocalDate data;
-
-    public void setTratta(Tratta tratta) {
-    }
-
-    public void setData(LocalDate data) {
-    }
-
-    public void setMezzi(List<Mezzo> mezzi) {
-    }
-
-    public void setDurata_effettiva(LocalTime durata) {
-    }
+    private LocalDateTime data;
 
     public Object getId() {
         return null;

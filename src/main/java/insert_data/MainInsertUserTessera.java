@@ -52,14 +52,14 @@ public class MainInsertUserTessera {
         utenteDAO.saveAll(utenti);
 
         Tessera tessera1 = new Tessera();
-        tessera1.setValidita(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate().plusYears(1));
+        tessera1.setValidita(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime().plusYears(1));
         tesseraDAO.save(tessera1);
         Utente utente1 = utenteDAO.getById(10L);
         utente1.setTessera(tessera1);
         utenteDAO.update(utente1);
 
         Tessera tessera2 = new Tessera();
-        tessera2.setValidita(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate().plusYears(1));
+        tessera2.setValidita(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime().plusYears(1));
         tesseraDAO.save(tessera2);
         Utente utente2 = utenteDAO.getById(5L);
         utente2.setTessera(tessera2);

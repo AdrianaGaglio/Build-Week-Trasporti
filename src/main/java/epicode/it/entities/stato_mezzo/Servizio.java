@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Entity
 @Data
+@NamedQuery(name="cercaSeInServizio", query = "SELECT s FROM Servizio s WHERE s.mezzo = :mezzo AND dataFine > :data AND dataFine IS NOT NULL")
 public class Servizio extends StatoMezzo {
     @ManyToOne
     @JoinColumn(name="tratta_id")

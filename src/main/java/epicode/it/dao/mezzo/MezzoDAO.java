@@ -51,27 +51,9 @@ public class MezzoDAO {
         em.getTransaction().commit();
     }
 
-    public void aggiungiServizio(Mezzo m, LocalDate inizio, LocalDate fine, Tratta tratta) {
-        StatoMezzoDAO statoMezzoDAO = new StatoMezzoDAO(em);
-        Servizio found = statoMezzoDAO.cercaSeInServizio(m, inizio);
-        if(found == null) {
-            em.getTransaction().begin();
-            Servizio servizio = new Servizio();
-            servizio.setDataInizio(inizio);
-            servizio.setDataFine(fine);
-            servizio.setMezzo(m);
-            servizio.setTratta(tratta);
-            em.persist(servizio);
-            m.setStato(Stato.IN_SERVIZIO);
-            m.getServizi().add(servizio);
-            em.merge(m);
-            em.getTransaction().commit();
-            System.out.println("Servizio assegnato correttamente per " + m);
-        } else {
-            System.out.println("Il mezzo è già in servizio: " + found);
-        }
-
+    public List<Mezzo> mezziPerLinea(Integer num) {
+        return em.createNamedQuery("trovaPerNumeroLinea", Mezzo.class)
+                .setParameter("linea", num).getResultList();
     }
-
 
 }

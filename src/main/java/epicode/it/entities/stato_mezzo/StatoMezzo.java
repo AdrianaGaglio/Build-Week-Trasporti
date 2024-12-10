@@ -9,8 +9,7 @@ import java.time.LocalDate;
 @Data
 @Entity
 @NamedQuery(name = "Trova_tutto_StatoMezzo", query = "SELECT a FROM StatoMezzo a")
-@NamedQuery(name="cercaSeInServizio", query = "SELECT s FROM StatoMezzo s WHERE s.mezzo = :mezzo AND dataFine > :data")
-@Inheritance(strategy = InheritanceType.JOINED)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Table(name = "stato_mezzo")
 public abstract class StatoMezzo {
     @Id
@@ -23,7 +22,7 @@ public abstract class StatoMezzo {
     @Column(name="data_fine")
     private LocalDate dataFine;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     private Mezzo mezzo;
 
 }
