@@ -33,4 +33,5 @@ public abstract class Mezzo {
     @ManyToMany(mappedBy = "mezzi")
     private List<Percorrenza> percorrenzae = new ArrayList<>();
 
+    public abstract Object getId();
 }

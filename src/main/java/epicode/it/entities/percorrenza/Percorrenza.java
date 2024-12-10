@@ -5,14 +5,13 @@ import epicode.it.entities.tratta.Tratta;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Collection;
 import java.util.List;
 
 @Data
 @Entity
-@NamedQuery(name = "findAll_Percorrenza", query = "SELECT a FROM Percorrenza a")
 public class Percorrenza {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -26,19 +25,26 @@ public class Percorrenza {
     private List<Mezzo> mezzi;
 
     private LocalTime durata_effettiva;
-
     private LocalDate data;
 
-    public void setTratta(Tratta tratta) {
+    public Collection<Object> getMezzi() {
+        return List.of();
     }
 
-    public void setData(LocalDate data) {
+    public void setTratta(Tratta tratta) {
     }
 
     public void setMezzi(List<Mezzo> mezzi) {
     }
 
-    public void setDurata_effettiva(LocalTime durata) {
+    public Object getDurata_effettiva() {
+        return null;
+    }
+
+    public void setDurata_effettiva(LocalTime tempoEffettivo) {
+    }
+
+    public void setData(LocalDate data) {
     }
 
     public Object getId() {
