@@ -13,6 +13,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 public class MainInsertAbbonamento {
@@ -29,7 +30,7 @@ public class MainInsertAbbonamento {
         abbonamento.setPeriodicy(Periodicy.mensile);
         abbonamento.setAttivo(true);
         abbonamento.setTariffa(faker.lorem().fixedString(10));
-        abbonamento.setScadenza(LocalDate.now().plusDays(30));
+        abbonamento.setScadenza(LocalDateTime.now().plusDays(7));
         Tessera tessera1 = tesseraDAO.getById(1L);
         abbonamento.setTessera(tessera1);
         abbonamentoDAO.save(abbonamento);

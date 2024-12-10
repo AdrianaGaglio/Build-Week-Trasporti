@@ -14,13 +14,13 @@ import java.util.List;
 public class Abbonamento extends Biglietto {
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+
     private Periodicy periodicy;
 
-    @Column(nullable = false)
+
     private boolean attivo;
 
-    @Column(nullable = false)
+
     private String tariffa;
 
     // RELAZIONE CON TESSERA

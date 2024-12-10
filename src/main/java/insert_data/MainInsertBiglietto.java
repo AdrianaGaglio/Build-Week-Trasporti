@@ -12,6 +12,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 public class MainInsertBiglietto {
@@ -27,7 +28,7 @@ public class MainInsertBiglietto {
         try {
             // CREO UN NUOVO BIGLIETTO GIORNALIERO
             Giornaliero giornaliero = new Giornaliero();
-            giornaliero.setScadenza(LocalDate.now());
+            giornaliero.setScadenza(LocalDateTime.now());
             giornaliero.setDaAttivare(true);
 
             // SALVO

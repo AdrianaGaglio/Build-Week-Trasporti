@@ -11,7 +11,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 import java.sql.Time;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 public class MainCreateRivenditori {
@@ -47,7 +47,7 @@ public class MainCreateRivenditori {
             // Creazione biglietti giornalieri rivenditore fisico 1
             for (int i = 0; i < 5; i++) {
                 Giornaliero giornaliero = new Giornaliero();
-                giornaliero.setScadenza(LocalDate.now().plusDays(faker.number().numberBetween(1, 30)));
+                giornaliero.setScadenza(LocalDateTime.now().plusDays(faker.number().numberBetween(1, 30)));
                 giornaliero.setDaAttivare(faker.bool().bool());
                 rivFisico1.addBiglietto(giornaliero);
                 em.persist(giornaliero);
@@ -56,7 +56,7 @@ public class MainCreateRivenditori {
             // Creazione  abbonamenti rivenditore fisico 2
             for (int i = 0; i < 3; i++) {
                 Abbonamento abbonamento = new Abbonamento();
-                abbonamento.setScadenza(LocalDate.now().plusMonths(faker.number().numberBetween(1, 12)));
+                abbonamento.setScadenza(LocalDateTime.now().plusMonths(faker.number().numberBetween(1, 12)));
                 abbonamento.setPeriodicy(Periodicy.values()[faker.number().numberBetween(0, Periodicy.values().length)]);
                 abbonamento.setAttivo(true);
                 abbonamento.setTariffa(faker.commerce().price() + " EUR");
@@ -68,13 +68,13 @@ public class MainCreateRivenditori {
             for (int i = 0; i < 7; i++) {
                 if (i % 2 == 0) {
                     Giornaliero giornaliero = new Giornaliero();
-                    giornaliero.setScadenza(LocalDate.now().plusDays(faker.number().numberBetween(1, 30)));
+                    giornaliero.setScadenza(LocalDateTime.now().plusDays(faker.number().numberBetween(1, 30)));
                     giornaliero.setDaAttivare(faker.bool().bool());
                     rivAutomatico1.addBiglietto(giornaliero);
                     em.persist(giornaliero);
                 } else {
                     Abbonamento abbonamento = new Abbonamento();
-                    abbonamento.setScadenza(LocalDate.now().plusMonths(faker.number().numberBetween(1, 12)));
+                    abbonamento.setScadenza(LocalDateTime.now().plusMonths(faker.number().numberBetween(1, 12)));
                     abbonamento.setPeriodicy(Periodicy.values()[faker.number().numberBetween(0, Periodicy.values().length)]);
                     abbonamento.setAttivo(true);
                     abbonamento.setTariffa(faker.commerce().price() + " EUR");

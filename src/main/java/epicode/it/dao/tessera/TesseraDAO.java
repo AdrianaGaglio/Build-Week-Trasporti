@@ -1,6 +1,7 @@
 package epicode.it.dao.tessera;
 
 import epicode.it.entities.tessera.Tessera;
+import epicode.it.entities.utente.Utente;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -37,4 +38,11 @@ public class TesseraDAO {
         em.remove(tessera);
         em.getTransaction().commit();
     }
+    public Tessera getTessera(Utente utente) {
+        return em.createNamedQuery("findAll_UserCard", Tessera.class)
+                .setParameter("id", utente.getId()).getResultStream().findFirst().orElse(null);
+    }
+
+
+
 }
