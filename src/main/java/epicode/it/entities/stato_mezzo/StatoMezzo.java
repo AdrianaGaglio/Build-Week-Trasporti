@@ -22,7 +22,7 @@ public abstract class StatoMezzo {
     @Column(name="data_fine")
     private LocalDate dataFine;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private Mezzo mezzo;
 
 }

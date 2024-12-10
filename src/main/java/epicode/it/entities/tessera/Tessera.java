@@ -24,5 +24,4 @@ public class Tessera {
     @OneToMany(mappedBy = "tessera")
     private List<Abbonamento> abbonamenti;
 
-
 }

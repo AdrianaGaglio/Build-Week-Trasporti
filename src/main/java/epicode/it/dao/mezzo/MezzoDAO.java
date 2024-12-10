@@ -17,6 +17,14 @@ public class MezzoDAO {
         em.getTransaction().commit();
     }
 
+    public void saveAll(List<Mezzo> mezzi) {
+        em.getTransaction().begin();
+        for (Mezzo mezzo : mezzi) {
+            em.persist(mezzo);
+        }
+        em.getTransaction().commit();
+    }
+
     public Mezzo findById(Long id) {
         return em.find(Mezzo.class, id);
     }

@@ -1,5 +1,7 @@
 package epicode.it.dao.stato_mezzo;
 
+import epicode.it.entities.mezzo.Mezzo;
+import epicode.it.entities.mezzo.Stato;
 import epicode.it.entities.stato_mezzo.Manutenzione;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
@@ -14,6 +16,10 @@ public class ManutenzioneDAO {
     public void save(Manutenzione oggetto) {
         em.getTransaction().begin();
         em.persist(oggetto);
+        Mezzo mezzo = oggetto.getMezzo();
+        mezzo.setStato(Stato.IN_MANUTENZIONE);
+        mezzo.getManutenzioni().add(oggetto);
+        em.merge(mezzo);
         em.getTransaction().commit();
     }
 
