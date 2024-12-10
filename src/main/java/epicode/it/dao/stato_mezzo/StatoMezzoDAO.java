@@ -1,10 +1,13 @@
 package epicode.it.dao.stato_mezzo;
 
+import epicode.it.entities.mezzo.Mezzo;
+import epicode.it.entities.stato_mezzo.Servizio;
 import epicode.it.entities.stato_mezzo.StatoMezzo;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @AllArgsConstructor
@@ -37,5 +40,9 @@ public class StatoMezzoDAO {
         em.getTransaction().commit();
     }
 
+    public Servizio cercaSeInServizio(Mezzo mezzo, LocalDate data) {
+        return (Servizio) em.createNamedQuery("cercaSeInServizio", StatoMezzo.class)
+                .setParameter("mezzo", mezzo).setParameter("data", data).getResultStream().findFirst().orElse(null);
+    }
 
 }

@@ -13,6 +13,10 @@ public class Autobus extends Mezzo{
 
     @Override
     public String toString() {
-        return "Autobus{"+ getManutenzioni() +"}";
+        return "Autobus{" +
+                "id=" + this.getId() +
+                ", capienza=" + this.getCapienza() +
+                ", stato=" + this.getStato() +
+                '}';
     }
 }

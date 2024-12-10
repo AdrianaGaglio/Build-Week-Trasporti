@@ -16,10 +16,6 @@ public class ManutenzioneDAO {
     public void save(Manutenzione manutenzione) {
         em.getTransaction().begin();
         em.persist(manutenzione);
-        Mezzo mezzo = manutenzione.getMezzo();
-        mezzo.setStato(Stato.IN_MANUTENZIONE);
-        mezzo.getManutenzioni().add(manutenzione);
-        em.merge(mezzo);
         em.getTransaction().commit();
     }
 
