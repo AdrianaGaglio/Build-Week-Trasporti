@@ -30,17 +30,4 @@ public class Tessera {
     @OneToOne
     @JoinColumn(name = "utente_id")
     private Utente utente;
-
-    private LocalDate validita;
-
-    private LocalDateTime validita;
-
-    @OneToMany(mappedBy = "tessera")
-    private List<Abbonamento> abbonamenti;
-
-    @OneToOne
-    @JoinColumn(name = "utente_id")
-    private Utente utente;
-
-
 }
