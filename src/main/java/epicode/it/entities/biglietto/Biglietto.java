@@ -30,4 +30,5 @@ public abstract class Biglietto {
     @ManyToOne
     private Rivenditore rivenditore;
 
+    public abstract void setDaAttivare(boolean b);
 }
