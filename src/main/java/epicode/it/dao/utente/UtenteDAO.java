@@ -1,5 +1,7 @@
 package epicode.it.dao.utente;
 
+import epicode.it.entities.rivenditore.Rivenditore;
+import epicode.it.entities.tessera.Tessera;
 import epicode.it.entities.utente.Utente;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
@@ -56,9 +58,6 @@ public class UtenteDAO {
         return em.createNamedQuery("findByEmail", Utente.class)
                 .setParameter("email", email).getResultStream().findFirst().orElse(null);
     }
-
-    // METODDO PER VERIFICA SE L'UTENTE HA UNA TESSERA
-    //Questo metodo recupera l'utente tramite il suo ID e verifica se la tessera non è null.
 
 
 }

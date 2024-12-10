@@ -12,8 +12,7 @@ import java.util.List;
 @Data
 @Entity
 @NamedQuery(name = "Trova_tutto_Mezzo", query = "SELECT a FROM Mezzo a")
-@NamedQuery(name = "inServizio", query = "SELECT a FROM Mezzo a JOIN StatoMezzo s ON a.id = s.mezzo_id WHERE " +
-        "")
+
 @Table(name = "mezzi")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class Mezzo {

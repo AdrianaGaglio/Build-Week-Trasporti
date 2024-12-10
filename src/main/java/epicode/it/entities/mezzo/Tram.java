@@ -13,6 +13,10 @@ public class Tram extends Mezzo{
 
     @Override
     public String toString() {
-        return "Tram{"+ getManutenzioni() +"}";
+        return "Tram{" +
+                "id=" + this.getId() +
+                ", capienza=" + this.getCapienza() +
+                ", stato=" + this.getStato() +
+                '}';
     }
 }
