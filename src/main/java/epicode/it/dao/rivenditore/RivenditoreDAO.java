@@ -1,15 +1,12 @@
-package epicode.it.dao;
+package epicode.it.dao.rivenditore;
 
+import epicode.it.dao.biglietto.BigliettoDAO;
 import epicode.it.entities.biglietto.Abbonamento;
-import epicode.it.entities.biglietto.Biglietto;
 import epicode.it.entities.biglietto.Giornaliero;
 import epicode.it.entities.biglietto.Periodicy;
-import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.rivenditore.Rivenditore;
-import epicode.it.entities.tessera.Tessera;
 import epicode.it.entities.tratta.Tratta;
 import epicode.it.entities.utente.Utente;
-import epicode.it.utilities.StringGenerator;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 

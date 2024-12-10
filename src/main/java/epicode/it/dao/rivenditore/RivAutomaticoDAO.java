@@ -1,4 +1,4 @@
-package epicode.it.dao;
+package epicode.it.dao.rivenditore;
 
 import epicode.it.entities.rivenditore.RivAutomatico;
 import jakarta.persistence.EntityManager;

@@ -1,33 +1,20 @@
 package insert_data;
 
 import com.github.javafaker.Faker;
-import epicode.it.dao.AbbonamentoDAO;
-import epicode.it.dao.RivAutomaticoDAO;
-import epicode.it.dao.RivenditoreDAO;
+import epicode.it.dao.biglietto.AbbonamentoDAO;
 import epicode.it.dao.percorrenza.PercorrenzaDAO;
 import epicode.it.dao.tessera.TesseraDAO;
 import epicode.it.dao.tratta.TrattaDAO;
 import epicode.it.dao.utente.UtenteDAO;
 import epicode.it.entities.biglietto.Abbonamento;
 import epicode.it.entities.biglietto.Periodicy;
-import epicode.it.entities.percorrenza.Percorrenza;
-import epicode.it.entities.rivenditore.RivAutomatico;
-import epicode.it.entities.rivenditore.RivFisico;
 import epicode.it.entities.tessera.Tessera;
-import epicode.it.entities.tratta.Tratta;
-import epicode.it.entities.utente.Utente;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
-import java.sql.Time;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 import static java.lang.Long.parseLong;
 

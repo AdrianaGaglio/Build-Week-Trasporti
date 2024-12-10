@@ -43,4 +43,6 @@ public class PercorrenzaDAO {
         em.remove(percorrenza);
         em.getTransaction().commit();
     }
+
+
 }

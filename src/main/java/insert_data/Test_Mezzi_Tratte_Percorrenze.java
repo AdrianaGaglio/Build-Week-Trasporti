@@ -60,14 +60,14 @@ public class Test_Mezzi_Tratte_Percorrenze {
         MezzoDAO mezzoDAO = new MezzoDAO(em);
         AutobusDAO autobusDAO = new AutobusDAO(em);
 
-//        Servizio servizio1 = new Servizio();
-//        Tratta tratta1 = trattaDAO.getById(faker.random().nextInt(1,50).longValue());
-//        servizio1.setTratta(tratta1);
-//        servizio1.setDataInizio(faker.date().past(90, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
-//        servizio1.setDataFine(servizio1.getDataInizio().plusDays(60));
-//        Mezzo mezzo1 = mezzoDAO.findById(faker.random().nextInt(1,100).longValue());
-//        servizio1.setMezzo(mezzo1);
-//        servizioDAO.save(servizio1);
+        Servizio servizio1 = new Servizio();
+        Tratta tratta1 = trattaDAO.getById(faker.random().nextInt(1,50).longValue());
+        servizio1.setTratta(tratta1);
+        servizio1.setDataInizio(faker.date().past(90, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+        servizio1.setDataFine(servizio1.getDataInizio().plusDays(60));
+        Mezzo mezzo1 = mezzoDAO.findById(faker.random().nextInt(1,100).longValue());
+        servizio1.setMezzo(mezzo1);
+        servizioDAO.save(servizio1);
 
         for (int i = 0; i < 50; i++) {
             Servizio servizio = new Servizio();
