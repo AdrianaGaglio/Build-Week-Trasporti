@@ -50,4 +50,15 @@ public class UtenteDAO {
         return em.createNamedQuery("findByCard", Utente.class)
                 .setParameter("codice", codice).getResultStream().findFirst().orElse(null);
     }
+
+    // RICERCA PER EMAIL
+    public Utente findByEmail(String email) {
+        return em.createNamedQuery("findByEmail", Utente.class)
+                .setParameter("email", email).getResultStream().findFirst().orElse(null);
+    }
+
+    // METODDO PER VERIFICA SE L'UTENTE HA UNA TESSERA
+    //Questo metodo recupera l'utente tramite il suo ID e verifica se la tessera non è null.
+
+
 }

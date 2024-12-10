@@ -10,6 +10,8 @@ import java.time.LocalDate;
 @Entity
 @NamedQuery(name = "findAll_Utente", query = "SELECT a FROM Utente a")
 @NamedQuery(name = "findByCard", query = "SELECT a FROM Utente a WHERE a.tessera.codice = :codice")
+@NamedQuery(name = "findByEmail", query = "SELECT u FROM Utente u WHERE u.email = :email")
+
 @Table(name="utenti")
 public class Utente {
     @Id
@@ -28,5 +30,6 @@ public class Utente {
     @OneToOne
     @JoinColumn(name = "tessera_id")
     private Tessera tessera;
+
 
 }

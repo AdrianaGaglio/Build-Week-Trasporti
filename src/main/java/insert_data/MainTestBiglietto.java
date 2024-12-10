@@ -9,6 +9,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class MainTestBiglietto {
@@ -20,7 +21,7 @@ public class MainTestBiglietto {
 
         Giornaliero giornaliero = new Giornaliero();
         giornaliero.setDaAttivare(true);
-        giornaliero.setScadenza(LocalDate.now().plusDays(1));
+        giornaliero.setScadenza(LocalDateTime.now().plusDays(1));
 
 
         Tratta tratta = em.find(Tratta.class, 1L);
