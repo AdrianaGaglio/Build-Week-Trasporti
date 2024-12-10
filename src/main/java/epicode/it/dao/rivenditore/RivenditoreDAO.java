@@ -4,6 +4,8 @@ import epicode.it.dao.biglietto.BigliettoDAO;
 import epicode.it.entities.biglietto.Abbonamento;
 import epicode.it.entities.biglietto.Giornaliero;
 import epicode.it.entities.biglietto.Periodicy;
+import epicode.it.entities.rivenditore.RivAutomatico;
+import epicode.it.entities.rivenditore.RivFisico;
 import epicode.it.entities.rivenditore.Rivenditore;
 import epicode.it.entities.tratta.Tratta;
 import epicode.it.entities.utente.Utente;
@@ -11,7 +13,9 @@ import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @AllArgsConstructor
@@ -47,18 +51,64 @@ public class RivenditoreDAO {
 
     //  aggiungi  biglietto
     public void creaGiornaliero(Rivenditore r, Tratta tratta) {
+        if (r instanceof RivFisico) {
+            RivFisico rivFisico = (RivFisico) r;
+            if (
+                    !LocalDate.now().getDayOfWeek().equals(rivFisico.getGiornoChiusura()) &&
+                            LocalTime.now().isAfter(rivFisico.getOraApertura().toLocalTime()) &&
+                            LocalTime.now().isBefore(rivFisico.getOraChiusura().toLocalTime())
+            ) {
+            creaGiornalieroTemplate(r,tratta);
+            } else {
+                System.out.println("Il rivenditore fisico è chiuso");
+            }
+        } else if (r instanceof RivAutomatico) {
+            RivAutomatico rivAuto = (RivAutomatico) r;
+            if (rivAuto.isAttivo()){
+                creaGiornalieroTemplate(r, tratta);
+            } else {
+                System.out.println("Rivenditore automatico fuori servizio");
+            }
+        }
+
+    }
+
+    private void creaGiornalieroTemplate(Rivenditore r, Tratta tratta) {
         Giornaliero biglietto = new Giornaliero();
         biglietto.setDaAttivare(true);
         biglietto.setTratta(tratta);
         biglietto.setScadenza(LocalDateTime.now().plus(Duration.ofMinutes(90)));
         biglietto.setRivenditore(r);
         r.getBiglietti().add(biglietto);
+
         update(r);
         BigliettoDAO bigliettoDAO = new BigliettoDAO(em);
         bigliettoDAO.save(biglietto);
     }
 
     public void creaAbbonamento(Rivenditore r, Periodicy periodicy, Utente utente) {
+        if (r instanceof RivFisico) {
+            RivFisico rivFisico = (RivFisico) r;
+            if (
+                    !LocalDate.now().getDayOfWeek().equals(rivFisico.getGiornoChiusura()) &&
+                            LocalTime.now().isAfter(rivFisico.getOraApertura().toLocalTime()) &&
+                            LocalTime.now().isBefore(rivFisico.getOraChiusura().toLocalTime())
+            ) {
+                creaAbbonamentoTemplate(r,periodicy,utente);
+            } else {
+                System.out.println("Il rivenditore fisico è chiuso");
+            }
+        } else if (r instanceof RivAutomatico) {
+            RivAutomatico rivAuto = (RivAutomatico) r;
+            if (rivAuto.isAttivo()){
+                creaAbbonamentoTemplate(r,periodicy,utente);
+            } else {
+                System.out.println("Rivenditore automatico fuori servizio");
+            }
+        }
+    }
+
+    private void creaAbbonamentoTemplate(Rivenditore r, Periodicy periodicy, Utente utente){
         if (utente.getTessera() != null) {
             if (utente.getTessera().getAbbonamenti().getLast().getScadenza().isBefore(LocalDateTime.now())) {
                 utente.getTessera().getAbbonamenti().getLast().setAttivo(false);
@@ -83,7 +133,7 @@ public class RivenditoreDAO {
                 System.out.println("Hai già un abbonamento attivo!");
             }
         } else {
-            System.out.println("Devi prima creare la tessera per fare l' abbonaento!");
+            System.out.println("Devi prima creare la tessera per fare l' abbonamento!");
         }
     }
 
