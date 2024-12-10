@@ -6,6 +6,8 @@ import epicode.it.entities.stato_mezzo.Servizio;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @AllArgsConstructor
@@ -15,10 +17,6 @@ public class ServizioDAO {
     public void save(Servizio oggetto) {
         em.getTransaction().begin();
         em.persist(oggetto);
-        Mezzo mezzo = oggetto.getMezzo();
-        mezzo.getServizi().add(oggetto);
-        mezzo.setStato(Stato.IN_SERVIZIO);
-        em.merge(mezzo);
         em.getTransaction().commit();
     }
 
@@ -41,6 +39,7 @@ public class ServizioDAO {
         em.remove(oggetto);
         em.getTransaction().commit();
     }
+
 
 
 }
