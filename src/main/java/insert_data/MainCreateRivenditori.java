@@ -11,6 +11,7 @@ import epicode.it.entities.biglietto.Abbonamento;
 import epicode.it.entities.biglietto.Periodicy;
 import epicode.it.entities.rivenditore.Rivenditore;
 import epicode.it.entities.utente.Utente;
+import epicode.it.servizi.GestoreTessera;
 import epicode.it.servizi.gestore_rivenditori_e_biglietti.GestoreRivenditoriEBiglietti;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -21,6 +22,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
+import java.util.Scanner;
 
 public class MainCreateRivenditori {
     public static void main(String[] args) {
@@ -30,11 +32,12 @@ public class MainCreateRivenditori {
 
         RivenditoreDAO rivenditoreDAO = new RivenditoreDAO(em);
         UtenteDAO utenteDAO = new UtenteDAO(em);
+        GestoreTessera gestoreTessera = new GestoreTessera(em);
 
         GestoreRivenditoriEBiglietti gestoreRiEVe = new GestoreRivenditoriEBiglietti(em);
-        gestoreRiEVe.creaRivenditoreFisico(DayOfWeek.SATURDAY, Time.valueOf("08:30:00"), Time.valueOf("18:00:00"));
+        gestoreRiEVe.creaRivenditoreFisico(DayOfWeek.SATURDAY, Time.valueOf("08:30:00"), Time.valueOf("20:00:00"));
         gestoreRiEVe.creaRivenditoreFisico(DayOfWeek.MONDAY, Time.valueOf("10:00:00"), Time.valueOf("23:00:00"));
-        gestoreRiEVe.creaRivenditoreFisico(DayOfWeek.TUESDAY, Time.valueOf("06:30:00"), Time.valueOf("15:00:00"));
+        gestoreRiEVe.creaRivenditoreFisico(DayOfWeek.TUESDAY, Time.valueOf("06:30:00"), Time.valueOf("20:00:00"));
 
 
         gestoreRiEVe.creaRivenditoreAutomatico();
@@ -52,8 +55,9 @@ public class MainCreateRivenditori {
         utente.setDataNascita(faker.date().birthday().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
         utenteDAO.save(utente);
         Utente utenteRichiamato = utenteDAO.getById(1L);
-//        gestoreRiEVe.creaAbbonamento(rivenditoreCasuale,Periodicy.settimanale,utenteRichiamato);
-        gestoreRiEVe.creaGiornaliero(rivenditoreCasuale, null);
+        gestoreTessera.creaTessera(rivenditoreCasuale, utenteRichiamato, new Scanner(System.in));
+        gestoreRiEVe.creaAbbonamento(rivenditoreCasuale,Periodicy.settimanale,utenteRichiamato);
+//        gestoreRiEVe.creaGiornaliero(rivenditoreCasuale, null);
 
 //        System.out.println("BIglietti venduti " + rivenditoreCasuale.getBiglietti().getFirst().getId());
 

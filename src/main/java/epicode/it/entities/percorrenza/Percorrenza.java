@@ -23,7 +23,7 @@ public class Percorrenza {
     @JoinColumn(name = "tratta_id")
     private Tratta tratta;
 
-    @OneToOne
+    @ManyToOne
     private Mezzo mezzo;
 
     private LocalTime durata_effettiva;

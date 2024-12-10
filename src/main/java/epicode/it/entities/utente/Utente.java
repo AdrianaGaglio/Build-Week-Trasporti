@@ -3,6 +3,7 @@ package epicode.it.entities.utente;
 import epicode.it.entities.tessera.Tessera;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,6 +31,7 @@ public class Utente {
 
     @OneToOne
     @JoinColumn(name = "tessera_id")
+    @EqualsAndHashCode.Exclude
     private Tessera tessera;
 
 

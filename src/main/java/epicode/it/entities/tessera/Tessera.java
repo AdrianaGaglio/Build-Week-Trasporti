@@ -5,8 +5,10 @@ import epicode.it.entities.utente.Utente;
 import epicode.it.utilities.StringGenerator;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -25,9 +27,10 @@ public class Tessera {
     private LocalDateTime validita;
 
     @OneToMany(mappedBy = "tessera")
-    private List<Abbonamento> abbonamenti;
+    private List<Abbonamento> abbonamenti = new ArrayList<>();
 
     @OneToOne
     @JoinColumn(name = "utente_id")
+    @EqualsAndHashCode.Exclude
     private Utente utente;
 }
