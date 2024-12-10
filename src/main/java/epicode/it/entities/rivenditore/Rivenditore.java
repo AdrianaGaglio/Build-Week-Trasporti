@@ -1,6 +1,8 @@
 package epicode.it.entities.rivenditore;
 
+import epicode.it.dao.BigliettoDAO;
 import epicode.it.entities.biglietto.Biglietto;
+import epicode.it.entities.biglietto.Giornaliero;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -20,20 +22,6 @@ public abstract class Rivenditore {
     @OneToMany(mappedBy = "rivenditore", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Biglietto> biglietti = new ArrayList<>();
 
-    @Column(name = "biglietti_venduti", nullable = false)
-    private int totaleBigliettiVenduti = 0;
 
-    //  aggiungi  biglietto
-    public void addBiglietto(Biglietto biglietto) {
-        biglietti.add(biglietto);
-        biglietto.setRivenditore(this);
-        totaleBigliettiVenduti++;
-    }
 
-    // rimuovi  biglietto
-    public void removeBiglietto(Biglietto biglietto) {
-        biglietti.remove(biglietto);
-        biglietto.setRivenditore(null);
-        totaleBigliettiVenduti--;
-    }
 }

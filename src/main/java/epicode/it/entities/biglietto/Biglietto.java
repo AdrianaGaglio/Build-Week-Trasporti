@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -20,7 +21,7 @@ public abstract class Biglietto {
     private String codice = "B-" + StringGenerator.random(10);
 
     @Column(nullable = false)
-    private LocalDate scadenza;
+    private LocalDateTime scadenza;
 
 
 
