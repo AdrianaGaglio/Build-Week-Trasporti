@@ -1,5 +1,6 @@
 package epicode.it.entities.biglietto;
 
+import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.tratta.Tratta;
 import jakarta.persistence.*;
 import lombok.Data;
