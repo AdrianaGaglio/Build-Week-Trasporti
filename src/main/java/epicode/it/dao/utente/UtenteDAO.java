@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Scanner;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -60,25 +61,57 @@ public class UtenteDAO {
                 .setParameter("email", email).getResultStream().findFirst().orElse(null);
     }
 
-    public Utente creaTessera(Rivenditore r, Utente u) {
-        em.getTransaction().begin();
-
-        if (u.getTessera() == null) {
-            System.out.println("Creazione tessera in corso...");
-            Tessera tessera = new Tessera();
-            tessera.setValidita(LocalDateTime.now().plusYears(1));
-            u.setTessera(tessera);
-            em.persist(tessera);
-            em.merge(u);
-        } else if (u.getTessera().getValidita().isBefore(LocalDateTime.now())) {
-            System.out.println("Tessera scaduta, necessita rinnovo");
+//    public Utente creaTessera(Rivenditore r, Utente u) {
+//        em.getTransaction().begin();
+//
+//        if (u.getTessera() == null) {
+//            System.out.println("Creazione tessera in corso...");
+//            Tessera tessera = new Tessera();
+//            tessera.setValidita(LocalDateTime.now().plusYears(1));
+//            u.setTessera(tessera);
+//            em.persist(tessera);
+//            em.merge(u);
+//        } else if (u.getTessera().getValidita().isBefore(LocalDateTime.now())) {
+//            System.out.println("Tessera scaduta, necessita rinnovo");
 //            u.getTessera().setValidita(LocalDateTime.now().plusYears(1));
 //            em.merge(u.getTessera());
 //            em.merge(u);
+//        } else {
+//            System.out.println("Utente già in possesso di tessera valida");
+//        }
+//        em.getTransaction().commit();
+//        return u;
+//    }
+public Utente creaTessera(Rivenditore r, Utente u, Scanner scanner) {
+    em.getTransaction().begin();
+
+    if (u.getTessera() == null) {
+        System.out.println("Creazione tessera in corso...");
+        Tessera tessera = new Tessera();
+        tessera.setValidita(LocalDateTime.now().plusYears(1));
+        u.setTessera(tessera);
+        em.persist(tessera);
+        em.merge(u);
+    } else if (u.getTessera().getValidita().isBefore(LocalDateTime.now())) {
+        System.out.println("Tessera scaduta, necessita rinnovo");
+        if (chiediRinnovo(scanner)) {
+            u.getTessera().setValidita(LocalDateTime.now().plusYears(1));
+            em.merge(u.getTessera());
         } else {
-            System.out.println("Utente già in possesso di tessera valida");
+            System.out.println("Rinnovo tessera annullato");
         }
-        em.getTransaction().commit();
-        return u;
+    } else {
+        System.out.println("Utente già in possesso di tessera valida");
     }
+
+    em.getTransaction().commit();
+    return u;
+}
+
+    private boolean chiediRinnovo(Scanner scanner) {
+        System.out.print("Vuoi rinnovare la tessera per un altro anno? (S/N): ");
+        String risposta = scanner.nextLine().trim().toUpperCase();
+        return risposta.equals("S");
+    }
+
 }
