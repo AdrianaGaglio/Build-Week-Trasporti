@@ -20,8 +20,13 @@ public class MainTest {
         EntityManager em = emf.createEntityManager();
 
         // 1. creare N rivenditori
+        // - conteggio biglietti vendutiè
+
 
         // 2. creare N utenti
+        // - cercare utente per tessera
+        // - cercare utente per email
+        // - verificare se l'utente ha abbonamenti attivi
 
         // 3. creare alcune tessere da associare agli utenti
 
