@@ -1,6 +1,6 @@
 package insert_data;
 
-import epicode.it.dao.GiornalieroDAO;
+import epicode.it.dao.biglietto.GiornalieroDAO;
 import epicode.it.entities.biglietto.Giornaliero;
 import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.tratta.Tratta;
@@ -8,7 +8,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 

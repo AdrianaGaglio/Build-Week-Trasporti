@@ -13,13 +13,9 @@ import java.util.List;
 public class ManutenzioneDAO {
     private EntityManager em;
 
-    public void save(Manutenzione oggetto) {
+    public void save(Manutenzione manutenzione) {
         em.getTransaction().begin();
-        em.persist(oggetto);
-        Mezzo mezzo = oggetto.getMezzo();
-        mezzo.setStato(Stato.IN_MANUTENZIONE);
-        mezzo.getManutenzioni().add(oggetto);
-        em.merge(mezzo);
+        em.persist(manutenzione);
         em.getTransaction().commit();
     }
 
@@ -31,15 +27,15 @@ public class ManutenzioneDAO {
         return em.createNamedQuery("Trova_tutto_Manutenzione", Manutenzione.class).getResultList();
     }
 
-    public void update(Manutenzione oggetto) {
+    public void update(Manutenzione manutenzione) {
         em.getTransaction().begin();
-        em.merge(oggetto);
+        em.merge(manutenzione);
         em.getTransaction().commit();
     }
 
-    public void delete(Manutenzione oggetto) {
+    public void delete(Manutenzione manutenzione) {
         em.getTransaction().begin();
-        em.remove(oggetto);
+        em.remove(manutenzione);
         em.getTransaction().commit();
     }
 

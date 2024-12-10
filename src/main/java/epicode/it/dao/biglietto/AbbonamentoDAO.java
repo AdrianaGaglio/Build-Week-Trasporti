@@ -1,10 +1,8 @@
-package epicode.it.dao;
+package epicode.it.dao.biglietto;
 
 import epicode.it.entities.biglietto.Abbonamento;
-import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 
 import java.util.List;
 

@@ -1,8 +1,6 @@
 package epicode.it.entities.rivenditore;
 
-import epicode.it.dao.BigliettoDAO;
 import epicode.it.entities.biglietto.Biglietto;
-import epicode.it.entities.biglietto.Giornaliero;
 import jakarta.persistence.*;
 import lombok.Data;
 

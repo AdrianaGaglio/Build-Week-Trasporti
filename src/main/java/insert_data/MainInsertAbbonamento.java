@@ -1,7 +1,7 @@
 package insert_data;
 
 import com.github.javafaker.Faker;
-import epicode.it.dao.AbbonamentoDAO;
+import epicode.it.dao.biglietto.AbbonamentoDAO;
 import epicode.it.dao.tessera.TesseraDAO;
 import epicode.it.dao.tratta.TrattaDAO;
 import epicode.it.entities.biglietto.Abbonamento;

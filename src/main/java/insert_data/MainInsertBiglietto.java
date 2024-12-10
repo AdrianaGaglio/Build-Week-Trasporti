@@ -1,12 +1,10 @@
 package insert_data;
 
 import com.github.javafaker.Faker;
-import epicode.it.dao.AbbonamentoDAO;
-import epicode.it.dao.GiornalieroDAO;
-import epicode.it.entities.biglietto.Abbonamento;
+import epicode.it.dao.biglietto.AbbonamentoDAO;
+import epicode.it.dao.biglietto.GiornalieroDAO;
 import epicode.it.entities.biglietto.Giornaliero;
 
-import epicode.it.entities.biglietto.Periodicy;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
