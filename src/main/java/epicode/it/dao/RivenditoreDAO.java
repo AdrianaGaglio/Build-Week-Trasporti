@@ -1,5 +1,6 @@
 package epicode.it.dao;
 
+import epicode.it.dao.tessera.TesseraDAO;
 import epicode.it.entities.biglietto.Abbonamento;
 import epicode.it.entities.biglietto.Biglietto;
 import epicode.it.entities.biglietto.Giornaliero;
@@ -89,6 +90,7 @@ public class RivenditoreDAO {
             System.out.println("Devi prima creare la tessera per fare l' abbonaento!");
         }
     }
+}
 
     // rimuovi  biglietto
 //    public void removeBiglietto(Biglietto biglietto) {
@@ -97,4 +99,3 @@ public class RivenditoreDAO {
 //        totaleBigliettiVenduti--;
 //    }
 
-}

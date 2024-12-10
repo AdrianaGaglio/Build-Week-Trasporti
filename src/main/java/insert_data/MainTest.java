@@ -79,7 +79,7 @@ public class MainTest {
         abbonamento.setPeriodicy(Periodicy.settimanale);
         abbonamento.setScadenza(LocalDateTime.now().minusDays(8));
         abbonamento.setAttivo(true);
-        abbonamento.getTratte().add(trattaDAO.getById(2L));
+//        abbonamento.getTratte().add(trattaDAO.getById(2L));
 
         abbonamentoDAO.save(abbonamento);
 

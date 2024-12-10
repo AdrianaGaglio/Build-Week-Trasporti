@@ -6,7 +6,7 @@ import epicode.it.utilities.StringGenerator;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -21,7 +21,7 @@ public class Tessera {
 
     private String codice = "T-" + StringGenerator.random(10);
 
-    private LocalDate validita;
+    private LocalDateTime validita;
 
     @OneToMany(mappedBy = "tessera")
     private List<Abbonamento> abbonamenti;
