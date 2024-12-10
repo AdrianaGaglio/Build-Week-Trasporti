@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.sql.Time;
+import java.time.DayOfWeek;
 
 @Data
 @Entity
@@ -12,7 +13,7 @@ import java.sql.Time;
 public class RivFisico extends Rivenditore  {
 
     @Column(name="giorno_chiusura")
-    private String giornoChiusura;
+    private DayOfWeek giornoChiusura;
 
     @Column(name="ora_apertura")
     private Time oraApertura;

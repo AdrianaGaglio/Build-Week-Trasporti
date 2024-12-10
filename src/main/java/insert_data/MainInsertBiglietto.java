@@ -11,7 +11,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Locale;
 
@@ -33,7 +32,6 @@ public class MainInsertBiglietto {
 
             // SALVO
             giornalieroDAO.save(giornaliero);
-
 
         } catch (Exception e) {
             e.printStackTrace();

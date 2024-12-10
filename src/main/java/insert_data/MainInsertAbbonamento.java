@@ -12,33 +12,31 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Locale;
 
 public class MainInsertAbbonamento {
-    public static void main(String[] args) {
-        Faker faker = new Faker(new Locale("it"));
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("unit-jpa");
-        EntityManager em = emf.createEntityManager();
+        public static void main(String[] args) {
+                Faker faker = new Faker(new Locale("it"));
+                EntityManagerFactory emf = Persistence.createEntityManagerFactory("unit-jpa");
+                EntityManager em = emf.createEntityManager();
 
-        AbbonamentoDAO abbonamentoDAO = new AbbonamentoDAO(em);
-        TesseraDAO tesseraDAO = new TesseraDAO(em);
-        TrattaDAO trattaDAO = new TrattaDAO(em);
+                AbbonamentoDAO abbonamentoDAO = new AbbonamentoDAO(em);
+                TesseraDAO tesseraDAO = new TesseraDAO(em);
+                TrattaDAO trattaDAO = new TrattaDAO(em);
 
-        Abbonamento abbonamento = new Abbonamento();
-        abbonamento.setPeriodicy(Periodicy.mensile);
-        abbonamento.setAttivo(true);
-        abbonamento.setTariffa(faker.lorem().fixedString(10));
-        abbonamento.setScadenza(LocalDateTime.now().plusDays(7));
-        Tessera tessera1 = tesseraDAO.getById(1L);
-        abbonamento.setTessera(tessera1);
-        abbonamentoDAO.save(abbonamento);
+                Abbonamento abbonamento = new Abbonamento();
+                abbonamento.setPeriodicy(Periodicy.mensile);
+                abbonamento.setAttivo(true);
+                abbonamento.setTariffa(faker.lorem().fixedString(10));
+                abbonamento.setScadenza(LocalDateTime.now().plusDays(7));
+                Tessera tessera1 = tesseraDAO.getById(1L);
+                abbonamento.setTessera(tessera1);
+                abbonamentoDAO.save(abbonamento);
 
-        Tratta tratta = trattaDAO.getById(1L);
-        abbonamento.getTratte().add(tratta);
-        abbonamentoDAO.update(abbonamento);
+                Tratta tratta = trattaDAO.getById(1L);
+                // abbonamento.getTratte().add(tratta);
+                abbonamentoDAO.update(abbonamento);
 
-
-    }
+        }
 }

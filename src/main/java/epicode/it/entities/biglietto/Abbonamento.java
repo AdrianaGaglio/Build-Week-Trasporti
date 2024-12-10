@@ -28,9 +28,9 @@ public class Abbonamento extends Biglietto {
      @JoinColumn(name = "tessera_id")
      private Tessera tessera;
 
-    // RELAZIONE CON TRATTA
-     @ManyToMany
-     @JoinColumn(name = "tratta_id") // Foreign key verso Tratta
-     private List<Tratta> tratte = new ArrayList<>();
+     // RELAZIONE CON TRATTA
+//     @ManyToMany
+//     @JoinColumn(name = "tratta_id") // Foreign key verso Tratta
+//     private List<Tratta> tratte = new ArrayList<>();
 
 }

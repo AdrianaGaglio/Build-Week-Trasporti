@@ -11,6 +11,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 import java.sql.Time;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.Locale;
 
@@ -24,12 +25,12 @@ public class MainCreateRivenditori {
             em.getTransaction().begin();
 
             RivFisico rivFisico1 = new RivFisico();
-            rivFisico1.setGiornoChiusura("Domenica");
+            rivFisico1.setGiornoChiusura(DayOfWeek.MONDAY);
             rivFisico1.setOraApertura(Time.valueOf("09:00:00"));
             rivFisico1.setOraChiusura(Time.valueOf("20:00:00"));
 
             RivFisico rivFisico2 = new RivFisico();
-            rivFisico2.setGiornoChiusura("Lunedì");
+            rivFisico2.setGiornoChiusura(DayOfWeek.THURSDAY);
             rivFisico2.setOraApertura(Time.valueOf("08:30:00"));
             rivFisico2.setOraChiusura(Time.valueOf("18:30:00"));
 
@@ -49,18 +50,19 @@ public class MainCreateRivenditori {
                 Giornaliero giornaliero = new Giornaliero();
                 giornaliero.setScadenza(LocalDateTime.now().plusDays(faker.number().numberBetween(1, 30)));
                 giornaliero.setDaAttivare(faker.bool().bool());
-                rivFisico1.addBiglietto(giornaliero);
+                // rivFisico1.addBiglietto(giornaliero);
                 em.persist(giornaliero);
             }
 
-            // Creazione  abbonamenti rivenditore fisico 2
+            // Creazione abbonamenti rivenditore fisico 2
             for (int i = 0; i < 3; i++) {
                 Abbonamento abbonamento = new Abbonamento();
                 abbonamento.setScadenza(LocalDateTime.now().plusMonths(faker.number().numberBetween(1, 12)));
-                abbonamento.setPeriodicy(Periodicy.values()[faker.number().numberBetween(0, Periodicy.values().length)]);
+                abbonamento
+                        .setPeriodicy(Periodicy.values()[faker.number().numberBetween(0, Periodicy.values().length)]);
                 abbonamento.setAttivo(true);
                 abbonamento.setTariffa(faker.commerce().price() + " EUR");
-                rivFisico2.addBiglietto(abbonamento);
+                // rivFisico2.addBiglietto(abbonamento);
                 em.persist(abbonamento);
             }
 
@@ -70,22 +72,21 @@ public class MainCreateRivenditori {
                     Giornaliero giornaliero = new Giornaliero();
                     giornaliero.setScadenza(LocalDateTime.now().plusDays(faker.number().numberBetween(1, 30)));
                     giornaliero.setDaAttivare(faker.bool().bool());
-                    rivAutomatico1.addBiglietto(giornaliero);
+                    // rivAutomatico1.addBiglietto(giornaliero);
                     em.persist(giornaliero);
                 } else {
                     Abbonamento abbonamento = new Abbonamento();
                     abbonamento.setScadenza(LocalDateTime.now().plusMonths(faker.number().numberBetween(1, 12)));
-                    abbonamento.setPeriodicy(Periodicy.values()[faker.number().numberBetween(0, Periodicy.values().length)]);
+                    abbonamento.setPeriodicy(
+                            Periodicy.values()[faker.number().numberBetween(0, Periodicy.values().length)]);
                     abbonamento.setAttivo(true);
                     abbonamento.setTariffa(faker.commerce().price() + " EUR");
-                    rivAutomatico1.addBiglietto(abbonamento);
+                    // rivAutomatico1.addBiglietto(abbonamento);
                     em.persist(abbonamento);
                 }
             }
 
             em.getTransaction().commit();
-
-
 
         } catch (Exception e) {
             em.getTransaction().rollback();

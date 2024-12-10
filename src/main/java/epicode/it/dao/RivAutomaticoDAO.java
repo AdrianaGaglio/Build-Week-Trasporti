@@ -10,6 +10,13 @@ import java.util.List;
 public class RivAutomaticoDAO {
     private EntityManager em;
 
+
+    public void createRivAutomatico(boolean attivo){
+        RivAutomatico r = new RivAutomatico();
+        r.setAttivo(attivo);
+        save(r);
+    }
+
     public void save(RivAutomatico oggetto) {
         em.getTransaction().begin();
         em.persist(oggetto);
