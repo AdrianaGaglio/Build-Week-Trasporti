@@ -1,11 +1,17 @@
 package insert_data;
 
 import com.github.javafaker.Faker;
+import epicode.it.dao.rivenditore.RivAutomaticoDAO;
+import epicode.it.dao.rivenditore.RivenditoreDAO;
+import epicode.it.dao.utente.UtenteDAO;
 import epicode.it.entities.rivenditore.RivFisico;
 import epicode.it.entities.rivenditore.RivAutomatico;
 import epicode.it.entities.biglietto.Giornaliero;
 import epicode.it.entities.biglietto.Abbonamento;
 import epicode.it.entities.biglietto.Periodicy;
+import epicode.it.entities.rivenditore.Rivenditore;
+import epicode.it.entities.utente.Utente;
+import epicode.it.servizi.gestore_rivenditori_e_biglietti.GestoreRivenditoriEBiglietti;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -13,6 +19,7 @@ import jakarta.persistence.Persistence;
 import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Locale;
 
 public class MainCreateRivenditori {
@@ -21,76 +28,34 @@ public class MainCreateRivenditori {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("unit-jpa");
         EntityManager em = emf.createEntityManager();
 
-        try {
-            em.getTransaction().begin();
+        RivenditoreDAO rivenditoreDAO = new RivenditoreDAO(em);
+        UtenteDAO utenteDAO = new UtenteDAO(em);
 
-            RivFisico rivFisico1 = new RivFisico();
-            rivFisico1.setGiornoChiusura(DayOfWeek.MONDAY);
-            rivFisico1.setOraApertura(Time.valueOf("09:00:00"));
-            rivFisico1.setOraChiusura(Time.valueOf("20:00:00"));
+        GestoreRivenditoriEBiglietti gestoreRiEVe = new GestoreRivenditoriEBiglietti(em);
+        gestoreRiEVe.creaRivenditoreFisico(DayOfWeek.SATURDAY, Time.valueOf("08:30:00"), Time.valueOf("18:00:00"));
+        gestoreRiEVe.creaRivenditoreFisico(DayOfWeek.MONDAY, Time.valueOf("10:00:00"), Time.valueOf("23:00:00"));
+        gestoreRiEVe.creaRivenditoreFisico(DayOfWeek.TUESDAY, Time.valueOf("06:30:00"), Time.valueOf("15:00:00"));
 
-            RivFisico rivFisico2 = new RivFisico();
-            rivFisico2.setGiornoChiusura(DayOfWeek.THURSDAY);
-            rivFisico2.setOraApertura(Time.valueOf("08:30:00"));
-            rivFisico2.setOraChiusura(Time.valueOf("18:30:00"));
 
-            RivAutomatico rivAutomatico1 = new RivAutomatico();
-            rivAutomatico1.setAttivo(true);
+        gestoreRiEVe.creaRivenditoreAutomatico();
+        gestoreRiEVe.creaRivenditoreAutomatico();
+        gestoreRiEVe.creaRivenditoreAutomatico();
 
-            RivAutomatico rivAutomatico2 = new RivAutomatico();
-            rivAutomatico2.setAttivo(false);
 
-            em.persist(rivFisico1);
-            em.persist(rivFisico2);
-            em.persist(rivAutomatico1);
-            em.persist(rivAutomatico2);
+        List<Rivenditore> rivenditori = rivenditoreDAO.findAll();
+        Rivenditore rivenditoreCasuale = rivenditori.get(faker.number().numberBetween(0, 5));
+        System.out.println(rivenditoreCasuale);
+        Utente utente = new Utente();
+        utente.setNome("Marco");
+        utente.setCognome("Cipolletta");
+        utente.setEmail("Marco@Cipo.it");
+        utente.setDataNascita(faker.date().birthday().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+        utenteDAO.save(utente);
+        Utente utenteRichiamato = utenteDAO.getById(1L);
+//        gestoreRiEVe.creaAbbonamento(rivenditoreCasuale,Periodicy.settimanale,utenteRichiamato);
+        gestoreRiEVe.creaGiornaliero(rivenditoreCasuale, null);
 
-            // Creazione biglietti giornalieri rivenditore fisico 1
-            for (int i = 0; i < 5; i++) {
-                Giornaliero giornaliero = new Giornaliero();
-                giornaliero.setScadenza(LocalDateTime.now().plusDays(faker.number().numberBetween(1, 30)));
-                giornaliero.setDaAttivare(faker.bool().bool());
-                // rivFisico1.addBiglietto(giornaliero);
-                em.persist(giornaliero);
-            }
+//        System.out.println("BIglietti venduti " + rivenditoreCasuale.getBiglietti().getFirst().getId());
 
-            // Creazione abbonamenti rivenditore fisico 2
-            for (int i = 0; i < 3; i++) {
-                Abbonamento abbonamento = new Abbonamento();
-                abbonamento.setScadenza(LocalDateTime.now().plusMonths(faker.number().numberBetween(1, 12)));
-                abbonamento
-                        .setPeriodicy(Periodicy.values()[faker.number().numberBetween(0, Periodicy.values().length)]);
-                abbonamento.setAttivo(true);
-                abbonamento.setTariffa(faker.commerce().price() + " EUR");
-                // rivFisico2.addBiglietto(abbonamento);
-                em.persist(abbonamento);
-            }
-
-            // Creazione biglietti misti rivenditore automatico 1
-            for (int i = 0; i < 7; i++) {
-                if (i % 2 == 0) {
-                    Giornaliero giornaliero = new Giornaliero();
-                    giornaliero.setScadenza(LocalDateTime.now().plusDays(faker.number().numberBetween(1, 30)));
-                    giornaliero.setDaAttivare(faker.bool().bool());
-                    // rivAutomatico1.addBiglietto(giornaliero);
-                    em.persist(giornaliero);
-                } else {
-                    Abbonamento abbonamento = new Abbonamento();
-                    abbonamento.setScadenza(LocalDateTime.now().plusMonths(faker.number().numberBetween(1, 12)));
-                    abbonamento.setPeriodicy(
-                            Periodicy.values()[faker.number().numberBetween(0, Periodicy.values().length)]);
-                    abbonamento.setAttivo(true);
-                    abbonamento.setTariffa(faker.commerce().price() + " EUR");
-                    // rivAutomatico1.addBiglietto(abbonamento);
-                    em.persist(abbonamento);
-                }
-            }
-
-            em.getTransaction().commit();
-
-        } catch (Exception e) {
-            em.getTransaction().rollback();
-            e.printStackTrace();
-        }
     }
 }
