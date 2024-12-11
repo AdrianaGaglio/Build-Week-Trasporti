@@ -1,4 +1,4 @@
-package epicode.it.servizi;
+package epicode.it.servizi.gestore_percorrenze;
 
 import epicode.it.dao.percorrenza.PercorrenzaDAO;
 import epicode.it.entities.mezzo.Mezzo;

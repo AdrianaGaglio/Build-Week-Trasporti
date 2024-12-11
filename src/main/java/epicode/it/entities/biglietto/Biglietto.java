@@ -1,12 +1,10 @@
 package epicode.it.entities.biglietto;
 
+import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.rivenditore.Rivenditore;
 import epicode.it.utilities.StringGenerator;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -14,6 +12,7 @@ import java.time.LocalDateTime;
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "biglietti")
 public abstract class Biglietto {
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
@@ -29,10 +28,16 @@ public abstract class Biglietto {
     @ManyToOne
     private Rivenditore rivenditore;
 
-    public abstract void setDaAttivare(boolean b);
+    @ManyToOne
+    private Mezzo mezzo;
 
-    // Getter aggiunto manualmente
-    public LocalDateTime getScadenza() {
-        return this.scadenza;
+    private boolean daAttivare = true;
+
+    public boolean isDaAttivare() {
+        return daAttivare;
+    }
+
+    public void setDaAttivare(boolean daAttivare) {
+        this.daAttivare = daAttivare;
     }
 }
