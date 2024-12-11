@@ -134,7 +134,6 @@ public class HandleBiglietti implements HttpHandler {
             em.close();
             return;
         }
-
         em.close();
         exchange.sendResponseHeaders(201, -1); // Creato con successo
     }

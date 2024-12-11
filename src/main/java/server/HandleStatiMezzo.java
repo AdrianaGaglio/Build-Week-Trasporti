@@ -138,7 +138,6 @@ public class HandleStatiMezzo implements HttpHandler {
                 // Creazione di un oggetto Servizio
                 gestore.aggiungiServizio((Mezzo) requestData.get("mezzo"),
                         Date.valueOf((String) requestData.get("dataInizio")).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate(),
-                        Date.valueOf((String) requestData.get("dataFine")).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate(),
                         (Tratta) requestData.get("tratta"));
 
             } else if ("manutenzione".equalsIgnoreCase(tipo)) {

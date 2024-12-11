@@ -23,6 +23,7 @@ import jakarta.persistence.Persistence;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.sql.Date;
 import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -122,30 +123,24 @@ public class HandleUtenti implements HttpHandler {
 
     private void handlePut(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
-        RivenditoreDAO dao = new RivenditoreDAO(em);
+        UtenteDAO dao = new UtenteDAO(em);
 
         // Leggi il corpo della richiesta come JSON
         Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
         Long id = Long.parseLong(requestData.get("id").toString());
 
-        Rivenditore rivenditore = dao.findById(id);
-        if (rivenditore == null) {
+        Utente utente = dao.getById(id);
+        if (utente == null) {
             exchange.sendResponseHeaders(404, -1); // Rivenditore non trovato
             em.close();
             return;
         }
 
-        if (rivenditore instanceof RivFisico) {
-            RivFisico rivFisico = (RivFisico) rivenditore;
-            rivFisico.setGiornoChiusura(DayOfWeek.valueOf((String) requestData.get("giornoChiusura")));
-            rivFisico.setOraApertura(Time.valueOf((String) requestData.get("oraApertura")));
-            rivFisico.setOraChiusura(Time.valueOf((String) requestData.get("oraChiusura")));
-            dao.update(rivFisico);
-        } else if (rivenditore instanceof RivAutomatico) {
-            RivAutomatico rivAutomatico = (RivAutomatico) rivenditore;
-            rivAutomatico.setAttivo((Boolean) requestData.get("attivo"));
-            dao.update(rivAutomatico);
-        }
+        utente.setNome((String) requestData.get("nome"));
+        utente.setCognome((String) requestData.get("cognome"));
+        utente.setEmail((String) requestData.get("email"));
+        utente.setDataNascita(Date.valueOf((String) requestData.get("dataNascita")).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+        dao.update(utente);
 
         em.close();
         exchange.sendResponseHeaders(200, -1); // Aggiornamento riuscito
@@ -178,8 +173,6 @@ public class HandleUtenti implements HttpHandler {
                     );
                 })
                 .collect(Collectors.joining(",", "[", "]"));
-
-
 
 
         // Restituisci la risposta

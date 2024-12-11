@@ -19,6 +19,7 @@ import epicode.it.entities.rivenditore.Rivenditore;
 import epicode.it.entities.tessera.Tessera;
 import epicode.it.entities.tratta.Tratta;
 import epicode.it.entities.utente.Utente;
+import epicode.it.servizi.gestire_tessera.GestioneTessera;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -114,34 +115,18 @@ public class HandleTessere implements HttpHandler {
     private void handlePost(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
         TesseraDAO tesseraDAO = new TesseraDAO(em);
+        RivenditoreDAO rivenditoreDAO = new RivenditoreDAO(em);
+        UtenteDAO utenteDAO = new UtenteDAO(em);
 
         try {
             // Leggi il corpo della richiesta come JSON
             Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
 
-            // Creazione di una nuova Tessera
-            Tessera tessera = new Tessera();
-            tessera.setValidita(LocalDateTime.parse((String) requestData.get("validita")));
+            GestioneTessera gestore = new GestioneTessera(em);
 
-            // Verifica se è associata a un utente
-            Map<String, Object> utenteData = (Map<String, Object>) requestData.get("utente");
-            if (utenteData != null) {
-                Long utenteId = Long.parseLong(utenteData.get("id").toString());
-                UtenteDAO utenteDAO = new UtenteDAO(em);
-                Utente utente = utenteDAO.getById(utenteId);
-
-                if (utente != null) {
-                    tessera.setUtente(utente);
-                    utente.setTessera(tessera);
-                    utenteDAO.update(utente);
-                } else {
-                    exchange.sendResponseHeaders(404, -1); // Utente non trovato
-                    return;
-                }
-            }
-
-            // Salva la Tessera
-            tesseraDAO.save(tessera);
+            Rivenditore rivenditore = (Rivenditore) requestData.get("rivenditore");
+            Utente utente = (Utente) requestData.get("utente");
+            gestore.creaTessera(rivenditore, utente);
 
             // Risposta al client
             exchange.sendResponseHeaders(201, -1); // Creato con successo
@@ -156,30 +141,22 @@ public class HandleTessere implements HttpHandler {
 
     private void handlePut(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
-        RivenditoreDAO dao = new RivenditoreDAO(em);
+        TesseraDAO dao = new TesseraDAO(em);
+
+        GestioneTessera gestore = new GestioneTessera(em);
 
         // Leggi il corpo della richiesta come JSON
         Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
         Long id = Long.parseLong(requestData.get("id").toString());
 
-        Rivenditore rivenditore = dao.findById(id);
-        if (rivenditore == null) {
+        Tessera tessera = dao.getById(id);
+        if (tessera == null) {
             exchange.sendResponseHeaders(404, -1); // Rivenditore non trovato
             em.close();
             return;
         }
 
-        if (rivenditore instanceof RivFisico) {
-            RivFisico rivFisico = (RivFisico) rivenditore;
-            rivFisico.setGiornoChiusura(DayOfWeek.valueOf((String) requestData.get("giornoChiusura")));
-            rivFisico.setOraApertura(Time.valueOf((String) requestData.get("oraApertura")));
-            rivFisico.setOraChiusura(Time.valueOf((String) requestData.get("oraChiusura")));
-            dao.update(rivFisico);
-        } else if (rivenditore instanceof RivAutomatico) {
-            RivAutomatico rivAutomatico = (RivAutomatico) rivenditore;
-            rivAutomatico.setAttivo((Boolean) requestData.get("attivo"));
-            dao.update(rivAutomatico);
-        }
+        gestore.rinnovaTessera(tessera);
 
         em.close();
         exchange.sendResponseHeaders(200, -1); // Aggiornamento riuscito
