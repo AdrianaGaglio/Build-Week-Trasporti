@@ -2,24 +2,20 @@ package epicode.it.servizi.gestore_stati_servizio;
 
 import epicode.it.dao.stato_mezzo.ManutenzioneDAO;
 import epicode.it.dao.stato_mezzo.ServizioDAO;
-import epicode.it.dao.stato_mezzo.StatoMezzoDAO;
 import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.mezzo.Stato;
 import epicode.it.entities.stato_mezzo.Manutenzione;
 import epicode.it.entities.stato_mezzo.Servizio;
-import epicode.it.entities.stato_mezzo.StatoMezzo;
 import epicode.it.entities.tratta.Tratta;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
 
 import java.time.LocalDate;
 
-public class Gestore_stati_servizio {
+public class GestoreStatiServizio {
 
     private EntityManager em;
 
-    public Gestore_stati_servizio(EntityManager em) {
+    public GestoreStatiServizio(EntityManager em) {
         this.em = em;
     }
 

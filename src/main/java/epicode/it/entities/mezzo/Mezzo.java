@@ -12,9 +12,10 @@ import java.util.List;
 @Data
 @Entity
 @NamedQuery(name = "Trova_tutto_Mezzo", query = "SELECT a FROM Mezzo a")
-@NamedQuery(name="trovaPerNumeroLinea", query ="SELECT a FROM Mezzo a WHERE linea = :linea")
+@NamedQuery(name="trovaPerNumeroLinea", query ="SELECT a FROM Mezzo a WHERE codice = :codice")
 @Table(name = "mezzi")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "tipo_mezzo")
 public abstract class Mezzo {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -31,7 +32,7 @@ public abstract class Mezzo {
     @Enumerated(EnumType.STRING)
     private Stato stato;
 
-    @ManyToMany(mappedBy = "mezzi")
+    @OneToMany(mappedBy = "mezzo")
     private List<Percorrenza> percorrenze = new ArrayList<>();
 
     private Integer codice;

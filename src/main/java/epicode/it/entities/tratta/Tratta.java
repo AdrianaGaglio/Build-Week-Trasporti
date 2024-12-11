@@ -31,15 +31,6 @@ public class Tratta {
     @OneToMany(mappedBy = "tratta")
     private List<Percorrenza> percorrenze = new ArrayList<>();
 
-    public Percorrenza percorriTratta(List<Mezzo> mezzi, LocalDate data) {
-        Percorrenza nuovaPercorrenza = new Percorrenza();
-        nuovaPercorrenza.setTratta(this);
-        nuovaPercorrenza.setMezzi(mezzi);
-        nuovaPercorrenza.setData(data);
-        nuovaPercorrenza.setDurata_effettiva(this.durata);
-        this.percorrenze.add(nuovaPercorrenza);
-        return nuovaPercorrenza;
-    }
 
     @Override
     public String toString() {

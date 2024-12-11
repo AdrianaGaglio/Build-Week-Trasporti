@@ -1,5 +1,6 @@
 package epicode.it.servizi;
 
+import epicode.it.dao.percorrenza.PercorrenzaDAO;
 import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.percorrenza.Percorrenza;
 import epicode.it.entities.tratta.Tratta;
@@ -30,8 +31,12 @@ class GestorePercorrenze {
     }
 
     public void percorri(Mezzo m, LocalDateTime data, Tratta tratta) {
+        PercorrenzaDAO percorrenzaDAO = new PercorrenzaDAO(em);
+        Percorrenza foundPM = percorrenzaDAO.trovaPerMezzo(m, data);
+        Percorrenza foundPT = percorrenzaDAO.trovaPerTratta(tratta, data);
         em.getTransaction().begin();
         // lo stesso mezzo non può percorrere più di una tratta alla volta
+
         // più mezzi non possono percorrere contemporaneamente la stessa tratta
         Percorrenza percorrenza = new Percorrenza();
         int random = ((int) (Math.random() * 2)) + 1;

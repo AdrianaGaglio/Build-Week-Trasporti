@@ -20,12 +20,10 @@ public abstract class Biglietto {
     @Column(nullable = false, unique = true)
     private String codice = "B-" + StringGenerator.random(10);
 
-
     @Column(nullable = false)
     private LocalDateTime scadenza;
 
-
-
+    private LocalDateTime emissione = LocalDateTime.now();
 
     @ManyToOne
     private Rivenditore rivenditore;
