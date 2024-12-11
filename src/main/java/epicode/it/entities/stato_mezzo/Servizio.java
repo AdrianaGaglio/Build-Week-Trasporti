@@ -8,6 +8,7 @@ import lombok.Data;
 @Entity
 @Data
 @NamedQuery(name="cercaSeInServizio", query = "SELECT s FROM Servizio s WHERE s.mezzo = :mezzo AND dataFine > :data AND dataFine IS NOT NULL")
+@NamedQuery(name="serviziPerMezzo", query ="SELECT s FROM Servizio s WHERE s.mezzo = :mezzo")
 public class Servizio extends StatoMezzo {
     @ManyToOne
     @JoinColumn(name="tratta_id")
@@ -16,7 +17,8 @@ public class Servizio extends StatoMezzo {
     @Override
     public String toString() {
         return "Servizio{" +
-                "tratta=" + tratta +
+                "id=" + this.getId() +
+                ", tratta=" + tratta +
                 ", data_inizio=" + this.getDataInizio() +
                 ", data_fine=" + this.getDataFine() +
                 ", mezzo=" + this.getMezzo() +
