@@ -3,6 +3,7 @@ package epicode.it.entities.rivenditore;
 import epicode.it.entities.biglietto.Biglietto;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ public abstract class Rivenditore {
     @OneToMany(mappedBy = "rivenditore", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Biglietto> biglietti = new ArrayList<>();
 
-
-
+    public List<Biglietto> getBiglietti() {
+        return this.biglietti;
+    }
 }

@@ -37,5 +37,5 @@ public abstract class Mezzo {
 
     private Integer codice;
 
-
+    
 }

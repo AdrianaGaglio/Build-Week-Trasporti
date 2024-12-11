@@ -6,32 +6,29 @@ import jakarta.persistence.*;
 import jdk.jfr.Name;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Data
 @Entity
 @Table(name="abbonamenti")
 public class Abbonamento extends Biglietto {
 
     @Enumerated(EnumType.STRING)
-
     private Periodicy periodicy;
-
 
     private boolean attivo;
 
-
     private String tariffa;
 
-    // RELAZIONE CON TESSERA
-     @ManyToOne
-     @JoinColumn(name = "tessera_id")
-     private Tessera tessera;
+    @ManyToOne
+    @JoinColumn(name = "tessera_id")
+    private Tessera tessera;
 
-     // RELAZIONE CON TRATTA
-//     @ManyToMany
-//     @JoinColumn(name = "tratta_id") // Foreign key verso Tratta
-//     private List<Tratta> tratte = new ArrayList<>();
+    // Getter aggiunto manualmente
+    public boolean isAttivo() {
+        return this.attivo;
+    }
 
+    @Override
+    public void setDaAttivare(boolean b) {
+        this.attivo = b;
+    }
 }

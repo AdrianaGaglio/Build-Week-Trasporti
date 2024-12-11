@@ -4,6 +4,7 @@ import epicode.it.entities.rivenditore.Rivenditore;
 import epicode.it.utilities.StringGenerator;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,4 +29,10 @@ public abstract class Biglietto {
     @ManyToOne
     private Rivenditore rivenditore;
 
+    public abstract void setDaAttivare(boolean b);
+
+    // Getter aggiunto manualmente
+    public LocalDateTime getScadenza() {
+        return this.scadenza;
+    }
 }
