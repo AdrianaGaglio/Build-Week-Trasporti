@@ -71,7 +71,7 @@ public class GestoreRivenditoriEBiglietti {
         Giornaliero biglietto = new Giornaliero();
         biglietto.setDaAttivare(true);
         biglietto.setTratta(tratta);
-        biglietto.setScadenza(LocalDateTime.now().plus(Duration.ofMinutes(90)));
+        biglietto.setScadenza(null);
         biglietto.setRivenditore(r);
         r.getBiglietti().add(biglietto);
 
