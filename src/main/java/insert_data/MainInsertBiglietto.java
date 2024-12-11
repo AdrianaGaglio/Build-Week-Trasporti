@@ -3,6 +3,7 @@ package insert_data;
 import com.github.javafaker.Faker;
 import epicode.it.dao.biglietto.AbbonamentoDAO;
 import epicode.it.dao.biglietto.GiornalieroDAO;
+import epicode.it.entities.biglietto.Abbonamento;
 import epicode.it.entities.biglietto.Giornaliero;
 
 import jakarta.persistence.EntityManager;
@@ -30,6 +31,8 @@ public class MainInsertBiglietto {
 
             // SALVO
             giornalieroDAO.save(giornaliero);
+
+
 
         } catch (Exception e) {
             e.printStackTrace();

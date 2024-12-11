@@ -39,7 +39,6 @@ public class HandleRivenditori implements HttpHandler {
 
         String method = exchange.getRequestMethod();
 
-
         switch (method) {
             case "GET":
                 System.out.println("arrivato fin qui");

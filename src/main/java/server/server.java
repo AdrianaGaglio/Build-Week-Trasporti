@@ -12,6 +12,7 @@ public class server {
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
 
         server.createContext("/rivenditori", new HandleRivenditori());
+        server.createContext("/biglietti", new HandleBiglietti());
         server.createContext("/prova", new ProvaHandler());
 
         // Avvia il server
