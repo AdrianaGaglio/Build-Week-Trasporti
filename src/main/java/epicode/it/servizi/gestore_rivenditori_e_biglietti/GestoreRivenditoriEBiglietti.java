@@ -65,7 +65,6 @@ public class GestoreRivenditoriEBiglietti {
                 System.out.println("Rivenditore automatico fuori servizio");
             }
         }
-
     }
 
     private void creaGiornalieroTemplate(Rivenditore r, Tratta tratta) {
