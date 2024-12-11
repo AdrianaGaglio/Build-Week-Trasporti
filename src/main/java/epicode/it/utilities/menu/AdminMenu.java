@@ -34,14 +34,9 @@ public class AdminMenu {
             System.out.println("1.Gestisci rivenditori");
             System.out.println("=========================");
             System.out.println("2. Gestisci mezzi");
-            System.out.println("2. Aggiungi nuovo mezzo");
-            System.out.println("3. Visualizza tutti i mezzi");
-            System.out.println("4. Assegna mezzo ad una tratta (metti in servizio)");
-            System.out.println("5. Metti  un mezzo in manutenzione");
-            System.out.println("6. Elimina mezzo");
             System.out.println("=========================");
-            System.out.println("7. Aggiungi nuova tratta");
-            System.out.println("8. Elimina tratta");
+            System.out.println("3. Aggiungi nuova tratta");
+            System.out.println("4. Elimina tratta");
             System.out.println("=> Scegli un opzione valida: (0 per tornare indietro)");
             switchOptions(scanner, em);
 
