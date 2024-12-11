@@ -125,7 +125,7 @@ public class HandleBiglietti implements HttpHandler {
         BigliettoDAO dao = new BigliettoDAO(em);
 
         List<Biglietto> biglietti = dao.findAll();
-        System.out.println(biglietti);
+
         em.close();
 
         String jsonResponse = biglietti.stream()

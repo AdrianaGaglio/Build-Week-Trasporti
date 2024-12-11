@@ -23,19 +23,11 @@ public class MainInsertBiglietto {
         GiornalieroDAO giornalieroDAO = new GiornalieroDAO(em);
         AbbonamentoDAO abbonamentoDAO = new AbbonamentoDAO(em);
 
-        try {
-            // CREO UN NUOVO BIGLIETTO GIORNALIERO
-            Giornaliero giornaliero = new Giornaliero();
-            giornaliero.setScadenza(LocalDateTime.now());
-            giornaliero.setDaAttivare(true);
-
-            // SALVO
-            giornalieroDAO.save(giornaliero);
 
 
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        for (int i = 0; i < 10; i++) {
+//            Giornaliero giornaliero = new Giornaliero();
+//            giornaliero.setTratta();
+//        }
     }
 }
