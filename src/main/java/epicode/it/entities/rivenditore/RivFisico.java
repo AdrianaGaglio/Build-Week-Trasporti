@@ -12,6 +12,7 @@ import java.time.DayOfWeek;
 @NamedQuery(name = "Trova_tutto_RivFisico", query = "SELECT a FROM RivFisico a")
 public class RivFisico extends Rivenditore  {
 
+    @Enumerated(EnumType.STRING)
     @Column(name="giorno_chiusura")
     private DayOfWeek giornoChiusura;
 
@@ -21,5 +22,13 @@ public class RivFisico extends Rivenditore  {
     @Column(name="ora_chiusura")
     private Time oraChiusura;
 
-
+    @Override
+    public String toString() {
+        return "\nRivFisico{" +
+                "id= " + getId() + ", " +
+                "giornoChiusura=" + giornoChiusura +
+                ", oraApertura=" + oraApertura +
+                ", oraChiusura=" + oraChiusura +
+                '}';
+    }
 }

@@ -19,7 +19,7 @@ public class GestoreStatiServizio {
         this.em = em;
     }
 
-    public void aggiungiServizio(Mezzo m, LocalDate inizio, LocalDate fine, Tratta tratta) {
+    public void aggiungiServizio(Mezzo m, LocalDate inizio, Tratta tratta) {
         ServizioDAO servizioDAO = new ServizioDAO(em);
         ManutenzioneDAO manutenzioneDAO = new ManutenzioneDAO(em);
         Servizio foundS = servizioDAO.cercaSeInServizio(m, inizio);
@@ -32,7 +32,6 @@ public class GestoreStatiServizio {
             }
             Servizio servizio = new Servizio();
             servizio.setDataInizio(inizio);
-            servizio.setDataFine(fine);
             servizio.setMezzo(m);
             servizio.setTratta(tratta);
             m.setStato(Stato.IN_SERVIZIO);

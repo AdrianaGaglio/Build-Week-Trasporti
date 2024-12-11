@@ -33,12 +33,23 @@ public class GestoreRivenditoriEBiglietti {
         r.setOraApertura(apertura);
         r.setOraChiusura(chiusura);
         rivenditoreDAO.save(r);
+        System.out.println("Rivenditore fisico creato!");
     }
 
     public void creaRivenditoreAutomatico() {
         RivAutomatico r = new RivAutomatico();
         r.setAttivo(true);
         rivenditoreDAO.save(r);
+        System.out.println("Rivenditore automatico creato!");
+    }
+
+
+    public List<Rivenditore> visualizzaRivenditori () {
+        return rivenditoreDAO.findAll();
+    }
+
+    public Rivenditore richiamaRivenditore(long i){
+        return rivenditoreDAO.findById(i);
     }
 
 
@@ -54,7 +65,7 @@ public class GestoreRivenditoriEBiglietti {
                 creaGiornalieroTemplate(r, tratta);
                 System.out.println("Biglietto creato!");
             } else {
-                System.out.println("Il rivenditore fisico è chiuso");
+                System.err.println("Il rivenditore fisico è chiuso");
             }
         } else if (r instanceof RivAutomatico) {
             RivAutomatico rivAuto = (RivAutomatico) r;
@@ -62,7 +73,7 @@ public class GestoreRivenditoriEBiglietti {
                 creaGiornalieroTemplate(r, tratta);
                 System.out.println("Biglietto creato!");
             } else {
-                System.out.println("Rivenditore automatico fuori servizio");
+                System.err.println("Rivenditore automatico fuori servizio");
             }
         }
 
@@ -91,14 +102,14 @@ public class GestoreRivenditoriEBiglietti {
             ) {
                 creaAbbonamentoTemplate(r, periodicy, utente);
             } else {
-                System.out.println("Il rivenditore fisico è chiuso");
+                System.err.println("Il rivenditore fisico è chiuso");
             }
         } else if (r instanceof RivAutomatico) {
             RivAutomatico rivAuto = (RivAutomatico) r;
             if (rivAuto.isAttivo()) {
                 creaAbbonamentoTemplate(r, periodicy, utente);
             } else {
-                System.out.println("Rivenditore automatico fuori servizio");
+                System.err.println("Rivenditore automatico fuori servizio");
             }
         }
     }
@@ -158,12 +169,13 @@ public class GestoreRivenditoriEBiglietti {
                     BigliettoDAO bigliettoDAO = new BigliettoDAO(em);
                     bigliettoDAO.save(a);
                     rivenditoreDAO.update(r);
+                    System.out.println("Abbonamento creato!");
                 } else {
-                    System.out.println("Hai già un abbonamento attivo con scadenza: " + abbonamentoAttivo.getScadenza());
+                    System.err.println("Hai già un abbonamento attivo con scadenza: " + abbonamentoAttivo.getScadenza());
                 }
             }
         } else {
-            System.out.println("Devi prima creare la tessera per fare l'abbonamento!");
+            System.err.println("Devi prima creare la tessera per fare l'abbonamento!");
         }
     }
 
