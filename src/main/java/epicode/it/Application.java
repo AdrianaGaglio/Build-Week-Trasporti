@@ -1,6 +1,7 @@
 package epicode.it;
 
 import com.github.javafaker.Faker;
+import epicode.it.dao.rivenditore.RivenditoreDAO;
 import epicode.it.utilities.menu.AdminMenu;
 import epicode.it.utilities.menu.RivenditoreMenu;
 import epicode.it.utilities.menu.UtenteMenu;
@@ -22,6 +23,8 @@ public class Application {
         Faker faker = new Faker(new Locale("it"));
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("unit-jpa");
         EntityManager em = emf.createEntityManager();
+
+
 
         while(true) {
             System.out.println("Scegli il tipo di utente: 1-Admin 2-Rivenditore 3-Utente (0-Per uscire)");

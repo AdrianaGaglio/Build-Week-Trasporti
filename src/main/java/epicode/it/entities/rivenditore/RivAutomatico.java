@@ -10,4 +10,12 @@ import lombok.Data;
 public class RivAutomatico extends Rivenditore  {
 
     private boolean attivo;
+
+    @Override
+    public String toString() {
+        return "\nRivenditoreAutomatico{" +
+                "id= " + getId() + ", " +
+                "attivo= " + attivo  +
+                "}";
+    }
 }

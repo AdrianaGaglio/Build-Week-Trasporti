@@ -12,7 +12,7 @@ import java.util.List;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "rivenditori")
-@NamedQuery(name = "Trova_tutto_Rivenditore", query = "SELECT a FROM Rivenditore a")
+@NamedQuery(name = "Trova_tutto_Rivenditore", query = "SELECT a FROM Rivenditore a ")
 public abstract class Rivenditore {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

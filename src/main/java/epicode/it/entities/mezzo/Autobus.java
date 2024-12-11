@@ -10,6 +10,7 @@ import lombok.Data;
 public class Autobus extends Mezzo{
 
     public Autobus() {
+        setCapienza(50);
 
     }
 

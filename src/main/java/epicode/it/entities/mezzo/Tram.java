@@ -10,6 +10,7 @@ import lombok.Data;
 public class Tram extends Mezzo{
 
     public Tram() {
+        setCapienza(75);
 
     }
 
