@@ -49,9 +49,9 @@ public class MainCreateRivenditori {
         utente.setDataNascita(faker.date().birthday().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
         utenteDAO.save(utente);
         Utente utenteRichiamato = utenteDAO.getById(1L);
-        gestoreTessera.creaTessera(rivenditoreCasuale, utenteRichiamato, new Scanner(System.in));
+//        gestoreTessera.creaTessera(rivenditoreCasuale, utenteRichiamato, new Scanner(System.in));
         gestoreRiEVe.creaAbbonamento(rivenditoreCasuale,Periodicy.settimanale,utenteRichiamato);
-        gestoreRiEVe.creaAbbonamento(rivenditoreCasuale,Periodicy.settimanale,utenteRichiamato);
+
 //        gestoreRiEVe.creaGiornaliero(rivenditoreCasuale, null);
 
 //        System.out.println("BIglietti venduti " + rivenditoreCasuale.getBiglietti().getFirst().getId());
