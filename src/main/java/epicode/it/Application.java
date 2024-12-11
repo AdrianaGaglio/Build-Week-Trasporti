@@ -33,7 +33,7 @@ public class Application {
             switch (tipo){
                 case 1 -> AdminMenu.showAdminMenu(scanner, em);
                 case 2 -> RivenditoreMenu.showRivenditoreMenu();
-                case 3 -> UtenteMenu.showUtenteMenu();
+                case 3 -> UtenteMenu.showUtenteMenu(scanner, em);
                 case 0 -> System.exit(0);
                 default -> System.out.println("Scelta non consentita");
             }

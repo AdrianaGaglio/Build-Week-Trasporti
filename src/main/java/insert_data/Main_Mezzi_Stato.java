@@ -12,6 +12,11 @@
 //import epicode.it.entities.percorrenza.Percorrenza;
 //import epicode.it.entities.tratta.Tratta;
 //
+//public class Main_Mezzi_Stato {
+//    public static void main(String[] args) {
+//        Faker faker = new Faker(new Locale("it"));
+//        EntityManagerFactory emf = Persistence.createEntityManagerFactory("unit-jpa");
+//        EntityManager em = emf.createEntityManager();
 //
 //import epicode.it.servizi.gestore_stati_servizio.GestoreStatiServizio;
 //import epicode.it.servizi.gestore_stati_servizio.StatisticheMezzo;
