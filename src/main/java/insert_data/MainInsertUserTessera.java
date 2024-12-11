@@ -100,8 +100,8 @@ public class MainInsertUserTessera {
 
         RivFisico rivFisico1 = new RivFisico();
         rivFisico1.setGiornoChiusura(DayOfWeek.MONDAY);
-        rivFisico1.setOraApertura(Time.valueOf("09:00:00"));
-        rivFisico1.setOraChiusura(Time.valueOf("20:00:00"));
+        rivFisico1.setOraApertura(LocalTime.parse("09:00:00"));
+        rivFisico1.setOraChiusura(LocalTime.parse("20:00:00"));
 
 
 

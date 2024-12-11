@@ -27,7 +27,7 @@ public class GestoreRivenditoriEBiglietti {
 
 
 
-    public void creaRivenditoreFisico(DayOfWeek dayOfWeek, Time apertura, Time chiusura) {
+    public void creaRivenditoreFisico(DayOfWeek dayOfWeek, LocalTime apertura, LocalTime chiusura) {
         RivFisico r = new RivFisico();
         r.setGiornoChiusura(dayOfWeek);
         r.setOraApertura(apertura);
@@ -59,8 +59,8 @@ public class GestoreRivenditoriEBiglietti {
             RivFisico rivFisico = (RivFisico) r;
             if (
                     !LocalDate.now().getDayOfWeek().equals(rivFisico.getGiornoChiusura()) &&
-                            LocalTime.now().isAfter(rivFisico.getOraApertura().toLocalTime()) &&
-                            LocalTime.now().isBefore(rivFisico.getOraChiusura().toLocalTime())
+                            LocalTime.now().isAfter(rivFisico.getOraApertura()) &&
+                            LocalTime.now().isBefore(rivFisico.getOraChiusura())
             ) {
                 creaGiornalieroTemplate(r, tratta);
                 System.out.println("Biglietto creato!");
@@ -96,8 +96,8 @@ public class GestoreRivenditoriEBiglietti {
             RivFisico rivFisico = (RivFisico) r;
             if (
                     !LocalDate.now().getDayOfWeek().equals(rivFisico.getGiornoChiusura()) &&
-                            LocalTime.now().isAfter(rivFisico.getOraApertura().toLocalTime()) &&
-                            LocalTime.now().isBefore(rivFisico.getOraChiusura().toLocalTime())
+                            LocalTime.now().isAfter(rivFisico.getOraApertura()) &&
+                            LocalTime.now().isBefore(rivFisico.getOraChiusura())
             ) {
                 creaAbbonamentoTemplate(r, periodicy, utente);
             } else {

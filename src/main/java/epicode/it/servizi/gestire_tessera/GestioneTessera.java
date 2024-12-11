@@ -25,8 +25,8 @@ public class GestioneTessera {
             RivFisico rivFisico = (RivFisico) r;
             if (
                     !LocalDate.now().getDayOfWeek().equals(rivFisico.getGiornoChiusura()) &&
-                            LocalTime.now().isAfter(rivFisico.getOraApertura().toLocalTime()) &&
-                            LocalTime.now().isBefore(rivFisico.getOraChiusura().toLocalTime())
+                            LocalTime.now().isAfter(rivFisico.getOraApertura()) &&
+                            LocalTime.now().isBefore(rivFisico.getOraChiusura())
             ) {
                 creaTesseraTemplate(r,u);
             } else {

@@ -14,6 +14,7 @@ import jakarta.persistence.Persistence;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -130,8 +131,8 @@ public class HandleRivenditori implements HttpHandler {
 
         if (tipo.equals("fisico")) {
             // Creazione di un rivenditore fisico
-            gestore.creaRivenditoreFisico(DayOfWeek.valueOf(((String) requestData.get("giornoChiusura")).toUpperCase()), Time.valueOf((String) requestData.get("oraApertura")),
-                    Time.valueOf((String) requestData.get("oraChiusura")));
+            gestore.creaRivenditoreFisico(DayOfWeek.of((Integer) requestData.get("giornoChiusura")), LocalTime.parse((String) requestData.get("oraApertura")),
+                    LocalTime.parse((String) requestData.get("oraChiusura")));
         } else if (tipo.equals("automatico")) {
             // Creazione di un rivenditore automatico
             gestore.creaRivenditoreAutomatico();
@@ -163,8 +164,8 @@ public class HandleRivenditori implements HttpHandler {
         if (rivenditore instanceof RivFisico) {
             RivFisico rivFisico = (RivFisico) rivenditore;
             rivFisico.setGiornoChiusura(DayOfWeek.valueOf((String) requestData.get("giornoChiusura")));
-            rivFisico.setOraApertura(Time.valueOf((String) requestData.get("oraApertura")));
-            rivFisico.setOraChiusura(Time.valueOf((String) requestData.get("oraChiusura")));
+            rivFisico.setOraApertura(LocalTime.parse((String) requestData.get("oraApertura")));
+            rivFisico.setOraChiusura(LocalTime.parse((String) requestData.get("oraChiusura")));
             dao.update(rivFisico);
         } else if (rivenditore instanceof RivAutomatico) {
             RivAutomatico rivAutomatico = (RivAutomatico) rivenditore;

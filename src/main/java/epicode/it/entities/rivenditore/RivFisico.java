@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.sql.Time;
 import java.time.DayOfWeek;
+import java.time.LocalTime;
 
 @Data
 @Entity
@@ -17,10 +18,10 @@ public class RivFisico extends Rivenditore  {
     private DayOfWeek giornoChiusura;
 
     @Column(name="ora_apertura")
-    private Time oraApertura;
+    private LocalTime oraApertura;
 
     @Column(name="ora_chiusura")
-    private Time oraChiusura;
+    private LocalTime oraChiusura;
 
     @Override
     public String toString() {
