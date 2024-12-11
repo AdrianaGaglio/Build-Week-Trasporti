@@ -26,6 +26,6 @@ public class StatisticheMezzo {
     public List<Manutenzione> periodiManutenzione(Mezzo mezzo) {
         ManutenzioneDAO manutenzioneDAO = new ManutenzioneDAO(em);
         List<Manutenzione> manutenzioni = manutenzioneDAO.manutenzioni(mezzo);
-        return manutenzioni;
+        return manutenzioni
     }
 }
