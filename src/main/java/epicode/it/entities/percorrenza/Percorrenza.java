@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collection;
 import java.util.List;
@@ -21,31 +22,12 @@ public class Percorrenza {
     @JoinColumn(name = "tratta_id")
     private Tratta tratta;
 
-    @ManyToMany
-    private List<Mezzo> mezzi;
+    @OneToOne
+    private Mezzo mezzo;
 
     private LocalTime durata_effettiva;
-    private LocalDate data;
 
-    public Collection<Object> getMezzi() {
-        return List.of();
-    }
-
-    public void setTratta(Tratta tratta) {
-    }
-
-    public void setMezzi(List<Mezzo> mezzi) {
-    }
-
-    public Object getDurata_effettiva() {
-        return null;
-    }
-
-    public void setDurata_effettiva(LocalTime tempoEffettivo) {
-    }
-
-    public void setData(LocalDate data) {
-    }
+    private LocalDateTime data;
 
     public Object getId() {
         return null;

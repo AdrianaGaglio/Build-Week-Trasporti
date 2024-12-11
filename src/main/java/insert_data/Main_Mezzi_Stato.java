@@ -11,6 +11,7 @@ import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.mezzo.Tram;
 import epicode.it.entities.stato_mezzo.Servizio;
 import epicode.it.entities.tratta.Tratta;
+import epicode.it.servizi.gestore_stati_servizio.Gestore_stati_servizio;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -50,10 +51,21 @@ public class Main_Mezzi_Stato {
 //            trattaDAO.save(tratta);
 //        }
 
-//        Mezzo mezzo = mezzoDAO.findById(1L);
-//        Tratta tratta = trattaDAO.getById(1L);
-//
-//        mezzoDAO.aggiungiServizio(mezzo,LocalDate.of(2025, 1, 10), LocalDate.of(2025, 2, 10), tratta);
+        Mezzo mezzo = mezzoDAO.findById(1L);
+        Mezzo mezzo2 = mezzoDAO.findById(2L);
+        Tratta tratta = trattaDAO.getById(1L);
+
+        Gestore_stati_servizio statiServizioManager = new Gestore_stati_servizio(em);
+
+//        statiServizioManager.aggiungiServizio(mezzo,LocalDate.of(2025, 3, 10), LocalDate.of(2025, 4, 10), tratta);
+//        statiServizioManager.aggiungiServizio(mezzo2,LocalDate.now(), LocalDate.now().plusDays(30), tratta);
+
+//        statiServizioManager.aggiungiManutenzione(mezzo, LocalDate.now(), "Controllo periodico");
+//        statiServizioManager.aggiungiServizio(mezzo2,LocalDate.now(),LocalDate.now().plusDays(30), tratta);
+
+        statiServizioManager.spostaInDeposito(mezzo);
+        statiServizioManager.spostaInDeposito(mezzo2);
 
     }
+
 }

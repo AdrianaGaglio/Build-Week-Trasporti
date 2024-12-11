@@ -40,4 +40,15 @@ public class Tratta {
         this.percorrenze.add(nuovaPercorrenza);
         return nuovaPercorrenza;
     }
+
+    @Override
+    public String toString() {
+        return "Tratta{" +
+                "id=" + id +
+                ", partenza='" + partenza + '\'' +
+                ", capolinea='" + capolinea + '\'' +
+                ", durata=" + durata +
+                // Evita di includere la lista completa dei servizi per prevenire cicli
+                '}';
+    }
 }

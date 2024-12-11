@@ -79,20 +79,6 @@ public class MainTest {
 //
 //        abbonamentoDAO.save(abbonamento);
 
-        AbbonamentoDAO abbonamentoDAO = new AbbonamentoDAO(em);
-        Abbonamento abbonamento = new Abbonamento();
-        Tessera tesseta2 = tesseraDAO.getById(2L);
-        abbonamento.setTessera(tesseta2);
-        abbonamento.setPeriodicy(Periodicy.settimanale);
-        abbonamento.setScadenza(LocalDateTime.now().minusDays(8));
-        abbonamento.setAttivo(true);
-//        abbonamento.getTratte().add(trattaDAO.getById(2L));
-
-        abbonamentoDAO.save(abbonamento);
-
-
-
-
 
 
 
@@ -224,4 +210,3 @@ public class MainTest {
                 // }
                 // }
         }
-}

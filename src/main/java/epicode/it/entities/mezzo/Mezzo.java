@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @Entity
 @NamedQuery(name = "Trova_tutto_Mezzo", query = "SELECT a FROM Mezzo a")
-
+@NamedQuery(name="trovaPerNumeroLinea", query ="SELECT a FROM Mezzo a WHERE linea = :linea")
 @Table(name = "mezzi")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class Mezzo {
@@ -32,7 +32,9 @@ public abstract class Mezzo {
     private Stato stato;
 
     @ManyToMany(mappedBy = "mezzi")
-    private List<Percorrenza> percorrenzae = new ArrayList<>();
+    private List<Percorrenza> percorrenze = new ArrayList<>();
+
+    private Integer codice;
 
     public abstract Object getId();
 }

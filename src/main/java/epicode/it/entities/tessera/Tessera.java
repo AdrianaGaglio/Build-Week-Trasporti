@@ -21,6 +21,7 @@ public class Tessera {
 
     private String codice = "T-" + StringGenerator.random(10);
 
+
     private LocalDateTime validita;
 
     @OneToMany(mappedBy = "tessera")
@@ -29,9 +30,4 @@ public class Tessera {
     @OneToOne
     @JoinColumn(name = "utente_id")
     private Utente utente;
-
-
-
-
-
 }

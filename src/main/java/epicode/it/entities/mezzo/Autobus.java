@@ -7,7 +7,8 @@ import lombok.Data;
 @Entity
 @NamedQuery(name = "Trova_tutto_Autobus", query = "SELECT a FROM Autobus a")
 public class Autobus extends Mezzo{
-    public Autobus() {
+    public Autobus(int codice) {
+        setCodice(codice);
         setCapienza(50);
     }
 
