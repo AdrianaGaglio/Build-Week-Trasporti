@@ -46,4 +46,9 @@ public class ServizioDAO {
                 .setParameter("mezzo", mezzo).setParameter("data", data).getResultStream().findFirst().orElse(null);
     }
 
+    public List<Servizio> servizi(Mezzo mezzo) {
+        return em.createNamedQuery("serviziPerMezzo", Servizio.class)
+                .setParameter("mezzo", mezzo).getResultList();
+    }
+
 }

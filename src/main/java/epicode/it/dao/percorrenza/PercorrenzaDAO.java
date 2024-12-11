@@ -62,7 +62,7 @@ public class PercorrenzaDAO {
     }
 
     public List<Percorrenza> perMezzoTratta(Tratta t, Mezzo m) {
-        return em.createNamedQuery("mediaPerTratta", Percorrenza.class)
+        return em.createNamedQuery("perMezzoTratta", Percorrenza.class)
                 .setParameter("tratta", t).setParameter("mezzo",m).getResultList();
     }
 
