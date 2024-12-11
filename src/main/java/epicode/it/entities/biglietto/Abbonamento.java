@@ -8,6 +8,7 @@ import lombok.Data;
 
 @Data
 @Entity
+@NamedQuery(name="perTessera", query ="SELECT a FROM Abbonamento a WHERE a.tessera = :tessera ORDER BY a.id ASC")
 @Table(name="abbonamenti")
 public class Abbonamento extends Biglietto {
 

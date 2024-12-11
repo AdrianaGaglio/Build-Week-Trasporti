@@ -17,6 +17,7 @@ import epicode.it.entities.biglietto.Biglietto;
 import epicode.it.entities.biglietto.Giornaliero;
 import epicode.it.entities.biglietto.Periodicy;
 import epicode.it.entities.mezzo.Mezzo;
+import epicode.it.entities.mezzo.Stato;
 import epicode.it.entities.rivenditore.RivAutomatico;
 import epicode.it.entities.rivenditore.RivFisico;
 import epicode.it.entities.rivenditore.Rivenditore;
@@ -25,12 +26,14 @@ import epicode.it.entities.stato_mezzo.Servizio;
 import epicode.it.entities.stato_mezzo.StatoMezzo;
 import epicode.it.entities.tessera.Tessera;
 import epicode.it.entities.tratta.Tratta;
+import epicode.it.servizi.gestore_stati_servizio.GestoreStatiServizio;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.sql.Date;
 import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -77,11 +80,50 @@ public class HandleStatiMezzo implements HttpHandler {
 
     }
 
-    private void handleDelete(HttpExchange exchange) {
+    private void handleDelete(HttpExchange exchange) throws IOException {
+        EntityManager em = emf.createEntityManager();
+        StatoMezzoDAO statoMezzoDAO = new StatoMezzoDAO(em);
+
+        try {
+            // Estrai l'ID dal percorso
+            String path = exchange.getRequestURI().getPath();
+            String[] pathParts = path.split("/");
+            if (pathParts.length < 3) {
+                exchange.sendResponseHeaders(400, -1); // ID non fornito
+                return;
+            }
+
+            Long id = Long.parseLong(pathParts[2]);
+            System.out.println(id);
+
+            // Verifica se la Tratta esiste
+            StatoMezzo statoMezzo = statoMezzoDAO.findById(id);
+            if (statoMezzo == null) {
+                exchange.sendResponseHeaders(404, -1); // Tratta non trovata
+                return;
+            }
+
+            // Elimina lo stato
+            em.getTransaction().begin();
+            statoMezzoDAO.update(statoMezzo);
+            em.getTransaction().commit();
+
+            // Risposta al client
+            exchange.sendResponseHeaders(200, -1); // Eliminazione riuscita
+        } catch (Exception e) {
+            e.printStackTrace(); // Log dell'errore per debugging
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            exchange.sendResponseHeaders(500, -1); // Errore interno del server
+        } finally {
+            em.close(); // Assicurati di chiudere l'EntityManager
+        }
     }
 
     private void handlePost(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
+        StatoMezzoDAO statoMezzoDAO = new StatoMezzoDAO(em);
         ServizioDAO servizioDAO = new ServizioDAO(em);
         ManutenzioneDAO manutenzioneDAO = new ManutenzioneDAO(em);
 
@@ -90,66 +132,19 @@ public class HandleStatiMezzo implements HttpHandler {
             Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
             String tipo = (String) requestData.get("tipo");
 
+            GestoreStatiServizio gestore = new GestoreStatiServizio(em);
+
             if ("servizio".equalsIgnoreCase(tipo)) {
                 // Creazione di un oggetto Servizio
-                Servizio servizio = new Servizio();
-
-                // Associa la tratta
-                Long trattaId = Long.parseLong(requestData.get("trattaId").toString());
-                TrattaDAO trattaDAO = new TrattaDAO(em);
-                Tratta tratta = trattaDAO.getById(trattaId);
-                if (tratta == null) {
-                    exchange.sendResponseHeaders(404, -1); // Tratta non trovata
-                    return;
-                }
-                servizio.setTratta(tratta);
-
-                // Associa il mezzo
-                Long mezzoId = Long.parseLong(requestData.get("mezzoId").toString());
-                MezzoDAO mezzoDAO = new MezzoDAO(em);
-                Mezzo mezzo = mezzoDAO.findById(mezzoId);
-                if (mezzo == null) {
-                    exchange.sendResponseHeaders(404, -1); // Mezzo non trovato
-                    return;
-                }
-                servizio.setMezzo(mezzo);
-
-                // Imposta le date
-                servizio.setDataInizio(LocalDate.parse((String) requestData.get("dataInizio")));
-                String dataFine = (String) requestData.get("dataFine");
-                if (dataFine != null) {
-                    servizio.setDataFine(LocalDate.parse(dataFine));
-                }
-
-                // Salva il servizio
-                servizioDAO.save(servizio);
+                gestore.aggiungiServizio((Mezzo) requestData.get("mezzo"),
+                        Date.valueOf((String) requestData.get("dataInizio")).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate(),
+                        Date.valueOf((String) requestData.get("dataFine")).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate(),
+                        (Tratta) requestData.get("tratta"));
 
             } else if ("manutenzione".equalsIgnoreCase(tipo)) {
-                // Creazione di un oggetto Manutenzione
-                Manutenzione manutenzione = new Manutenzione();
-
-                // Associa il mezzo
-                Long mezzoId = Long.parseLong(requestData.get("mezzoId").toString());
-                MezzoDAO mezzoDAO = new MezzoDAO(em);
-                Mezzo mezzo = mezzoDAO.findById(mezzoId);
-                if (mezzo == null) {
-                    exchange.sendResponseHeaders(404, -1); // Mezzo non trovato
-                    return;
-                }
-                manutenzione.setMezzo(mezzo);
-
-                // Imposta le date
-                manutenzione.setDataInizio(LocalDate.parse((String) requestData.get("dataInizio")));
-                String dataFine = (String) requestData.get("dataFine");
-                if (dataFine != null) {
-                    manutenzione.setDataFine(LocalDate.parse(dataFine));
-                }
-
-                // Imposta la descrizione
-                manutenzione.setDescrizione((String) requestData.get("descrizione"));
-
-                // Salva la manutenzione
-                manutenzioneDAO.save(manutenzione);
+                gestore.aggiungiManutenzione((Mezzo) requestData.get("mezzo"),
+                        Date.valueOf((String) requestData.get("dataInizio")).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate(),
+                        (String) requestData.get("descrizione"));
 
             } else {
                 exchange.sendResponseHeaders(400, -1); // Tipo non valido
@@ -168,29 +163,41 @@ public class HandleStatiMezzo implements HttpHandler {
 
     private void handlePut(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
-        RivenditoreDAO dao = new RivenditoreDAO(em);
+        StatoMezzoDAO dao = new StatoMezzoDAO(em);
+        ManutenzioneDAO manutenzioneDAO = new ManutenzioneDAO(em);
+        ServizioDAO servizioDAO = new ServizioDAO(em);
 
         // Leggi il corpo della richiesta come JSON
         Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
         Long id = Long.parseLong(requestData.get("id").toString());
 
-        Rivenditore rivenditore = dao.findById(id);
-        if (rivenditore == null) {
+        StatoMezzo statoMezzo = dao.findById(id);
+        if (statoMezzo == null) {
             exchange.sendResponseHeaders(404, -1); // Rivenditore non trovato
             em.close();
             return;
         }
-
-        if (rivenditore instanceof RivFisico) {
-            RivFisico rivFisico = (RivFisico) rivenditore;
-            rivFisico.setGiornoChiusura(DayOfWeek.valueOf((String) requestData.get("giornoChiusura")));
-            rivFisico.setOraApertura(Time.valueOf((String) requestData.get("oraApertura")));
-            rivFisico.setOraChiusura(Time.valueOf((String) requestData.get("oraChiusura")));
-            dao.update(rivFisico);
-        } else if (rivenditore instanceof RivAutomatico) {
-            RivAutomatico rivAutomatico = (RivAutomatico) rivenditore;
-            rivAutomatico.setAttivo((Boolean) requestData.get("attivo"));
-            dao.update(rivAutomatico);
+        if (statoMezzo instanceof Servizio) {
+            Servizio servizio = (Servizio) statoMezzo;
+            servizio.setDataFine(Date.valueOf((String) requestData.get("dataFine")).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+            Mezzo mezzo = servizio.getMezzo();
+            MezzoDAO mezzoDAO = new MezzoDAO(em);
+            mezzo.setStato(Stato.valueOf((String) requestData.get("statoMezzo")));
+            servizio.setTratta((Tratta) requestData.get("tratta"));
+            servizio.setDataInizio(Date.valueOf((String) requestData.get("dataInizio")).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+            dao.update(servizio);
+            mezzoDAO.update(mezzo);
+        } else if (statoMezzo instanceof Manutenzione) {
+            Manutenzione manutenzione = (Manutenzione) statoMezzo;
+            manutenzione.setDataFine(Date.valueOf((String) requestData.get("dataFine")).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+            manutenzione.setDescrizione((String) requestData.get("descrizione"));
+            manutenzione.setMezzo((Mezzo) requestData.get("mezzo"));
+            manutenzione.setDataInizio(Date.valueOf((String) requestData.get("dataInizio")).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+            Mezzo mezzo = manutenzione.getMezzo();
+            MezzoDAO mezzoDAO = new MezzoDAO(em);
+            mezzo.setStato(Stato.valueOf((String) requestData.get("statoMezzo")));
+            manutenzioneDAO.update(manutenzione);
+            mezzoDAO.update(mezzo);
         }
 
         em.close();

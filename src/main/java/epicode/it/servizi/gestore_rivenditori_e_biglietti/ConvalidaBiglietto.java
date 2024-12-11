@@ -2,12 +2,19 @@ package epicode.it.servizi.gestore_rivenditori_e_biglietti;
 
 import epicode.it.entities.biglietto.Biglietto;
 import epicode.it.entities.mezzo.Mezzo;
+import jakarta.persistence.EntityManager;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ConvalidaBiglietto {
+
+    private EntityManager em;
+
+    public ConvalidaBiglietto(EntityManager em) {
+        this.em = em;
+    }
 
     // Metodo per convalidare un biglietto
     public void convalida(Biglietto biglietto) {

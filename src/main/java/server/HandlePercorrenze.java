@@ -21,6 +21,7 @@ import epicode.it.entities.rivenditore.RivFisico;
 import epicode.it.entities.rivenditore.Rivenditore;
 import epicode.it.entities.tessera.Tessera;
 import epicode.it.entities.tratta.Tratta;
+import epicode.it.servizi.gestore_percorrenze.GestorePercorrenze;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -29,6 +30,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Time;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -73,7 +75,45 @@ public class HandlePercorrenze implements HttpHandler {
 
     }
 
-    private void handleDelete(HttpExchange exchange) {
+    private void handleDelete(HttpExchange exchange) throws IOException {
+        EntityManager em = emf.createEntityManager();
+        PercorrenzaDAO percorrenzaDAO = new PercorrenzaDAO(em);
+
+        try {
+            // Estrai l'ID dal percorso
+            String path = exchange.getRequestURI().getPath();
+            String[] pathParts = path.split("/");
+            if (pathParts.length < 3) {
+                exchange.sendResponseHeaders(400, -1); // ID non fornito
+                return;
+            }
+
+            Long id = Long.parseLong(pathParts[2]);
+            System.out.println(id);
+
+            // Verifica se la Tratta esiste
+            Percorrenza percorrenza = percorrenzaDAO.getById(id);
+            if (percorrenza == null) {
+                exchange.sendResponseHeaders(404, -1); // Tratta non trovata
+                return;
+            }
+
+            // Elimina la Tratta
+            em.getTransaction().begin();
+            percorrenzaDAO.delete(percorrenza);
+            em.getTransaction().commit();
+
+            // Risposta al client
+            exchange.sendResponseHeaders(200, -1); // Eliminazione riuscita
+        } catch (Exception e) {
+            e.printStackTrace(); // Log dell'errore per debugging
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            exchange.sendResponseHeaders(500, -1); // Errore interno del server
+        } finally {
+            em.close(); // Assicurati di chiudere l'EntityManager
+        }
     }
 
     private void handlePost(HttpExchange exchange) throws IOException {
@@ -85,38 +125,10 @@ public class HandlePercorrenze implements HttpHandler {
             Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
 
             // Creazione di una nuova Percorrenza
-            Percorrenza percorrenza = new Percorrenza();
-
-            // Associazione della Tratta
-            Long trattaId = Long.parseLong(requestData.get("trattaId").toString());
-            TrattaDAO trattaDAO = new TrattaDAO(em);
-            Tratta tratta = trattaDAO.getById(trattaId);
-            if (tratta == null) {
-                exchange.sendResponseHeaders(404, -1); // Tratta non trovata
-                return;
-            }
-            percorrenza.setTratta(tratta);
-
-            // Associazione del Mezzo
-            Long mezzoId = Long.parseLong(requestData.get("mezzoId").toString());
-            MezzoDAO mezzoDAO = new MezzoDAO(em);
-            Mezzo mezzo = mezzoDAO.findById(mezzoId);
-            if (mezzo == null) {
-                exchange.sendResponseHeaders(404, -1); // Mezzo non trovato
-                return;
-            }
-            percorrenza.setMezzo(mezzo);
-
-            // Imposta durata_effettiva
-            String durataEffettiva = (String) requestData.get("durata_effettiva");
-            percorrenza.setDurata_effettiva(LocalTime.parse(durataEffettiva));
-
-            // Imposta data
-            String dataString = (String) requestData.get("data");
-            percorrenza.setData(LocalDateTime.parse(dataString));
-
-            // Salva la Percorrenza
-            percorrenzaDAO.save(percorrenza);
+            GestorePercorrenze gestore = new GestorePercorrenze(em);
+            LocalDate date = LocalDate.parse((String) requestData.get("data"));
+            LocalTime time = LocalTime.parse((String) requestData.get("time"));
+            gestore.aggiungiPercorrenza((Mezzo) requestData.get("mezzo"), LocalDateTime.of(date, time),(Tratta) requestData.get("tratta"));
 
             // Risposta al client
             exchange.sendResponseHeaders(201, -1); // Creato con successo
@@ -131,31 +143,23 @@ public class HandlePercorrenze implements HttpHandler {
 
     private void handlePut(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
-        RivenditoreDAO dao = new RivenditoreDAO(em);
+        PercorrenzaDAO dao = new PercorrenzaDAO(em);
 
         // Leggi il corpo della richiesta come JSON
         Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
         Long id = Long.parseLong(requestData.get("id").toString());
 
-        Rivenditore rivenditore = dao.findById(id);
-        if (rivenditore == null) {
+        Percorrenza percorrenza = dao.getById(id);
+        if (percorrenza == null) {
             exchange.sendResponseHeaders(404, -1); // Rivenditore non trovato
             em.close();
             return;
         }
 
-        if (rivenditore instanceof RivFisico) {
-            RivFisico rivFisico = (RivFisico) rivenditore;
-            rivFisico.setGiornoChiusura(DayOfWeek.valueOf((String) requestData.get("giornoChiusura")));
-            rivFisico.setOraApertura(Time.valueOf((String) requestData.get("oraApertura")));
-            rivFisico.setOraChiusura(Time.valueOf((String) requestData.get("oraChiusura")));
-            dao.update(rivFisico);
-        } else if (rivenditore instanceof RivAutomatico) {
-            RivAutomatico rivAutomatico = (RivAutomatico) rivenditore;
-            rivAutomatico.setAttivo((Boolean) requestData.get("attivo"));
-            dao.update(rivAutomatico);
-        }
-
+        percorrenza.setTratta((Tratta) requestData.get("tratta"));
+        percorrenza.setMezzo((Mezzo) requestData.get("mezzo"));
+        percorrenza.setDurata_effettiva(LocalTime.parse((String) requestData.get("durata")));
+        dao.update(percorrenza);
         em.close();
         exchange.sendResponseHeaders(200, -1); // Aggiornamento riuscito
     }

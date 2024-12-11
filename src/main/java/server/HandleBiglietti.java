@@ -7,6 +7,7 @@ import epicode.it.dao.biglietto.AbbonamentoDAO;
 import epicode.it.dao.biglietto.BigliettoDAO;
 import epicode.it.dao.biglietto.GiornalieroDAO;
 import epicode.it.dao.rivenditore.RivenditoreDAO;
+import epicode.it.dao.tratta.TrattaDAO;
 import epicode.it.entities.biglietto.Abbonamento;
 import epicode.it.entities.biglietto.Biglietto;
 import epicode.it.entities.biglietto.Giornaliero;
@@ -16,6 +17,10 @@ import epicode.it.entities.rivenditore.RivFisico;
 import epicode.it.entities.rivenditore.Rivenditore;
 import epicode.it.entities.tessera.Tessera;
 import epicode.it.entities.tratta.Tratta;
+import epicode.it.entities.utente.Utente;
+import epicode.it.servizi.gestore_rivenditori_e_biglietti.ConvalidaBiglietto;
+import epicode.it.servizi.gestore_rivenditori_e_biglietti.GestoreRivenditoriEBiglietti;
+import epicode.it.servizi.gestore_rivenditori_e_biglietti.RinnovoAbbonamento;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -67,30 +72,63 @@ public class HandleBiglietti implements HttpHandler {
 
     }
 
-    private void handleDelete(HttpExchange exchange) {
+    private void handleDelete(HttpExchange exchange) throws IOException {
+        EntityManager em = emf.createEntityManager();
+        BigliettoDAO bigliettoDAO = new BigliettoDAO(em);
+
+        try {
+            // Estrai l'ID dal percorso
+            String path = exchange.getRequestURI().getPath();
+            String[] pathParts = path.split("/");
+            if (pathParts.length < 3) {
+                exchange.sendResponseHeaders(400, -1); // ID non fornito
+                return;
+            }
+
+            Long id = Long.parseLong(pathParts[2]);
+            System.out.println(id);
+
+            // Verifica se la Tratta esiste
+            Biglietto biglietto = bigliettoDAO.findById(id);
+            if (biglietto == null) {
+                exchange.sendResponseHeaders(404, -1); // Tratta non trovata
+                return;
+            }
+
+            // Elimina la Tratta
+            em.getTransaction().begin();
+            bigliettoDAO.delete(biglietto);
+            em.getTransaction().commit();
+
+            // Risposta al client
+            exchange.sendResponseHeaders(200, -1); // Eliminazione riuscita
+        } catch (Exception e) {
+            e.printStackTrace(); // Log dell'errore per debugging
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            exchange.sendResponseHeaders(500, -1); // Errore interno del server
+        } finally {
+            em.close(); // Assicurati di chiudere l'EntityManager
+        }
     }
 
     private void handlePost(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
         GiornalieroDAO giornalieroDAO = new GiornalieroDAO(em);
         AbbonamentoDAO abbonamentoDAO = new AbbonamentoDAO(em);
+        RivenditoreDAO rivenditoreDAO = new RivenditoreDAO(em);
 
         // Leggi il corpo della richiesta come JSON
         Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
         String tipo = (String) requestData.get("tipo");
 
+        GestoreRivenditoriEBiglietti gestore = new GestoreRivenditoriEBiglietti(em);
+
         if ("giornaliero".equalsIgnoreCase(tipo)) {
-            // Creazione di un rivenditore fisico
-            Giornaliero giornaliero = new Giornaliero();
-            giornaliero.setTratta((Tratta) requestData.get("tratta"));
-            giornalieroDAO.save(giornaliero);
+            gestore.creaGiornaliero((Rivenditore) requestData.get("rivenditore"), (Tratta) requestData.get("tratta"));
         } else if ("abbonamento".equalsIgnoreCase(tipo)) {
-            // Creazione di un rivenditore automatico
-            Abbonamento abbonamento = new Abbonamento();
-            abbonamento.setTessera((Tessera) requestData.get("tessera"));
-            abbonamento.setPeriodicy((Periodicy.valueOf((String) requestData.get("periodicy"))));
-            abbonamento.setEmissione(LocalDateTime.now());
-            abbonamentoDAO.save(abbonamento);
+            gestore.creaAbbonamento((Rivenditore) requestData.get("rivenditore"), Periodicy.valueOf((String) requestData.get("periodicy")), (Utente) requestData.get("utente"));
         } else {
             exchange.sendResponseHeaders(400, -1); // Tipo non valido
             em.close();
@@ -103,29 +141,27 @@ public class HandleBiglietti implements HttpHandler {
 
     private void handlePut(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
-        RivenditoreDAO dao = new RivenditoreDAO(em);
+        BigliettoDAO dao = new BigliettoDAO(em);
 
         // Leggi il corpo della richiesta come JSON
         Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
         Long id = Long.parseLong(requestData.get("id").toString());
 
-        Rivenditore rivenditore = dao.findById(id);
-        if (rivenditore == null) {
+        Biglietto biglietto = dao.findById(id);
+        if (biglietto == null) {
             exchange.sendResponseHeaders(404, -1); // Rivenditore non trovato
             em.close();
             return;
         }
 
-        if (rivenditore instanceof RivFisico) {
-            RivFisico rivFisico = (RivFisico) rivenditore;
-            rivFisico.setGiornoChiusura(DayOfWeek.valueOf((String) requestData.get("giornoChiusura")));
-            rivFisico.setOraApertura(Time.valueOf((String) requestData.get("oraApertura")));
-            rivFisico.setOraChiusura(Time.valueOf((String) requestData.get("oraChiusura")));
-            dao.update(rivFisico);
-        } else if (rivenditore instanceof RivAutomatico) {
-            RivAutomatico rivAutomatico = (RivAutomatico) rivenditore;
-            rivAutomatico.setAttivo((Boolean) requestData.get("attivo"));
-            dao.update(rivAutomatico);
+        if (biglietto instanceof Giornaliero) {
+            Giornaliero giornaliero = (Giornaliero) biglietto;
+            ConvalidaBiglietto convalida = new ConvalidaBiglietto(em);
+            convalida.convalida(giornaliero);
+        } else if (biglietto instanceof Abbonamento) {
+           Abbonamento abbonamento = (Abbonamento) biglietto;
+            RinnovoAbbonamento rinnovo = new RinnovoAbbonamento(em);
+            rinnovo.rinnova((Tessera) requestData.get("tessera"), Periodicy.valueOf((String) requestData.get("periodicy")));
         }
 
         em.close();

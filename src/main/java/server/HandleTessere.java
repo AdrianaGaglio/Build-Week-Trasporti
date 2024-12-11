@@ -70,7 +70,45 @@ public class HandleTessere implements HttpHandler {
 
     }
 
-    private void handleDelete(HttpExchange exchange) {
+    private void handleDelete(HttpExchange exchange) throws IOException {
+        EntityManager em = emf.createEntityManager();
+        TesseraDAO dao = new TesseraDAO(em);
+
+        try {
+            // Estrai l'ID dal percorso
+            String path = exchange.getRequestURI().getPath();
+            String[] pathParts = path.split("/");
+            if (pathParts.length < 3) {
+                exchange.sendResponseHeaders(400, -1); // ID non fornito
+                return;
+            }
+
+            Long id = Long.parseLong(pathParts[2]);
+            System.out.println(id);
+
+            // Verifica se la Tratta esiste
+            Tessera tessera = dao.getById(id);
+            if (tessera == null) {
+                exchange.sendResponseHeaders(404, -1); // Tratta non trovata
+                return;
+            }
+
+            // Elimina la Tratta
+            em.getTransaction().begin();
+            dao.delete(tessera);
+            em.getTransaction().commit();
+
+            // Risposta al client
+            exchange.sendResponseHeaders(200, -1); // Eliminazione riuscita
+        } catch (Exception e) {
+            e.printStackTrace(); // Log dell'errore per debugging
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            exchange.sendResponseHeaders(500, -1); // Errore interno del server
+        } finally {
+            em.close(); // Assicurati di chiudere l'EntityManager
+        }
     }
 
     private void handlePost(HttpExchange exchange) throws IOException {

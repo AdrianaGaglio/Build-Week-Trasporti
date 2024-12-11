@@ -11,7 +11,6 @@ public class server {
 
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
-
         server.createContext("/prova", new ProvaHandler());
         server.createContext("/rivenditori", new HandleRivenditori());
         server.createContext("/biglietti", new HandleBiglietti());
@@ -21,8 +20,6 @@ public class server {
         server.createContext("/percorrenze", new HandlePercorrenze());
         server.createContext("/utenti", new HandleUtenti());
         server.createContext("/stati-mezzo", new HandleStatiMezzo());
-
-
         // Avvia il server
         server.start();
         System.out.println("Server avviato su http://localhost:8000");

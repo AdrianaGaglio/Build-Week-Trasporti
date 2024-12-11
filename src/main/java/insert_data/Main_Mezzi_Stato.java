@@ -17,9 +17,10 @@ import epicode.it.servizi.gestore_stati_servizio.GestoreStatiServizio;
 import epicode.it.entities.percorrenza.Percorrenza;
 import epicode.it.entities.tratta.Tratta;
 
-import epicode.it.servizi.GestorePercorrenze;
+
 import epicode.it.servizi.gestore_stati_servizio.GestoreStatiServizio;
 
+import epicode.it.servizi.gestore_stati_servizio.StatisticheMezzo;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;

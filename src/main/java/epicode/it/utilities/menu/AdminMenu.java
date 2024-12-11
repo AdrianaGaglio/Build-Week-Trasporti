@@ -82,7 +82,7 @@ public class AdminMenu {
                             break;
                         }
                     }
-                    gestoreRivenditori.creaRivenditoreFisico(DayOfWeek.of(day), Time.valueOf(LocalTime.of(openHour, openMinutes)), Time.valueOf(LocalTime.of(closeHour, closeMinutes)));
+//                    gestoreRivenditori.creaRivenditoreFisico(DayOfWeek.of(day), Time.valueOf(LocalTime.of(openHour, openMinutes)), Time.valueOf(LocalTime.of(closeHour, closeMinutes)));
                 } else if (riv == 2) {
                     gestoreRivenditori.creaRivenditoreAutomatico();
                 }

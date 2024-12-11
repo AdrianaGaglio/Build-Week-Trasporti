@@ -2,9 +2,12 @@ package server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import epicode.it.dao.biglietto.BigliettoDAO;
 import epicode.it.dao.rivenditore.RivenditoreDAO;
+import epicode.it.entities.biglietto.Biglietto;
 import epicode.it.entities.rivenditore.Rivenditore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import epicode.it.servizi.gestore_rivenditori_e_biglietti.GestoreRivenditoriEBiglietti;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -58,7 +61,45 @@ public class HandleRivenditori implements HttpHandler {
         }
     }
 
-    private void handleDelete(HttpExchange exchange) {
+    private void handleDelete(HttpExchange exchange) throws IOException {
+        EntityManager em = emf.createEntityManager();
+        RivenditoreDAO rivenditoreDAO = new RivenditoreDAO(em);
+
+        try {
+            // Estrai l'ID dal percorso
+            String path = exchange.getRequestURI().getPath();
+            String[] pathParts = path.split("/");
+            if (pathParts.length < 3) {
+                exchange.sendResponseHeaders(400, -1); // ID non fornito
+                return;
+            }
+
+            Long id = Long.parseLong(pathParts[2]);
+            System.out.println(id);
+
+            // Verifica se la Tratta esiste
+            Rivenditore rivenditore = rivenditoreDAO.findById(id);
+            if (rivenditore == null) {
+                exchange.sendResponseHeaders(404, -1); // Tratta non trovata
+                return;
+            }
+
+            // Elimina la Tratta
+            em.getTransaction().begin();
+            rivenditoreDAO.delete(rivenditore);
+            em.getTransaction().commit();
+
+            // Risposta al client
+            exchange.sendResponseHeaders(200, -1); // Eliminazione riuscita
+        } catch (Exception e) {
+            e.printStackTrace(); // Log dell'errore per debugging
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            exchange.sendResponseHeaders(500, -1); // Errore interno del server
+        } finally {
+            em.close(); // Assicurati di chiudere l'EntityManager
+        }
     }
 
     private void handlePost(HttpExchange exchange) throws IOException {
@@ -68,19 +109,15 @@ public class HandleRivenditori implements HttpHandler {
         // Leggi il corpo della richiesta come JSON
         Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
         String tipo = (String) requestData.get("tipo");
+        GestoreRivenditoriEBiglietti gestore = new GestoreRivenditoriEBiglietti(em);
 
         if ("fisico".equalsIgnoreCase(tipo)) {
             // Creazione di un rivenditore fisico
-            RivFisico rivFisico = new RivFisico();
-            rivFisico.setGiornoChiusura(DayOfWeek.valueOf((String) requestData.get("giornoChiusura")));
-            rivFisico.setOraApertura(Time.valueOf((String) requestData.get("oraApertura")));
-            rivFisico.setOraChiusura(Time.valueOf((String) requestData.get("oraChiusura")));
-            dao.save(rivFisico);
+            gestore.creaRivenditoreFisico(DayOfWeek.valueOf((String) requestData.get("giornoChiusura")), Time.valueOf((String) requestData.get("oraApertura")),
+                    Time.valueOf((String) requestData.get("oraChiusura")));
         } else if ("automatico".equalsIgnoreCase(tipo)) {
             // Creazione di un rivenditore automatico
-            RivAutomatico rivAutomatico = new RivAutomatico();
-            rivAutomatico.setAttivo((Boolean) requestData.get("attivo"));
-            dao.save(rivAutomatico);
+            gestore.creaRivenditoreAutomatico();
         } else {
             exchange.sendResponseHeaders(400, -1); // Tipo non valido
             em.close();
