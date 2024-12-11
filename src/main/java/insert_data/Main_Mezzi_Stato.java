@@ -9,10 +9,12 @@ import epicode.it.dao.stato_mezzo.StatoMezzoDAO;
 import epicode.it.dao.tratta.TrattaDAO;
 import epicode.it.entities.mezzo.Autobus;
 import epicode.it.entities.mezzo.Tram;
+import epicode.it.entities.percorrenza.Percorrenza;
 import epicode.it.entities.tratta.Tratta;
 
 import epicode.it.servizi.GestorePercorrenze;
 import epicode.it.servizi.gestore_stati_servizio.GestoreStatiServizio;
+import epicode.it.servizi.gestore_stati_servizio.StatisticheMezzo;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -21,6 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Locale;
 
 public class Main_Mezzi_Stato {
@@ -72,20 +75,28 @@ public class Main_Mezzi_Stato {
 
         GestoreStatiServizio gestoreStati = new GestoreStatiServizio(em);
 
-        gestoreStati.aggiungiServizio(bus1, LocalDate.now(), LocalDate.now().plusDays(30), trattaDAO.getById(1L));
-        gestoreStati.aggiungiServizio(bus2, LocalDate.now(), LocalDate.now().plusDays(30), trattaDAO.getById(2L));
-        gestoreStati.aggiungiServizio(bus3, LocalDate.now(), LocalDate.now().plusDays(30), trattaDAO.getById(1L));
+//        gestoreStati.aggiungiServizio(bus1, LocalDate.now(), LocalDate.now().plusDays(30), trattaDAO.getById(1L));
+//        gestoreStati.aggiungiServizio(bus2, LocalDate.now(), LocalDate.now().plusDays(30), trattaDAO.getById(2L));
+//        gestoreStati.aggiungiServizio(bus3, LocalDate.now(), LocalDate.now().plusDays(30), trattaDAO.getById(1L));
+//
+//
+//        GestorePercorrenze gestorePercorrenze = new GestorePercorrenze(em);
+//
+//
+////        gestorePercorrenze.aggiungiPercorrenza(bus2, LocalDateTime.now(), trattaDAO.getById(1L));
+//        gestorePercorrenze.aggiungiPercorrenza(bus1, LocalDateTime.now(), trattaDAO.getById(1L));
+//
+//        PercorrenzaDAO percorrenzaDAO = new PercorrenzaDAO(em);
+//
+//        List<Percorrenza> percorrenzas = percorrenzaDAO.perMezzoTratta(trattaDAO.getById(1L), bus1);
+//        percorrenzas.forEach(System.out::println);
 
+        StatisticheMezzo statisticheMezzo = new StatisticheMezzo(em);
 
-        GestorePercorrenze gestorePercorrenze = new GestorePercorrenze(em);
+        gestoreStati.aggiungiManutenzione(bus2, LocalDate.now(), "Controllo");
 
-
-//        gestorePercorrenze.aggiungiPercorrenza(bus2, LocalDateTime.now(), trattaDAO.getById(1L));
-        gestorePercorrenze.aggiungiPercorrenza(bus1, LocalDateTime.now(), trattaDAO.getById(1L));
-
-        PercorrenzaDAO percorrenzaDAO = new PercorrenzaDAO(em);
-
-        System.out.println(gestorePercorrenze.mediaPercorrenzaPerTratta(trattaDAO.getById(1L), mezzoDAO.findById(1L)));
+        statisticheMezzo.periodiServizio(bus1).forEach(System.out::println);
+        statisticheMezzo.periodiManutenzione(bus2).forEach(System.out::println);
 
     }
 
