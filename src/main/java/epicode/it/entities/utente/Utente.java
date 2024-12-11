@@ -34,5 +34,4 @@ public class Utente {
     @EqualsAndHashCode.Exclude
     private Tessera tessera;
 
-
 }

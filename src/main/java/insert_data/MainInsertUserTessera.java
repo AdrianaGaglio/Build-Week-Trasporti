@@ -11,7 +11,7 @@
 //import epicode.it.entities.tessera.Tessera;
 //import epicode.it.entities.tratta.Tratta;
 //import epicode.it.entities.utente.Utente;
-//import epicode.it.servizi.GestoreTessera;
+//import epicode.it.servizi.gestire_tessera.GestoreTessera;
 //import jakarta.persistence.EntityManager;
 //import jakarta.persistence.EntityManagerFactory;
 //import jakarta.persistence.Persistence;
@@ -107,7 +107,7 @@
 //        for (int i = 0; i < 10; i++) {
 //            try {
 //                Tessera tessera = new Tessera();
-//                tessera.setValidita(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate().plusYears(1));
+//                tessera.setValidita(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime().plusYears(1));
 //                tesseraDAO.save(tessera);
 //                Utente utente = utenteDAO.getById((long) (i + 1));
 //                utente.setTessera(tessera);
@@ -135,7 +135,7 @@
 //        for (int i = 0; i < 150; i++) {
 //            try {
 //                Percorrenza percorrenza = new Percorrenza();
-//                percorrenza.setData(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+//                percorrenza.setData(faker.date().past(365, TimeUnit.DAYS).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime());
 //                percorrenza.setDurata_effettiva(LocalTime.of(faker.random().nextInt(0, 2), faker.random().nextInt(10, 45)));
 //                percorrenza.setTratta(trattaDAO.getById(parseLong(faker.random().nextInt(1, 51).toString())));
 //                percorrenzaDAO.save(percorrenza);

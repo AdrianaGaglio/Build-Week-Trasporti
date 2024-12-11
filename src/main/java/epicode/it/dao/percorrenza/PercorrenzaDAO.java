@@ -6,7 +6,9 @@ import epicode.it.entities.tratta.Tratta;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @AllArgsConstructor
@@ -49,15 +51,19 @@ public class PercorrenzaDAO {
 
     public Percorrenza trovaPerMezzo(Mezzo m, LocalDateTime data) {
         return em.createNamedQuery("trovaPerMezzo", Percorrenza.class)
-                .setParameter("mezzo", m).setParameter("data", data).getResultStream()
-                .filter(p -> p.getData().getHour() == data.getHour() && p.getData().getMinute() == data.getMinute() ).findFirst().orElse(null);
+                .setParameter("mezzo", m).getResultStream()
+                .filter(p -> p.getData().truncatedTo(ChronoUnit.MINUTES).equals(data.truncatedTo(ChronoUnit.MINUTES))).findFirst().orElse(null);
     }
 
     public Percorrenza trovaPerTratta(Tratta t, LocalDateTime data) {
         return em.createNamedQuery("trovaPerTratta", Percorrenza.class)
-                .setParameter("tratta", t).setParameter("data", data).getResultStream()
-                .filter(p-> p.getData().getHour() == data.getHour() && p.getData().getMinute() == data.getMinute() ).findFirst().orElse(null);
+                .setParameter("tratta", t).getResultStream()
+                .filter(p -> p.getData().truncatedTo(ChronoUnit.MINUTES).equals(data.truncatedTo(ChronoUnit.MINUTES))).findFirst().orElse(null);
     }
 
+    public List<Percorrenza> perMezzoTratta(Tratta t, Mezzo m) {
+        return em.createNamedQuery("mediaPerTratta", Percorrenza.class)
+                .setParameter("tratta", t).setParameter("mezzo",m).getResultList();
+    }
 
 }

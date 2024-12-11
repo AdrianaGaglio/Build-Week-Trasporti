@@ -3,6 +3,7 @@ package epicode.it.entities.biglietto;
 import epicode.it.entities.tessera.Tessera;
 import epicode.it.entities.tratta.Tratta;
 import jakarta.persistence.*;
+import jdk.jfr.Name;
 import lombok.Data;
 
 import java.util.ArrayList;

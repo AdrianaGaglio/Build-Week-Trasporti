@@ -1,4 +1,4 @@
-package epicode.it.servizi;
+package epicode.it.servizi.gestire_tessera;
 
 import epicode.it.entities.rivenditore.RivAutomatico;
 import epicode.it.entities.rivenditore.RivFisico;
@@ -41,18 +41,12 @@ public class GestoreTessera {
                 System.out.println("Rivenditore automatico fuori servizio");
             }
         }
-
     }
-
-
-
-
 
     private void  creaTesseraTemplate(Rivenditore r, Utente u, Scanner scanner) {
         em.getTransaction().begin();
 
         if (u.getTessera() == null) {
-
             System.out.println("Creazione tessera in corso...");
             Tessera tessera = new Tessera();
             tessera.setValidita(LocalDateTime.now().plusYears(1));
