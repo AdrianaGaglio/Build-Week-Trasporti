@@ -111,11 +111,28 @@ public class HandleRivenditori implements HttpHandler {
         String tipo = (String) requestData.get("tipo");
         GestoreRivenditoriEBiglietti gestore = new GestoreRivenditoriEBiglietti(em);
 
-        if ("fisico".equalsIgnoreCase(tipo)) {
+        System.out.println("Tipo: " + tipo);
+        System.out.println("Giorno Chiusura: " + requestData.get("giornoChiusura"));
+        System.out.println("Ora Apertura: " + requestData.get("oraApertura"));
+        System.out.println("Ora Chiusura: " + requestData.get("oraChiusura"));
+
+        try {
+            // Logica per creare il rivenditore
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            exchange.sendResponseHeaders(400, -1); // Errore nei dati
+        } catch (Exception e) {
+            e.printStackTrace();
+            exchange.sendResponseHeaders(500, -1); // Errore interno
+        } finally {
+            em.close();
+        }
+
+        if (tipo.equals("fisico")) {
             // Creazione di un rivenditore fisico
-            gestore.creaRivenditoreFisico(DayOfWeek.valueOf((String) requestData.get("giornoChiusura")), Time.valueOf((String) requestData.get("oraApertura")),
+            gestore.creaRivenditoreFisico(DayOfWeek.valueOf(((String) requestData.get("giornoChiusura")).toUpperCase()), Time.valueOf((String) requestData.get("oraApertura")),
                     Time.valueOf((String) requestData.get("oraChiusura")));
-        } else if ("automatico".equalsIgnoreCase(tipo)) {
+        } else if (tipo.equals("automatico")) {
             // Creazione di un rivenditore automatico
             gestore.creaRivenditoreAutomatico();
         } else {
