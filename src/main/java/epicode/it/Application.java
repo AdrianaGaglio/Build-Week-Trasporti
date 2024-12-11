@@ -24,13 +24,14 @@ public class Application {
         EntityManager em = emf.createEntityManager();
 
         while(true) {
-            System.out.println("Scegli il tipo di utente: 1-Admin 2-Rivenditore 3-Utente");
+            System.out.println("Scegli il tipo di utente: 1-Admin 2-Rivenditore 3-Utente (0-Per uscire)");
             int tipo = scanner.nextInt();
             scanner.nextLine();
             switch (tipo){
                 case 1 -> AdminMenu.showAdminMenu(scanner, em);
                 case 2 -> RivenditoreMenu.showRivenditoreMenu();
                 case 3 -> UtenteMenu.showUtenteMenu();
+                case 0 -> System.exit(0);
                 default -> System.out.println("Scelta non consentita");
             }
 

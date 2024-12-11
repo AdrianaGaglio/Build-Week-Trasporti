@@ -10,6 +10,8 @@ import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.lang.Integer.parseInt;
 
@@ -48,25 +50,23 @@ public class AdminMenu {
                         System.out.println("Giorno di chiusura: 1-Lun 2-Mar 3-Mer 4-Gio 5-Ven 6-Sab 7-Dom (0 per tornare indietro)");
                         day = scanner.nextInt();
                         scanner.nextLine();
-                        if(day == 0) break;
+                        if(day == 0) return;
                         if (day > 7) {
                             System.out.println("Giorno non valido, riprova.");
                         } else {
                             break;
                         }
                     }
+                    Pattern pattern = Pattern.compile("^(?:[01]?\\d|2[0-3])-[0-5]\\d$");
                     while (true) {
                         System.out.println("Orario apertura (hh-mm):");
                         String apertura = scanner.nextLine();
-                        openHour = parseInt(apertura.substring(0, 2));
-                        openMinutes = parseInt(apertura.substring(3, 5));
-                        scanner.nextLine();
-                        if (openHour > 23) {
-                            System.out.println("Orario non valido, riprova.");
-                        } else if (openMinutes > 59) {
-                            System.out.println("Minuti non validi, riprova.");
-                        } else {
+                        Matcher matcher = pattern.matcher(apertura);
+
+                        if (matcher.matches()) {
                             break;
+                        }else {
+                            System.out.println("Orario non valido, riprova.");
                         }
                     }
                     while (true) {
@@ -74,7 +74,6 @@ public class AdminMenu {
                         String chiusura = scanner.nextLine();
                         closeHour = parseInt(chiusura.substring(0, 2));
                         closeMinutes = parseInt(chiusura.substring(3, 5));
-                        scanner.nextLine();
                         if (closeHour > 23) {
                             System.out.println("Orario non valido, riprova.");
                         } else if (closeMinutes > 59) {
