@@ -31,7 +31,8 @@ public abstract class Biglietto {
 
     public abstract void setDaAttivare(boolean b);
 
-    public LocalDateTime getEmissione() {
-        return this.emissione;
+    // Getter aggiunto manualmente
+    public LocalDateTime getScadenza() {
+        return this.scadenza;
     }
 }
