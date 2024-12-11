@@ -3,15 +3,36 @@ package epicode.it.servizi.gestore_rivenditori_e_biglietti;
 import epicode.it.entities.biglietto.Biglietto;
 import epicode.it.entities.mezzo.Mezzo;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 public class ConvalidaBiglietto {
 
+    // Metodo per convalidare un biglietto
     public void convalida(Biglietto biglietto) {
-        // da implementare
-        // mette lo stato da_attivare a false
-        // imposta la data di scadenza a +90min
+        if (biglietto != null && biglietto.isDaAttivare()) {
+            biglietto.setDaAttivare(false);
+            biglietto.setScadenza(LocalDateTime.now().plusMinutes(90));
+            System.out.println("Biglietto convalidato con successo.");
+        } else {
+            System.out.println("Errore: Biglietto non valido o già convalidato.");
+        }
     }
 
-    public void bigliettiConvalidatiPerMezzo(Mezzo mezzo) {
-        // deve restituire la lista dei biglietti convalidati su quel mezzo
+    // Metodo per ottenere i biglietti convalidati su un determinato mezzo
+    public List<Biglietto> bigliettiConvalidatiPerMezzo(Mezzo mezzo) {
+        List<Biglietto> bigliettiConvalidati = new ArrayList<>();
+
+        if (mezzo != null && mezzo.getBiglietti() != null) {
+            for (Biglietto biglietto : mezzo.getBiglietti()) {
+                if (!biglietto.isDaAttivare() && biglietto.getScadenza().isAfter(LocalDateTime.now())) {
+                    bigliettiConvalidati.add(biglietto);
+                }
+            }
+        } else {
+            System.out.println("Nessun biglietto trovato per il mezzo specificato.");
+        }
+        return bigliettiConvalidati;
     }
 }

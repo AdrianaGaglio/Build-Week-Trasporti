@@ -9,9 +9,17 @@ import epicode.it.dao.stato_mezzo.StatoMezzoDAO;
 import epicode.it.dao.tratta.TrattaDAO;
 import epicode.it.entities.mezzo.Autobus;
 import epicode.it.entities.mezzo.Tram;
+
 import epicode.it.entities.tratta.Tratta;
 
 import epicode.it.servizi.gestore_stati_servizio.GestoreStatiServizio;
+
+import epicode.it.entities.percorrenza.Percorrenza;
+import epicode.it.entities.tratta.Tratta;
+
+import epicode.it.servizi.GestorePercorrenze;
+import epicode.it.servizi.gestore_stati_servizio.GestoreStatiServizio;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -20,6 +28,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+
+import java.util.List;
+
 import java.util.Locale;
 
 public class Main_Mezzi_Stato {
@@ -57,6 +68,27 @@ public class Main_Mezzi_Stato {
             tratta.setDurata(LocalTime.of(faker.random().nextInt(1,2),faker.random().nextInt(0,59), faker.random().nextInt(0,59)));
             trattaDAO.save(tratta);
         }
+//        for (int i = 0; i < 5; i++) {
+//            int random = ((int) (Math.random() * 100)) + 1;
+//            Autobus autobus = new Autobus(random);
+//            mezzoDAO.save(autobus);
+//        }
+//
+//        for (int i = 0; i < 5; i++) {
+//            int random = ((int) (Math.random() * 100)) + 1;
+//            Tram tram = new Tram(random);
+//            mezzoDAO.save(tram);
+//        }
+//
+//        String city = faker.country().capital();
+//
+//        for(int i = 0; i < 100; i++) {
+//            Tratta tratta = new Tratta();
+//            tratta.setPartenza(faker.address().streetAddress());
+//            tratta.setCapolinea(faker.address().streetAddress());
+//            tratta.setDurata(LocalTime.of(faker.random().nextInt(1,2),faker.random().nextInt(0,59), faker.random().nextInt(0,59)));
+//            trattaDAO.save(tratta);
+//        }
 
         Autobus bus1 = (Autobus) mezzoDAO.findById(1L);
         Autobus bus2 = (Autobus) mezzoDAO.findById(2L);
@@ -80,6 +112,28 @@ public class Main_Mezzi_Stato {
 
 
 
+//        gestoreStati.aggiungiServizio(bus1, LocalDate.now(), LocalDate.now().plusDays(30), trattaDAO.getById(1L));
+//        gestoreStati.aggiungiServizio(bus2, LocalDate.now(), LocalDate.now().plusDays(30), trattaDAO.getById(2L));
+//        gestoreStati.aggiungiServizio(bus3, LocalDate.now(), LocalDate.now().plusDays(30), trattaDAO.getById(1L));
+//
+//
+//        GestorePercorrenze gestorePercorrenze = new GestorePercorrenze(em);
+//
+//
+////        gestorePercorrenze.aggiungiPercorrenza(bus2, LocalDateTime.now(), trattaDAO.getById(1L));
+//        gestorePercorrenze.aggiungiPercorrenza(bus1, LocalDateTime.now(), trattaDAO.getById(1L));
+//
+//        PercorrenzaDAO percorrenzaDAO = new PercorrenzaDAO(em);
+//
+//        List<Percorrenza> percorrenzas = percorrenzaDAO.perMezzoTratta(trattaDAO.getById(1L), bus1);
+//        percorrenzas.forEach(System.out::println);
+
+        StatisticheMezzo statisticheMezzo = new StatisticheMezzo(em);
+
+        gestoreStati.aggiungiManutenzione(bus2, LocalDate.now(), "Controllo");
+
+        statisticheMezzo.periodiServizio(bus1).forEach(System.out::println);
+        statisticheMezzo.periodiManutenzione(bus2).forEach(System.out::println);
 
     }
 

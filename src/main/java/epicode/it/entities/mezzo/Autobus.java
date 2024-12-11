@@ -26,4 +26,6 @@ public class Autobus extends Mezzo{
                 ", stato=" + this.getStato() +
                 '}';
     }
+
+
 }

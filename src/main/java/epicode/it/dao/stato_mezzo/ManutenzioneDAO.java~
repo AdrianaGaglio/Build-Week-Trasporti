@@ -46,9 +46,4 @@ public class ManutenzioneDAO {
                 .setParameter("mezzo", mezzo).setParameter("data", data).getResultStream().findFirst().orElse(null);
     }
 
-    public List<Manutenzione> manutenzioni (Mezzo mezzo) {
-        return em.createNamedQuery("manutenzioniPerMezzo", Manutenzione.class)
-                .setParameter("mezzo", mezzo).getResultList();
-    }
-
 }
