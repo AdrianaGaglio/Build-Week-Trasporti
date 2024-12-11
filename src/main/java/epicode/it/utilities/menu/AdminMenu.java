@@ -278,7 +278,7 @@ case 3 -> {
     System.out.println("Seleziona tratta");
 }
                 case 0 -> running = false;
-                default -> System.err.println("Inserisci un valore valido")
+                default -> System.err.println("Inserisci un valore valido");
             }
         }
     }
