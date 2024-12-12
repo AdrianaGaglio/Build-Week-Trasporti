@@ -2,6 +2,7 @@ package epicode.it.entities.biglietto;
 
 import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.rivenditore.Rivenditore;
+import epicode.it.entities.utente.Utente;
 import epicode.it.utilities.StringGenerator;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -33,6 +34,36 @@ public abstract class Biglietto {
     private Mezzo mezzo;
 
     private boolean daAttivare = true;
+
+    @ManyToOne
+    private Utente utente;
+
+    // Getter e Setter per emissione (data di emissione)
+    public LocalDateTime getEmissione() {
+        return emissione;
+    }
+
+    public void setEmissione(LocalDateTime emissione) {
+        this.emissione = emissione;
+    }
+
+    // Getter e Setter per scadenza (data di scadenza)
+    public LocalDateTime getScadenza() {
+        return scadenza;
+    }
+
+    public void setScadenza(LocalDateTime scadenza) {
+        this.scadenza = scadenza;
+    }
+
+    // Getter e Setter per utente
+    public Utente getUtente() {
+        return utente;
+    }
+
+    public void setUtente(Utente utente) {
+        this.utente = utente;
+    }
 
     public boolean isDaAttivare() {
         return daAttivare;

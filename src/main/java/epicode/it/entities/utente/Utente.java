@@ -13,8 +13,7 @@ import java.time.LocalDateTime;
 @NamedQuery(name = "findAll_Utente", query = "SELECT a FROM Utente a")
 @NamedQuery(name = "findByCard", query = "SELECT a FROM Utente a WHERE a.tessera.codice = :codice")
 @NamedQuery(name = "findByEmail", query = "SELECT u FROM Utente u WHERE u.email = :email")
-
-@Table(name="utenti")
+@Table(name = "utenti")
 public class Utente {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -24,7 +23,7 @@ public class Utente {
 
     private String cognome;
 
-    @Column(name="data_nascita")
+    @Column(name = "data_nascita")
     private LocalDate dataNascita;
 
     private String email;
@@ -36,4 +35,15 @@ public class Utente {
 
     private String ruolo;
 
+    @Override
+    public String toString() {
+        return "Utente{" +
+                "id=" + id +
+                ", nome='" + nome + '\'' +
+                ", cognome='" + cognome + '\'' +
+                ", dataNascita=" + dataNascita +
+                ", email='" + email + '\'' +
+                ", tessera=" + tessera +
+                '}';
+    }
 }

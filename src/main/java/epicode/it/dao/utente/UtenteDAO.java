@@ -1,17 +1,13 @@
 package epicode.it.dao.utente;
 
-import epicode.it.entities.rivenditore.Rivenditore;
-import epicode.it.entities.tessera.Tessera;
 import epicode.it.entities.utente.Utente;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Scanner;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -57,7 +53,6 @@ public class UtenteDAO {
                 .setParameter("codice", codice).getResultStream().findFirst().orElse(null);
     }
 
-
     // RICERCA PER EMAIL
     public Utente findByEmail(String email) {
         return em.createNamedQuery("findByEmail", Utente.class)
@@ -75,4 +70,15 @@ public class UtenteDAO {
         return utente;
     }
 
+    public boolean isAbbonamentoAttivo(Utente utente) {
+        if (utente.getTessera() != null) {
+            return utente.getTessera().getAbbonamenti().stream()
+                    .anyMatch(a -> a.isAttivo() && a.getScadenza().isAfter(LocalDateTime.now()));
+        }
+        return false;
+    }
+
+    public boolean isTesseraAttiva(Utente utente) {
+        return utente.getTessera() != null && utente.getTessera().getValidita().isAfter(LocalDateTime.now());
+    }
 }

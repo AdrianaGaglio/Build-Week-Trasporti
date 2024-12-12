@@ -1,12 +1,14 @@
 package insert_data;
 
 import com.github.javafaker.Faker;
+import epicode.it.dao.biglietto.GiornalieroDAO;
 import epicode.it.dao.mezzo.MezzoDAO;
 import epicode.it.dao.rivenditore.RivenditoreDAO;
 import epicode.it.dao.stato_mezzo.ManutenzioneDAO;
 import epicode.it.dao.stato_mezzo.ServizioDAO;
 import epicode.it.dao.stato_mezzo.StatoMezzoDAO;
 import epicode.it.dao.utente.UtenteDAO;
+import epicode.it.entities.biglietto.Giornaliero;
 import epicode.it.entities.biglietto.Periodicy;
 import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.rivenditore.Rivenditore;
@@ -33,16 +35,19 @@ public class MainCreateRivenditori {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("unit-jpa");
         EntityManager em = emf.createEntityManager();
 
-        RivenditoreDAO rivenditoreDAO = new RivenditoreDAO(em);
-        UtenteDAO utenteDAO = new UtenteDAO(em);
-        GestoreTessera gestoreTessera = new GestoreTessera(em);
-        GestoreRivenditoriEBiglietti gestoreRivenditori = new GestoreRivenditoriEBiglietti(em);
-
-        for (int i = 0; i < 10; i++) {
-            gestoreRivenditori.creaRivenditoreFisico(DayOfWeek.of(faker.random().nextInt(1,7)), LocalTime.of(faker.random().nextInt(8,10), faker.random().nextInt(0,59)),
-                    LocalTime.of(faker.random().nextInt(17,20), faker.random().nextInt(0,59)));
-            gestoreRivenditori.creaRivenditoreAutomatico();
-        }
+//        RivenditoreDAO rivenditoreDAO = new RivenditoreDAO(em);
+//        UtenteDAO utenteDAO = new UtenteDAO(em);
+//        GestoreTessera gestoreTessera = new GestoreTessera(em);
+//        GestoreRivenditoriEBiglietti gestoreRivenditori = new GestoreRivenditoriEBiglietti(em);
+//
+//        for (int i = 0; i < 10; i++) {
+//            gestoreRivenditori.creaRivenditoreFisico(DayOfWeek.of(faker.random().nextInt(1,7)), LocalTime.of(faker.random().nextInt(8,10), faker.random().nextInt(0,59)),
+//                    LocalTime.of(faker.random().nextInt(17,20), faker.random().nextInt(0,59)));
+//            gestoreRivenditori.creaRivenditoreAutomatico();
+//        }
+        GiornalieroDAO giornalieroDAO = new GiornalieroDAO(em);
+        List<Giornaliero> biglietti = giornalieroDAO.findAll();
+        biglietti.forEach(System.out::println);
 
 
     }

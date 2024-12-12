@@ -37,7 +37,7 @@ public abstract class Mezzo {
     @OneToMany(mappedBy = "mezzo")
     private List<Percorrenza> percorrenze = new ArrayList<>();
 
-    @OneToMany(mappedBy = "mezzo", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "mezzo")
     private List<Biglietto> biglietti = new ArrayList<>();
 
     private Integer codice;
