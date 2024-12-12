@@ -25,7 +25,7 @@ public class RivFisico extends Rivenditore  {
 
     @Override
     public String toString() {
-        return "\nRivFisico{" +
+        return "RivFisico{" +
                 "id= " + getId() + ", " +
                 "giornoChiusura=" + giornoChiusura +
                 ", oraApertura=" + oraApertura +

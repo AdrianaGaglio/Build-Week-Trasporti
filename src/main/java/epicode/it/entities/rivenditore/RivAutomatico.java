@@ -13,7 +13,7 @@ public class RivAutomatico extends Rivenditore  {
 
     @Override
     public String toString() {
-        return "\nRivenditoreAutomatico{" +
+        return "RivenditoreAutomatico{" +
                 "id= " + getId() + ", " +
                 "attivo= " + attivo  +
                 "}";
