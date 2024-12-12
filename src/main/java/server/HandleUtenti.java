@@ -177,7 +177,11 @@ public class HandleUtenti implements HttpHandler {
         utente.setNome((String) requestData.get("nome"));
         utente.setCognome((String) requestData.get("cognome"));
         utente.setEmail((String) requestData.get("email"));
-        utente.setDataNascita(Date.valueOf((String) requestData.get("dataNascita")).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+        // Parsing della data di nascita
+        String dataNascitaString = (String) requestData.get("dataNascita");
+        if (dataNascitaString != null) {
+            utente.setDataNascita(LocalDate.parse(dataNascitaString));
+        }
         utente.setRuolo((String) requestData.get("ruolo"));
         dao.update(utente);
 
