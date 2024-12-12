@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class StatisticheRivenditore {
 
-    public List<Biglietto> bigliettiEmessiPerRivenditore(Rivenditore rivenditore, LocalDate dateFrom, LocalDate dateTo) {
+    public static List<Biglietto> bigliettiEmessiPerRivenditoreInUnDatoPeriodo(Rivenditore rivenditore, LocalDate dateFrom, LocalDate dateTo) {
         if (rivenditore == null) {
             throw new IllegalArgumentException("Rivenditore non può essere null");
         }

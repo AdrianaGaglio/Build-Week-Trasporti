@@ -34,6 +34,18 @@ public class Utente {
     @EqualsAndHashCode.Exclude
     private Tessera tessera;
 
+
     private String ruolo;
 
+    @Override
+    public String toString() {
+        return "Utente{" +
+                "id=" + id +
+                ", nome='" + nome + '\'' +
+                ", cognome='" + cognome + '\'' +
+                ", dataNascita=" + dataNascita +
+                ", email='" + email + '\'' +
+                ", tessera=" + tessera +
+                '}';
+    }
 }

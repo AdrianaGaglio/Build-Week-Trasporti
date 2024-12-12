@@ -3,6 +3,7 @@ package epicode.it.servizi.gestore_rivenditori_e_biglietti;
 import epicode.it.dao.biglietto.BigliettoDAO;
 import epicode.it.dao.rivenditore.RivenditoreDAO;
 import epicode.it.entities.biglietto.Abbonamento;
+import epicode.it.entities.biglietto.Biglietto;
 import epicode.it.entities.biglietto.Giornaliero;
 import epicode.it.entities.biglietto.Periodicy;
 import epicode.it.entities.rivenditore.RivAutomatico;
@@ -62,23 +63,23 @@ public class GestoreRivenditoriEBiglietti {
                             LocalTime.now().isAfter(rivFisico.getOraApertura()) &&
                             LocalTime.now().isBefore(rivFisico.getOraChiusura())
             ) {
-                creaGiornalieroTemplate(r, tratta);
-                System.out.println("Biglietto creato!");
+              Biglietto biglietto = creaGiornalieroTemplate(r, tratta);
+                System.out.println("Biglietto creato! " + biglietto );
             } else {
                 System.err.println("Il rivenditore fisico è chiuso");
             }
         } else if (r instanceof RivAutomatico) {
             RivAutomatico rivAuto = (RivAutomatico) r;
             if (rivAuto.isAttivo()) {
-                creaGiornalieroTemplate(r, tratta);
-                System.out.println("Biglietto creato!");
+                Biglietto biglietto = creaGiornalieroTemplate(r, tratta);
+                System.out.println("Biglietto creato! " + biglietto );
             } else {
                 System.err.println("Rivenditore automatico fuori servizio");
             }
         }
     }
 
-    private void creaGiornalieroTemplate(Rivenditore r, Tratta tratta) {
+    private Biglietto creaGiornalieroTemplate(Rivenditore r, Tratta tratta) {
         Giornaliero biglietto = new Giornaliero();
         biglietto.setDaAttivare(true);
         biglietto.setTratta(tratta);
@@ -89,6 +90,7 @@ public class GestoreRivenditoriEBiglietti {
         BigliettoDAO bigliettoDAO = new BigliettoDAO(em);
         bigliettoDAO.save(biglietto);
         rivenditoreDAO.update(r);
+        return biglietto;
     }
 
     public void creaAbbonamento(Rivenditore r, Periodicy periodicy, Utente utente) {

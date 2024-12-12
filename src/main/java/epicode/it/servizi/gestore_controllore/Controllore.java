@@ -7,9 +7,9 @@ import java.time.LocalDateTime;
 
 public class Controllore {
 
-    public void controlloBiglietto(Biglietto biglietto, Tratta tratta) {
+    public void controlloBiglietto(Biglietto biglietto) {
         LocalDateTime now = LocalDateTime.now();
-        if (biglietto.getScadenza().isBefore(now)) {
+        if (biglietto.getScadenza() != null && biglietto.getScadenza().isBefore(now)) {
             throw new IllegalStateException("Biglietto scaduto");
         }
     }

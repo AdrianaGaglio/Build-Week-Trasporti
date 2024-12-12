@@ -1,6 +1,10 @@
 package epicode.it.servizi.gestore_rivenditori_e_biglietti;
 
+import epicode.it.dao.biglietto.BigliettoDAO;
+import epicode.it.dao.biglietto.GiornalieroDAO;
+import epicode.it.dao.mezzo.MezzoDAO;
 import epicode.it.entities.biglietto.Biglietto;
+import epicode.it.entities.biglietto.Giornaliero;
 import epicode.it.entities.mezzo.Mezzo;
 import jakarta.persistence.EntityManager;
 
@@ -17,10 +21,22 @@ public class ConvalidaBiglietto {
     }
 
     // Metodo per convalidare un biglietto
-    public void convalida(Biglietto biglietto) {
+    public void convalida(Giornaliero biglietto, Mezzo mezzo) {
+        System.out.println(mezzo);
+        GiornalieroDAO bigliettoDAO = new GiornalieroDAO(em);
+        MezzoDAO mezzoDAO = new MezzoDAO(em);
         if (biglietto != null && biglietto.isDaAttivare()) {
+            em.getTransaction().begin();
             biglietto.setDaAttivare(false);
             biglietto.setScadenza(LocalDateTime.now().plusMinutes(90));
+            biglietto.setMezzo(mezzo);
+            System.out.println(biglietto.getMezzo());
+            mezzo.getBiglietti().add(biglietto);
+
+            em.merge(mezzo);
+            em.merge(biglietto);
+
+            em.getTransaction().commit();
             System.out.println("Biglietto convalidato con successo.");
         } else {
             System.out.println("Errore: Biglietto non valido o già convalidato.");

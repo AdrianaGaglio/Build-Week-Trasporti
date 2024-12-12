@@ -1,14 +1,21 @@
 package epicode.it.utilities.menu;
 
 import epicode.it.dao.biglietto.BigliettoDAO;
+import epicode.it.dao.biglietto.GiornalieroDAO;
+import epicode.it.dao.mezzo.MezzoDAO;
 import epicode.it.dao.rivenditore.RivenditoreDAO;
 import epicode.it.dao.tratta.TrattaDAO;
 import epicode.it.dao.utente.UtenteDAO;
 import epicode.it.entities.biglietto.Biglietto;
+import epicode.it.entities.biglietto.Giornaliero;
 import epicode.it.entities.biglietto.Periodicy;
+import epicode.it.entities.mezzo.Mezzo;
+import epicode.it.entities.mezzo.Stato;
 import epicode.it.entities.rivenditore.Rivenditore;
+import epicode.it.entities.stato_mezzo.Servizio;
 import epicode.it.entities.tratta.Tratta;
 import epicode.it.entities.utente.Utente;
+import epicode.it.servizi.gestore_rivenditori_e_biglietti.ConvalidaBiglietto;
 import epicode.it.servizi.gestore_rivenditori_e_biglietti.GestoreRivenditoriEBiglietti;
 import epicode.it.servizi.gestore_controllore.Controllore;
 import jakarta.persistence.EntityManager;
@@ -19,21 +26,25 @@ import java.util.Scanner;
 public class UtenteMenu {
     private static RivenditoreDAO rivenditoreDAO;
     private static BigliettoDAO bigliettoDAO;
+    private static GiornalieroDAO giornalieroDAO;
     private static TrattaDAO trattaDAO;
+    private static MezzoDAO mezzoDAO;
     private static UtenteDAO utenteDAO;
 
     public static void showUtenteMenu(Scanner scanner, EntityManager em, Utente utente) {
         rivenditoreDAO = new RivenditoreDAO(em);
         bigliettoDAO = new BigliettoDAO(em);
+        giornalieroDAO = new GiornalieroDAO(em);
         trattaDAO = new TrattaDAO(em);
+        mezzoDAO = new MezzoDAO(em);
         utenteDAO = new UtenteDAO(em);
 
-        System.out.println("--- Menu utente di" + utente.getNome() +   " " + utente.getCognome() + " ---");
+        System.out.println("--- Menu utente di " + utente.getNome() + " " + utente.getCognome() + " ---");
         System.out.println("1. Compra biglietto giornaliero");
         System.out.println("2. Convalida biglietto");
         System.out.println("3. Compra abbonamento");
         System.out.println("=> Scegli un opzione valida: (0 per tornare indietro)");
-        switchOptions(scanner, em,utente);
+        switchOptions(scanner, em, utente);
     }
 
     private static void mostraRivenditori() {
@@ -94,40 +105,52 @@ public class UtenteMenu {
 
     private static void gestisciConvalida(Scanner scanner, EntityManager em, Controllore controllore) {
         System.out.println("=> Convalida biglietto");
-        System.out.println("Inserisci il codice del biglietto:");
-        String codice = scanner.nextLine();
+        System.out.println("Inserisci l' id del biglietto:");
+        long codice = scanner.nextLong();
+        scanner.nextLine();
 
-        mostraTratte();
-        System.out.println("Inserisci l'ID della tratta:");
-        long trattaId = scanner.nextLong();
+        Giornaliero biglietto = giornalieroDAO.findById(codice);
+
+
+        if (biglietto == null) {
+            System.out.println("Biglietto non trovato!");
+            return;
+        }
+
+        System.out.println("Inserisci l'ID del mezzo:");
+        long mezzoId = scanner.nextLong();
         scanner.nextLine();
 
         try {
-            Tratta tratta = trattaDAO.getById(trattaId);
-            if (tratta == null) {
-                System.out.println("Tratta non trovata!");
+            Mezzo mezzo = mezzoDAO.findById(mezzoId);
+            if (mezzo == null) {
+                System.out.println("Mezzo non trovato!");
                 return;
             }
 
-            List<Biglietto> biglietti = bigliettoDAO.findAll();
-            Biglietto biglietto = biglietti.stream()
-                    .filter(b -> b.getCodice().equals(codice))
-                    .findFirst()
-                    .orElse(null);
+            if (mezzo.getStato() == Stato.IN_SERVIZIO) {
+                Servizio inServizio = mezzo.getServizi()
+                        .stream()
+                        .filter(servizio -> servizio.getDataFine() == null)
+                        .findFirst()
+                        .orElse(null);
 
-            if (biglietto == null) {
-                System.out.println("Biglietto non trovato!");
-                return;
+                if (inServizio.getTratta().getId() == biglietto.getTratta().getId()) {
+                    if (biglietto.isDaAttivare()) {
+                        controllore.controlloBiglietto(biglietto);
+                        ConvalidaBiglietto convalida = new ConvalidaBiglietto(em);
+                        convalida.convalida(biglietto, mezzo);
+
+                        System.out.println("Biglietto convalidato con successo!");
+                    } else {
+                        System.out.println("Il biglietto è già stato convalidato!");
+                    }
+                } else {
+                    System.out.println("La tratta del biglietto non corrisponde alla tratta del mezzo!");
+                }
             }
 
-            if (biglietto.isDaAttivare()) {
-                controllore.controlloBiglietto(biglietto, tratta);
-                biglietto.setDaAttivare(false);
-                bigliettoDAO.update(biglietto);
-                System.out.println("Biglietto convalidato con successo!");
-            } else {
-                System.out.println("Il biglietto è già stato convalidato!");
-            }
+
         } catch (IllegalStateException e) {
             System.out.println("Errore di validazione: " + e.getMessage());
         } catch (Exception e) {
@@ -202,6 +225,6 @@ public class UtenteMenu {
             default -> System.out.println("Opzione non valida");
         }
 
-        showUtenteMenu(scanner, em,utente);
+        showUtenteMenu(scanner, em, utente);
     }
 }

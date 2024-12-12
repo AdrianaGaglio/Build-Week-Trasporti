@@ -156,7 +156,7 @@ public class HandleBiglietti implements HttpHandler {
         if (biglietto instanceof Giornaliero) {
             Giornaliero giornaliero = (Giornaliero) biglietto;
             ConvalidaBiglietto convalida = new ConvalidaBiglietto(em);
-            convalida.convalida(giornaliero);
+//            convalida.convalida(giornaliero);
         } else if (biglietto instanceof Abbonamento) {
            Abbonamento abbonamento = (Abbonamento) biglietto;
             RinnovoAbbonamento rinnovo = new RinnovoAbbonamento(em);
