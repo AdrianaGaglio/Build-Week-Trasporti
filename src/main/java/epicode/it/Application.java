@@ -27,7 +27,16 @@ public class Application {
 
 
         while(true) {
-            System.out.println("Scegli il tipo di utente: 1-Admin 2-Rivenditore 3-Utente (0-Per uscire)");
+            System.out.println("\n--Scegli il tipo di utente--");
+            System.out.println("1. Admin");
+            System.out.println("=========================");
+            System.out.println("2. Rivenditore");
+            System.out.println("=========================");
+            System.out.println("3. Utente");
+            System.out.println("=========================");
+            System.out.println("=> Scegli un opzione valida (0 per uscire)\n");
+
+
             int tipo = scanner.nextInt();
             scanner.nextLine();
             switch (tipo){
