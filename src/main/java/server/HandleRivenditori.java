@@ -83,10 +83,9 @@ public class HandleRivenditori implements HttpHandler {
                 return;
             }
 
-            // Elimina la Tratta
-            em.getTransaction().begin();
+
             rivenditoreDAO.delete(rivenditore);
-            em.getTransaction().commit();
+
 
             // Risposta al client
             exchange.sendResponseHeaders(200, -1); // Eliminazione riuscita
@@ -157,7 +156,9 @@ public class HandleRivenditori implements HttpHandler {
         // Leggi il corpo della richiesta come JSON
         Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
         Long id = Long.parseLong(requestData.get("id").toString());
+        String tipo = (String) requestData.get("tipo");  // Legge il tipo dal corpo della richiesta
 
+        // Trova il rivenditore esistente
         Rivenditore rivenditore = dao.findById(id);
         if (rivenditore == null) {
             exchange.sendResponseHeaders(404, -1); // Rivenditore non trovato
@@ -165,21 +166,50 @@ public class HandleRivenditori implements HttpHandler {
             return;
         }
 
-        if (rivenditore instanceof RivFisico) {
-            RivFisico rivFisico = (RivFisico) rivenditore;
-            rivFisico.setGiornoChiusura(DayOfWeek.valueOf((String) requestData.get("giornoChiusura")));
-            rivFisico.setOraApertura(LocalTime.parse((String) requestData.get("oraApertura")));
-            rivFisico.setOraChiusura(LocalTime.parse((String) requestData.get("oraChiusura")));
-            dao.update(rivFisico);
-        } else if (rivenditore instanceof RivAutomatico) {
-            RivAutomatico rivAutomatico = (RivAutomatico) rivenditore;
-            rivAutomatico.setAttivo((Boolean) requestData.get("attivo"));
-            dao.update(rivAutomatico);
+        // Controlla il tipo di rivenditore
+        if (tipo == null || tipo.isEmpty()) {
+            exchange.sendResponseHeaders(400, -1); // Tipo non presente nella richiesta
+            em.close();
+            return;
+        }
+
+        try {
+            // Aggiorna solo se il tipo corrisponde al tipo dell'oggetto
+            if (tipo.toLowerCase().equals("rivfisico") && rivenditore instanceof RivFisico) {
+                RivFisico rivFisico = (RivFisico) rivenditore;
+                if (requestData.containsKey("giornoChiusura")) {
+                    rivFisico.setGiornoChiusura(DayOfWeek.of((Integer) requestData.get("giornoChiusura")));
+                }
+                if (requestData.containsKey("oraApertura")) {
+                    rivFisico.setOraApertura(LocalTime.parse((String) requestData.get("oraApertura")));
+                }
+                if (requestData.containsKey("oraChiusura")) {
+                    rivFisico.setOraChiusura(LocalTime.parse((String) requestData.get("oraChiusura")));
+                }
+                dao.update(rivFisico); // Salva le modifiche
+            } else if (tipo.toLowerCase().equals("rivautomatico") && rivenditore instanceof RivAutomatico) {
+                RivAutomatico rivAutomatico = (RivAutomatico) rivenditore;
+                if (requestData.containsKey("attivo")) {
+                    rivAutomatico.setAttivo((Boolean) requestData.get("attivo"));
+                }
+                dao.update(rivAutomatico); // Salva le modifiche
+            } else {
+                // Tipo non corrisponde con il tipo del rivenditore trovato
+                exchange.sendResponseHeaders(400, -1); // Tipo non valido per l'entità trovata
+                em.close();
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            exchange.sendResponseHeaders(500, -1); // Errore interno
+            em.close();
+            return;
         }
 
         em.close();
         exchange.sendResponseHeaders(200, -1); // Aggiornamento riuscito
     }
+
 
     private void handleGet(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
