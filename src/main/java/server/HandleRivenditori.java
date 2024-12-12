@@ -8,9 +8,7 @@ import epicode.it.entities.biglietto.Biglietto;
 import epicode.it.entities.rivenditore.Rivenditore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import epicode.it.servizi.gestore_rivenditori_e_biglietti.GestoreRivenditoriEBiglietti;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
+import jakarta.persistence.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -107,44 +105,50 @@ public class HandleRivenditori implements HttpHandler {
         EntityManager em = emf.createEntityManager();
         RivenditoreDAO dao = new RivenditoreDAO(em);
 
+
         // Leggi il corpo della richiesta come JSON
         Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
         String tipo = (String) requestData.get("tipo");
-        GestoreRivenditoriEBiglietti gestore = new GestoreRivenditoriEBiglietti(em);
-
-        System.out.println("Tipo: " + tipo);
-        System.out.println("Giorno Chiusura: " + requestData.get("giornoChiusura"));
-        System.out.println("Ora Apertura: " + requestData.get("oraApertura"));
-        System.out.println("Ora Chiusura: " + requestData.get("oraChiusura"));
 
         try {
+            // Inizio della transazione
+
+
             // Logica per creare il rivenditore
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-            exchange.sendResponseHeaders(400, -1); // Errore nei dati
+            if ("rivfisico".equalsIgnoreCase(tipo)) {
+                System.out.println("riv fisico request");
+
+                RivFisico r = new RivFisico();
+                DayOfWeek dayOfWeek = DayOfWeek.of((Integer) requestData.get("giornoChiusura"));
+                r.setGiornoChiusura(dayOfWeek);
+                r.setOraApertura(LocalTime.parse((String) requestData.get("oraApertura")));
+                r.setOraChiusura(LocalTime.parse((String) requestData.get("oraChiusura")));
+                dao.save(r);
+            } else if ("rivautomatico".equalsIgnoreCase(tipo)) {
+                System.out.println("riv automatico request");
+                RivAutomatico rivAutomatico = new RivAutomatico();
+                rivAutomatico.setAttivo(true);
+                dao.save(rivAutomatico);
+            } else {
+                exchange.sendResponseHeaders(400, -1); // Tipo non valido
+                return;
+            }
+
+
+            exchange.sendResponseHeaders(201, -1); // Creato con successo
         } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback(); // Rollback in caso di errore
+            }
             e.printStackTrace();
             exchange.sendResponseHeaders(500, -1); // Errore interno
         } finally {
-            em.close();
+            if (em.isOpen()) {
+                em.close(); // Chiudi la sessione
+            }
         }
-
-        if (tipo.equals("fisico")) {
-            // Creazione di un rivenditore fisico
-            gestore.creaRivenditoreFisico(DayOfWeek.of((Integer) requestData.get("giornoChiusura")), LocalTime.parse((String) requestData.get("oraApertura")),
-                    LocalTime.parse((String) requestData.get("oraChiusura")));
-        } else if (tipo.equals("automatico")) {
-            // Creazione di un rivenditore automatico
-            gestore.creaRivenditoreAutomatico();
-        } else {
-            exchange.sendResponseHeaders(400, -1); // Tipo non valido
-            em.close();
-            return;
-        }
-
-        em.close();
-        exchange.sendResponseHeaders(201, -1); // Creato con successo
     }
+
 
     private void handlePut(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
@@ -179,21 +183,32 @@ public class HandleRivenditori implements HttpHandler {
 
     private void handleGet(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
-        RivenditoreDAO dao = new RivenditoreDAO(em);
-
-        // Recupera tutti i rivenditori
-        List<Rivenditore> rivenditori = dao.findAll();
+        // DAO per il recupero dei rivenditori
+        TypedQuery<Rivenditore> query = em.createNamedQuery("Trova_tutto_Rivenditore", Rivenditore.class);
+        List<Rivenditore> rivenditori = query.getResultList();
         em.close();
 
-        // Converti la lista in JSON manualmente
+        // Converti la lista in JSON
         String jsonResponse = rivenditori.stream()
-                .map(r -> String.format("{\"id\":%d,\"tipo\":\"%s\"}", r.getId(), r.getClass().getSimpleName()))
+                .map(r -> {
+                    if (r instanceof RivFisico) {
+                        RivFisico rivFisico = (RivFisico) r;
+                        return String.format("{\"id\":%d,\"tipo\":\"RivFisico\",\"giornoChiusura\":\"%s\",\"oraApertura\":\"%s\",\"oraChiusura\":\"%s\"}",
+                                rivFisico.getId(), rivFisico.getGiornoChiusura(), rivFisico.getOraApertura(), rivFisico.getOraChiusura());
+                    } else if (r instanceof RivAutomatico) {
+                        RivAutomatico rivAutomatico = (RivAutomatico) r;
+                        return String.format("{\"id\":%d,\"tipo\":\"RivAutomatico\",\"attivo\":%b}", rivAutomatico.getId(), rivAutomatico.isAttivo());
+                    } else {
+                        return String.format("{\"id\":%d,\"tipo\":\"Rivenditore\"}", r.getId());
+                    }
+                })
                 .collect(Collectors.joining(",", "[", "]"));
 
-        // Restituisci la risposta
+        // Restituisci la risposta JSON
         exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(jsonResponse.getBytes());
         }
     }
+
 }
