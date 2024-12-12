@@ -33,12 +33,13 @@ import static java.lang.Integer.parseInt;
 
 public class AdminMenu {
 
-    private static boolean mainMenuRunning = true;
+    public static boolean mainMenuRunning = true;
 
 
     public static void showAdminMenu(Scanner scanner, EntityManager em) {
         while (mainMenuRunning) {
             System.out.println("\n--- Menu admin ---");
+            System.out.println("=========================");
             System.out.println("1. Gestisci rivenditori");
             System.out.println("=========================");
             System.out.println("2. Gestisci mezzi");
