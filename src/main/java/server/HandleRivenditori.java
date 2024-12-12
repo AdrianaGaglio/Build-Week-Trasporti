@@ -210,7 +210,6 @@ public class HandleRivenditori implements HttpHandler {
         exchange.sendResponseHeaders(200, -1); // Aggiornamento riuscito
     }
 
-
     private void handleGet(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
         // DAO per il recupero dei rivenditori

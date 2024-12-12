@@ -253,8 +253,6 @@ public class HandleBiglietti implements HttpHandler {
         }
     }
 
-
-
     private void handlePut(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
         BigliettoDAO dao = new BigliettoDAO(em);
