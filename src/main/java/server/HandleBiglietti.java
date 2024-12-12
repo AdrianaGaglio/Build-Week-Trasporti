@@ -30,6 +30,7 @@ import java.io.OutputStream;
 import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -173,41 +174,82 @@ public class HandleBiglietti implements HttpHandler {
         GiornalieroDAO giornalieroDAO = new GiornalieroDAO(em);
         AbbonamentoDAO abbonamentoDAO = new AbbonamentoDAO(em);
 
-        // Recupera tutti i rivenditori
+        // Recupera l'ID della tessera dalla richiesta (esempio: query parameter o path parameter)
+        String query = exchange.getRequestURI().getQuery();
+        String tesseraIdStr = null;
+        if (query != null) {
+            tesseraIdStr = query.split("=")[1];  // supponendo una query del tipo "tesseraId=123"
+        }
+
+        Long tesseraId = (tesseraIdStr != null) ? Long.parseLong(tesseraIdStr) : null;
+
+        // Recupera la tessera dalla base di dati
+        Tessera tessera = null;
+        if (tesseraId != null) {
+            tessera = em.find(Tessera.class, tesseraId);
+        }
+
+        // Recupera i biglietti e gli abbonamenti associati alla tessera
         List<Biglietto> biglietti = bigliettoDAO.findAll();
+        List<Abbonamento> abbonamenti = new ArrayList<>();
+
+        if (tessera != null) {
+            abbonamenti = abbonamentoDAO.perTessera(tessera);  // Estrai gli abbonamenti associati alla tessera
+        }
+
+        final List<Abbonamento> finalAbbonamenti = abbonamenti;
+
         em.close();
 
-        // Converti la lista in JSON manualmente
+        // Costruisci la risposta JSON
         String jsonResponse = biglietti.stream()
                 .map(b -> {
+                    StringBuilder jsonBuilder = new StringBuilder();
                     if (b instanceof Giornaliero) {
                         Giornaliero giornaliero = (Giornaliero) b;
-                        return String.format(
+                        jsonBuilder.append(String.format(
                                 "{\"id\":%d,\"tipo\":\"%s\",\"daAttivare\":%b}",
                                 giornaliero.getId(),
                                 giornaliero.getClass().getSimpleName(),
                                 giornaliero.isDaAttivare()
-                        );
+                        ));
                     } else if (b instanceof Abbonamento) {
                         Abbonamento abbonamento = (Abbonamento) b;
-                        return String.format(
+                        jsonBuilder.append(String.format(
                                 "{\"id\":%d,\"tipo\":\"%s\",\"attivo\":%b,\"tariffa\":\"%s\",\"periodicy\":\"%s\"}",
                                 abbonamento.getId(),
                                 abbonamento.getClass().getSimpleName(),
                                 abbonamento.isAttivo(),
                                 abbonamento.getTariffa(),
                                 abbonamento.getPeriodicy()
-                        );
+                        ));
                     } else {
-                        return String.format(
+                        jsonBuilder.append(String.format(
                                 "{\"id\":%d,\"tipo\":\"%s\"}",
                                 b.getId(),
                                 b.getClass().getSimpleName()
-                        );
+                        ));
                     }
+
+                    // Aggiungi gli abbonamenti se presenti
+                    if (!finalAbbonamenti.isEmpty()) {
+                        jsonBuilder.append(",\"abbonamenti\":[");
+
+                        jsonBuilder.append(finalAbbonamenti.stream()
+                                .map(a -> String.format(
+                                        "{\"id\":%d,\"tipo\":\"%s\",\"attivo\":%b,\"tariffa\":\"%s\",\"periodicy\":\"%s\"}",
+                                        a.getId(),
+                                        a.getClass().getSimpleName(),
+                                        a.isAttivo(),
+                                        a.getTariffa(),
+                                        a.getPeriodicy()
+                                ))
+                                .collect(Collectors.joining(",", "", "]")));
+                    }
+
+                    return jsonBuilder.toString();
                 })
                 .collect(Collectors.joining(",", "[", "]"));
-
 
         // Restituisci la risposta
         exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
@@ -215,4 +257,5 @@ public class HandleBiglietti implements HttpHandler {
             os.write(jsonResponse.getBytes());
         }
     }
+
 }

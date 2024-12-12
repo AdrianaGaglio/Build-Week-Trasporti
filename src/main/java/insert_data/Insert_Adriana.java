@@ -117,33 +117,35 @@ public class Insert_Adriana {
 //            rivenditoreDAO.update(rivenditore);
 //        }
 
-        for (int i = 0; i < 10; i++) {
-            Giornaliero giornaliero = new Giornaliero();
-            giornaliero.setEmissione(LocalDateTime.now());
-            Tratta tratta = trattaDAO.getById(faker.random().nextInt(1, 10).longValue());
-            giornaliero.setTratta(tratta);
-            giornaliero.setScadenza(null);
-            Rivenditore rivenditore = rivenditoreDAO.findById(faker.random().nextInt(152, 171).longValue());
-        }
+//        for (int i = 0; i < 10; i++) {
+//            Giornaliero giornaliero = new Giornaliero();
+//            giornaliero.setEmissione(LocalDateTime.now());
+//            Tratta tratta = trattaDAO.getById(faker.random().nextInt(1, 10).longValue());
+//            giornaliero.setTratta(tratta);
+//            giornaliero.setScadenza(null);
+//            Rivenditore rivenditore = rivenditoreDAO.findById(faker.random().nextInt(152, 171).longValue());
+//        }
 
         AbbonamentoDAO abbonamentoDAO = new AbbonamentoDAO(em);
 
 
-//        for (int i = 0; i < 10; i++) {
-//            Abbonamento abbonamento = new Abbonamento();
-//            abbonamento.setAttivo(true);
-//            abbonamento.setPeriodicy(Periodicy.mensile);
-//            Tessera tessera = tesseraDAO.getById(2L);
-//            abbonamento.setTessera(tessera);
-//            abbonamento.setScadenza(LocalDateTime.now().plusDays(30));
-//            Rivenditore rivenditore = rivenditoreDAO.findById(faker.random().nextInt(152,171).longValue());
-//            abbonamento.setRivenditore(rivenditore);
-//            abbonamentoDAO.save(abbonamento);
-//            tessera.getAbbonamenti().add(abbonamento);
-//            tesseraDAO.update(tessera);
-//            rivenditore.getBiglietti().add(abbonamento);
-//            rivenditoreDAO.update(rivenditore);
-//        }
+        for (int i = 0; i < 10; i++) {
+            Abbonamento abbonamento = new Abbonamento();
+            abbonamento.setAttivo(true);
+            abbonamento.setPeriodicy(Periodicy.mensile);
+            Tessera tessera = tesseraDAO.getById(2L);
+            abbonamento.setTessera(tessera);
+            abbonamento.setScadenza(LocalDateTime.now().plusDays(30));
+            Rivenditore rivenditore = rivenditoreDAO.findById(faker.random().nextInt(152,171).longValue());
+            abbonamento.setRivenditore(rivenditore);
+            tessera.getAbbonamenti().add(abbonamento);
+            rivenditore.getBiglietti().add(abbonamento);
+            em.getTransaction().begin();
+            em.persist(abbonamento);
+            em.merge(tessera);
+            em.merge(rivenditore);
+            em.getTransaction().commit();
+        }
 
     }
 }
