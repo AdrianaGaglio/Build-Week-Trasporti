@@ -17,6 +17,7 @@ import epicode.it.entities.biglietto.Giornaliero;
 import epicode.it.entities.biglietto.Periodicy;
 import epicode.it.entities.mezzo.Autobus;
 import epicode.it.entities.mezzo.Mezzo;
+import epicode.it.entities.mezzo.Stato;
 import epicode.it.entities.mezzo.Tram;
 import epicode.it.entities.rivenditore.RivAutomatico;
 import epicode.it.entities.rivenditore.RivFisico;
@@ -97,10 +98,9 @@ public class HandleMezzi implements HttpHandler {
                 return;
             }
 
-            // Elimina la Tratta
-            em.getTransaction().begin();
+
             mezzoDAO.delete(mezzo);
-            em.getTransaction().commit();
+
 
             // Risposta al client
             exchange.sendResponseHeaders(200, -1); // Eliminazione riuscita
@@ -117,33 +117,41 @@ public class HandleMezzi implements HttpHandler {
 
     private void handlePost(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
+
         MezzoDAO mezzoDAO = new MezzoDAO(em);
         AutobusDAO autobusDAO = new AutobusDAO(em);
         TramDAO tramDAO = new TramDAO(em);
 
-        // Leggi il corpo della richiesta come JSON
-        Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
-        String tipo = (String) requestData.get("tipo");
 
-        if ("autobus".equalsIgnoreCase(tipo)) {
-            // Creazione di un rivenditore fisico
-            Autobus autobus = new Autobus();
-            autobus.setCodice((Integer) requestData.get("codice"));
-            autobusDAO.save(autobus);
-        } else if ("tram".equalsIgnoreCase(tipo)) {
-            // Creazione di un rivenditore automatico
-            Tram tram = new Tram();
-            tram.setCodice((Integer) requestData.get("codice"));
-            tramDAO.save(tram);
-        } else {
-            exchange.sendResponseHeaders(400, -1); // Tipo non valido
-            em.close();
-            return;
+        try {
+            // Leggi il corpo della richiesta come JSON
+            Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
+            String tipo = (String) requestData.get("tipo");
+
+            if ("autobus".equalsIgnoreCase(tipo)) {
+                // Creazione di un autobus
+                Autobus autobus = new Autobus();
+                autobus.setCodice((Integer) requestData.get("codice"));
+                autobus.setStato(Stato.DEPOSITO);
+                autobusDAO.save(autobus);
+            } else if ("tram".equalsIgnoreCase(tipo)) {
+                // Creazione di un tram
+                Tram tram = new Tram();
+                tram.setCodice((Integer) requestData.get("codice"));
+                tram.setStato(Stato.DEPOSITO);
+                tramDAO.save(tram);
+            } else {
+                exchange.sendResponseHeaders(400, -1); // Tipo non valido
+                em.close();
+                return;
+            }
+            exchange.sendResponseHeaders(201, -1); // Creato con successo
+
+        } finally {
+            em.close(); // Chiudi l'EntityManager
         }
-
-        em.close();
-        exchange.sendResponseHeaders(201, -1); // Creato con successo
     }
+
 
     private void handlePut(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
@@ -164,8 +172,8 @@ public class HandleMezzi implements HttpHandler {
 
         if (mezzo instanceof Autobus) {
             Autobus autobus = (Autobus) mezzo;
-           autobus.setCodice((Integer) requestData.get("codice"));
-           autobusDAO.update(autobus);
+            autobus.setCodice((Integer) requestData.get("codice"));
+            autobusDAO.update(autobus);
         } else if (mezzo instanceof Tram) {
             Tram tram = (Tram) mezzo;
             tram.setCodice((Integer) requestData.get("codice"));
@@ -221,7 +229,6 @@ public class HandleMezzi implements HttpHandler {
                     }
                 })
                 .collect(Collectors.joining(",", "[", "]"));
-
 
 
         // Restituisci la risposta
