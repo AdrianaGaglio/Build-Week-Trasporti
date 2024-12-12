@@ -28,13 +28,13 @@ public class Insert_Tratte_Percorrenze {
         TrattaDAO trattaDAO = new TrattaDAO(em);
         MezzoDAO mezzoDAO = new MezzoDAO(em);
 
-//        for (int i = 0; i < 100; i++) {
-//            Tratta tratta = new Tratta();
-//            tratta.setPartenza(faker.address().streetAddress());
-//            tratta.setCapolinea(faker.address().streetAddress());
-//            tratta.setDurata(LocalTime.of(faker.random().nextInt(1,2),faker.random().nextInt(0,59), faker.random().nextInt(0,59)));
-//            trattaDAO.save(tratta);
-//        }
+        for (int i = 0; i < 100; i++) {
+            Tratta tratta = new Tratta();
+            tratta.setPartenza(faker.address().streetAddress());
+            tratta.setCapolinea(faker.address().streetAddress());
+            tratta.setDurata(LocalTime.of(faker.random().nextInt(1,2),faker.random().nextInt(0,59), faker.random().nextInt(0,59)));
+            trattaDAO.save(tratta);
+        }
 
         for (int i = 0; i < 10; i++) {
             Autobus autobus = new Autobus();

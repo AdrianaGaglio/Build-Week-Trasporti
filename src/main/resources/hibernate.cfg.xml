@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <!-- Configurazione per il database locale (PostgreSQL) -->
+    <session-factory>
+        <!-- Configurazione del database e del server -->
+        <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/trasporti</property>
+        <property name="hibernate.connection.username">postgres</property>
+        <property name="hibernate.connection.password">12345</property>
+        <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+
+        <!-- Gestione delle transazioni -->
+        <property name="hibernate.transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</property>
+        <property name="hibernate.transaction.coordinator_class">org.hibernate.transaction.JDBCTransactionFactory</property>
+
+        <!-- Creazione e aggiornamento delle tabelle -->
+        <property name="hibernate.hbm2ddl.auto">update</property>
+        <property name="hibernate.default_schema">public</property>
+
+        <!-- Log delle query SQL -->
+        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.format_sql">true</property>
+
+        <!-- Connessione al secondo database (PostgreSQL su Supabase) -->
+        <!-- Puoi commentare la sezione qui sotto se non la utilizzi -->
+        <property name="hibernate.connection.url.supabase">jdbc:postgresql://aws-0-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require</property>
+        <property name="hibernate.connection.username.supabase">postgres.ieixjenjlgoggwckmuzo</property>
+        <property name="hibernate.connection.password.supabase">ngca4eAZyYVWvR9</property>
+        <property name="hibernate.connection.driver_class.supabase">org.postgresql.Driver</property>
+        <property name="hibernate.dialect.supabase">org.hibernate.dialect.PostgreSQLDialect</property>
+
+        <!-- Configurazione delle entità -->
+<!--        <mapping class="com.example.YourEntityClass"/> &lt;!&ndash; Aggiungi le tue entità qui &ndash;&gt;-->
+        <mapping class="epicode.it.entities.biglietto.Biglietto"/>
+        <mapping class="epicode.it.entities.biglietto.Giornaliero"/>
+        <mapping class="epicode.it.entities.biglietto.Abbonamento"/>
+        <mapping class="epicode.it.entities.mezzo.Mezzo"/>
+        <mapping class="epicode.it.entities.mezzo.Autobus"/>
+        <mapping class="epicode.it.entities.mezzo.Tram"/>
+        <mapping class="epicode.it.entities.percorrenza.Percorrenza"/>
+        <mapping class="epicode.it.entities.rivenditore.Rivenditore"/>
+        <mapping class="epicode.it.entities.rivenditore.RivFisico"/>
+        <mapping class="epicode.it.entities.rivenditore.RivAutomatico"/>
+        <mapping class="epicode.it.entities.stato_mezzo.StatoMezzo"/>
+        <mapping class="epicode.it.entities.stato_mezzo.Servizio"/>
+        <mapping class="epicode.it.entities.stato_mezzo.Manutenzione"/>
+        <mapping class="epicode.it.entities.tessera.Tessera"/>
+        <mapping class="epicode.it.entities.tratta.Tratta"/>
+        <mapping class="epicode.it.entities.utente.Utente"/>
+    </session-factory>
+</hibernate-configuration>

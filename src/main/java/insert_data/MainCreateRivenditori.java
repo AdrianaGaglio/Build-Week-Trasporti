@@ -22,6 +22,7 @@ import jakarta.persistence.Persistence;
 import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
@@ -32,48 +33,17 @@ public class MainCreateRivenditori {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("unit-jpa");
         EntityManager em = emf.createEntityManager();
 
-//        RivenditoreDAO rivenditoreDAO = new RivenditoreDAO(em);
-//        UtenteDAO utenteDAO = new UtenteDAO(em);
-//        GestoreTessera gestoreTessera = new GestoreTessera(em);
-//
-//        GestoreRivenditoriEBiglietti gestoreRiEVe = new GestoreRivenditoriEBiglietti(em);
-//        gestoreRiEVe.creaRivenditoreFisico(DayOfWeek.SATURDAY, Time.valueOf("08:30:00"), Time.valueOf("20:00:00"));
-//        gestoreRiEVe.creaRivenditoreFisico(DayOfWeek.MONDAY, Time.valueOf("10:00:00"), Time.valueOf("23:00:00"));
-//        gestoreRiEVe.creaRivenditoreFisico(DayOfWeek.TUESDAY, Time.valueOf("06:30:00"), Time.valueOf("20:00:00"));
-//
-//
-//        gestoreRiEVe.creaRivenditoreAutomatico();
-//        gestoreRiEVe.creaRivenditoreAutomatico();
-//        gestoreRiEVe.creaRivenditoreAutomatico();
-//
-//
-//        List<Rivenditore> rivenditori = rivenditoreDAO.findAll();
-//        Rivenditore rivenditoreCasuale = rivenditori.get(faker.number().numberBetween(0, 5));
-//        System.out.println(rivenditoreCasuale);
-//        Utente utente = new Utente();
-//        utente.setNome("Marco");
-//        utente.setCognome("Cipolletta");
-//        utente.setEmail("Marco@Cipo.it");
-//        utente.setDataNascita(faker.date().birthday().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
-//        utenteDAO.save(utente);
-//        Utente utenteRichiamato = utenteDAO.getById(1L);
-//      gestoreTessera.creaTessera(rivenditoreCasuale, utenteRichiamato, new Scanner(System.in));
-//        gestoreRiEVe.creaAbbonamento(rivenditoreCasuale,Periodicy.settimanale,utenteRichiamato);
+        RivenditoreDAO rivenditoreDAO = new RivenditoreDAO(em);
+        UtenteDAO utenteDAO = new UtenteDAO(em);
+        GestoreTessera gestoreTessera = new GestoreTessera(em);
+        GestoreRivenditoriEBiglietti gestoreRivenditori = new GestoreRivenditoriEBiglietti(em);
 
-//        gestoreRiEVe.creaGiornaliero(rivenditoreCasuale, null);
+        for (int i = 0; i < 10; i++) {
+            gestoreRivenditori.creaRivenditoreFisico(DayOfWeek.of(faker.random().nextInt(1,7)), LocalTime.of(faker.random().nextInt(8,10), faker.random().nextInt(0,59)),
+                    LocalTime.of(faker.random().nextInt(17,20), faker.random().nextInt(0,59)));
+            gestoreRivenditori.creaRivenditoreAutomatico();
+        }
 
-//        System.out.println("BIglietti venduti " + rivenditoreCasuale.getBiglietti().getFirst().getId());
-
-        MezzoDAO mezzoDAO = new MezzoDAO(em);
-        ServizioDAO statoMezzoDAO = new ServizioDAO(em);
-        ManutenzioneDAO manutenzioneDAO = new ManutenzioneDAO(em);
-        GestoreStatiServizio gestoreStatiServizio = new GestoreStatiServizio(em);
-        Mezzo mezzo = mezzoDAO.findById(2L);
-        Mezzo mezzo2 = mezzoDAO.findById(1L);
-
-        System.out.println( statoMezzoDAO.cercaSeInServizio(mezzo2, LocalDate.now()));
-        gestoreStatiServizio.aggiungiManutenzione(mezzo,LocalDate.now(),"Lava cerchi");
-        System.out.println( manutenzioneDAO.cercaSeInManutenzione(mezzo, LocalDate.now()));
 
     }
 }
