@@ -18,7 +18,6 @@ public class Giornaliero extends Biglietto {
     private Mezzo mezzo;
 
     // RELAZIONE CON TRATTA
-     @ManyToOne
-     private Tratta tratta;
-
+    @ManyToOne
+    private Tratta tratta;
 }
