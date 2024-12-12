@@ -44,7 +44,7 @@ public class GestoreRivenditoriEBiglietti {
             return;
         }
 
-        Tessera tessera = tesseraDAO.getTessera(utente);
+        Tessera tessera = tesseraDAO.getTessera(utente);//prova//
         if (tessera != null) {
             tessera.setValidita(LocalDateTime.now().plusYears(1));
             tesseraDAO.update(tessera);
