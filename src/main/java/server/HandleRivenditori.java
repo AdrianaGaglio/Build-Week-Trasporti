@@ -122,7 +122,9 @@ public class HandleRivenditori implements HttpHandler {
                 r.setGiornoChiusura(dayOfWeek);
                 r.setOraApertura(LocalTime.parse((String) requestData.get("oraApertura")));
                 r.setOraChiusura(LocalTime.parse((String) requestData.get("oraChiusura")));
-                dao.save(r);
+                em.getTransaction().begin();
+                em.persist(r);
+                em.getTransaction().commit();
             } else if ("rivautomatico".equalsIgnoreCase(tipo)) {
                 System.out.println("riv automatico request");
                 RivAutomatico rivAutomatico = new RivAutomatico();
@@ -132,8 +134,6 @@ public class HandleRivenditori implements HttpHandler {
                 exchange.sendResponseHeaders(400, -1); // Tipo non valido
                 return;
             }
-
-
             exchange.sendResponseHeaders(201, -1); // Creato con successo
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
@@ -209,6 +209,7 @@ public class HandleRivenditori implements HttpHandler {
         em.close();
         exchange.sendResponseHeaders(200, -1); // Aggiornamento riuscito
     }
+
 
     private void handleGet(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
