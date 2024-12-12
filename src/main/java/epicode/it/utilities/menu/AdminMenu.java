@@ -5,6 +5,7 @@ import epicode.it.dao.rivenditore.RivenditoreDAO;
 import epicode.it.dao.stato_mezzo.ManutenzioneDAO;
 import epicode.it.dao.stato_mezzo.ServizioDAO;
 import epicode.it.dao.tratta.TrattaDAO;
+import epicode.it.entities.biglietto.Biglietto;
 import epicode.it.entities.mezzo.Autobus;
 import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.mezzo.Stato;
@@ -16,6 +17,7 @@ import epicode.it.entities.stato_mezzo.Manutenzione;
 import epicode.it.entities.stato_mezzo.Servizio;
 import epicode.it.entities.tratta.Tratta;
 import epicode.it.servizi.gestore_rivenditori_e_biglietti.GestoreRivenditoriEBiglietti;
+import epicode.it.servizi.gestore_rivenditori_e_biglietti.StatisticheRivenditore;
 import epicode.it.servizi.gestore_stati_servizio.GestoreStatiServizio;
 import jakarta.persistence.EntityManager;
 
@@ -24,6 +26,7 @@ import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -89,6 +92,8 @@ public class AdminMenu {
             System.out.println("3. Modifica un rivenditore");
             System.out.println("=========================");
             System.out.println("4. Elimina un rivenditore");
+            System.out.println("=========================");
+            System.out.println("5. Controlla biglietti e abbonamenti emessi da un rivenditore in un dato periodo");
             System.out.println("=========================");
             System.out.println("0. Torna indietro\n");
 
@@ -261,6 +266,64 @@ public class AdminMenu {
                     } else {
                         System.err.println("Rivenditore non trovato");
                     }
+                }
+                case 5 -> {
+                    System.out.println("Inserisci l' id del rivenditore che vuoi controllare");
+                    Rivenditore rivenditore = rivenditoreDAO.findById(scanner.nextLong());
+                    scanner.nextLine();
+                    if (rivenditore == null) {
+                        System.err.println("Rivenditore non trovato!");
+                        break;
+                    }
+                    System.out.println("Inserisci il range di data che vuoi controllare");
+
+                    Pattern patternData = Pattern.compile("^\\d{2}/\\d{2}/\\d{4}$");
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                    LocalDate dateFrom, dateTo;
+
+                    while (true) {
+                        System.out.println("Inserisci la data di inizio (dd/MM/yyyy):");
+                        String inputDateFrom = scanner.nextLine();
+                        Matcher matcherFrom = patternData.matcher(inputDateFrom);
+
+                        if (matcherFrom.matches()) {
+                            dateFrom = LocalDate.parse(inputDateFrom, formatter);
+                            break;
+                        } else {
+                            System.err.println("Formato non valido, riprova (dd/MM/yyyy):");
+                        }
+                    }
+
+                    while (true) {
+                        System.out.println("Inserisci la data di fine (dd/MM/yyyy):");
+                        String inputDateTo = scanner.nextLine();
+                        Matcher matcherTo = patternData.matcher(inputDateTo);
+
+                        if (matcherTo.matches()) {
+                                dateTo = LocalDate.parse(inputDateTo, formatter);
+                                if (!dateTo.isBefore(dateFrom)) { // Verifica che la data di fine sia successiva o uguale
+                                    break;
+                                } else {
+                                    System.err.println("La data di fine deve essere successiva o uguale alla data di inizio. Riprova.");
+                                }
+                        } else {
+                            System.err.println("Formato non valido, riprova (dd/MM/yyyy):");
+                        }
+                    }
+
+
+
+                    List<Biglietto> biglietti =  StatisticheRivenditore.bigliettiEmessiPerRivenditoreInUnDatoPeriodo(rivenditore,dateFrom,dateTo);
+
+                    if (biglietti.isEmpty()) {
+                        System.out.println("Nessun biglietto emesso nel periodo selezionato.");
+                    } else {
+                        System.out.println("Biglietti emessi nel periodo selezionato:");
+                        System.out.println("------------------------");
+                        biglietti.forEach(System.out::println);
+                        System.out.println("------------------------");
+                    }
+
                 }
                 case 0 -> {
                     running = false;
