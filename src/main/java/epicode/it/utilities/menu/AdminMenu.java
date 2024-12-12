@@ -132,7 +132,7 @@ public class AdminMenu {
                                 System.out.println("Orario non valido, riprova.");
                             }
                         }
-                        gestoreRivenditoriEBiglietti.creaRivenditoreFisico(DayOfWeek.of(day), Time.valueOf(LocalTime.of(openHour, openMinutes)), Time.valueOf(LocalTime.of(closeHour, closeMinutes)));
+                        gestoreRivenditoriEBiglietti.creaRivenditoreFisico(DayOfWeek.of(day), LocalTime.of(openHour, openMinutes), LocalTime.of(closeHour, closeMinutes));
                     } else if (riv == 2) {
                         gestoreRivenditoriEBiglietti.creaRivenditoreAutomatico();
                     }
@@ -190,8 +190,8 @@ public class AdminMenu {
                                 }
                             }
                             rivFisico.setGiornoChiusura(DayOfWeek.of(day));
-                            rivFisico.setOraApertura(Time.valueOf(LocalTime.of(openHour, openMinutes)));
-                            rivFisico.setOraChiusura(Time.valueOf(LocalTime.of(closeHour, closeMinutes)));
+                            rivFisico.setOraApertura(LocalTime.of(openHour, openMinutes));
+                            rivFisico.setOraChiusura(LocalTime.of(closeHour, closeMinutes));
                             rivenditoreDAO.update(rivFisico);
                             System.out.println("Rivenditore fisico aggiornato!");
                         } else {

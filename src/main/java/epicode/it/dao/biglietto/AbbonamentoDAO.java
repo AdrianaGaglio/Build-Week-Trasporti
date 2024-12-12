@@ -1,6 +1,7 @@
 package epicode.it.dao.biglietto;
 
 import epicode.it.entities.biglietto.Abbonamento;
+import epicode.it.entities.tessera.Tessera;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 
@@ -37,5 +38,8 @@ public class AbbonamentoDAO {
         em.getTransaction().commit();
     }
 
-
+    public List<Abbonamento> perTessera(Tessera tessera) {
+        return em.createNamedQuery("perTessera", Abbonamento.class)
+                .setParameter("tessera", tessera).getResultList();
+    }
 }

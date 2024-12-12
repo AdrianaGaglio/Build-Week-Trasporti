@@ -39,8 +39,6 @@ public class TrattaDAO {
     }
 
     public void delete(Tratta tratta) {
-        em.getTransaction().begin();
-        em.remove(tratta);
-        em.getTransaction().commit();
+        em.remove(em.contains(tratta) ? tratta : em.merge(tratta));
     }
 }

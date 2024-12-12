@@ -51,9 +51,3 @@ public class RivenditoreDAO {
 
 }
 
-// rimuovi biglietto
-// public void removeBiglietto(Biglietto biglietto) {
-// biglietti.remove(biglietto);
-// biglietto.setRivenditore(null);
-// totaleBigliettiVenduti--;
-// }

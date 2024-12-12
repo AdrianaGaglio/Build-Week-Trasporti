@@ -9,7 +9,7 @@ import lombok.Data;
 @Entity
 public class Giornaliero extends Biglietto {
 
-    @Column(name="da_attivare", nullable = false)
+    @Column(name="da_attivare")
     private boolean daAttivare;
 
     // RELAZIONE CON MEZZO

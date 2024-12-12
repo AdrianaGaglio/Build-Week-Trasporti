@@ -6,13 +6,14 @@ import lombok.AllArgsConstructor;
 
 import java.sql.Time;
 import java.time.DayOfWeek;
+import java.time.LocalTime;
 import java.util.List;
 
 @AllArgsConstructor
 public class RivFisicoDAO {
     private EntityManager em;
 
-    public void createRivFisico(DayOfWeek day, Time oraChiusura,Time oraApertura) {
+    public void createRivFisico(DayOfWeek day, LocalTime oraChiusura, LocalTime oraApertura) {
         RivFisico r = new RivFisico();
         r.setGiornoChiusura(day);
         r.setOraChiusura(oraChiusura);
