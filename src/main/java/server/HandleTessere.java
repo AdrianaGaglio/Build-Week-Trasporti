@@ -28,7 +28,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Time;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -122,11 +124,65 @@ public class HandleTessere implements HttpHandler {
             // Leggi il corpo della richiesta come JSON
             Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
 
-            GestioneTessera gestore = new GestioneTessera(em);
 
-            Rivenditore rivenditore = (Rivenditore) requestData.get("rivenditore");
-            Utente utente = (Utente) requestData.get("utente");
-            gestore.creaTessera(rivenditore, utente);
+            long utenteId = Long.parseLong(requestData.get("utenteId").toString());
+            // Deserializza l'utente
+            Utente utente = utenteDAO.getById(utenteId);
+
+            // Deserializza il rivenditore in base al tipo
+            long rivId = Long.parseLong(requestData.get("rivenditoreId").toString());
+            Rivenditore rivenditore = rivenditoreDAO.findById(rivId);
+            RivFisico rivFisico = null;
+            RivAutomatico rivAutomatico = null;
+            if(rivenditore.getTipo().toLowerCase().equals("rivfisico")) {
+                rivFisico = (RivFisico) rivenditore;
+                System.out.println(rivFisico);
+                if (!LocalDate.now().getDayOfWeek().equals(rivFisico.getGiornoChiusura()) &&
+                        LocalTime.now().isAfter(rivFisico.getOraApertura()) &&
+                        LocalTime.now().isBefore(rivFisico.getOraChiusura())) {
+
+                    // Inizia la transazione
+                    em.getTransaction().begin();
+                    if (utente.getTessera() == null) {
+                        System.out.println("Creazione tessera in corso...");
+                        Tessera tessera = new Tessera();
+                        tessera.setValidita(LocalDateTime.now().plusYears(1));
+                        utente.setTessera(tessera);
+                        tessera.setUtente(utente);
+                        em.persist(tessera);
+                        em.merge(utente);
+                    } else if (utente.getTessera().getValidita().isBefore(LocalDateTime.now())) {
+                        System.out.println("Tessera scaduta, necessita rinnovo");
+                    } else {
+                        System.out.println("Utente già in possesso di tessera valida");
+                    }
+                    em.getTransaction().commit();
+                } else {
+                    System.out.println("Il rivenditore fisico è chiuso");
+                }
+            } else if(rivenditore.getTipo().toLowerCase().equals("rivautomatico")){
+                rivAutomatico = (RivAutomatico) rivenditore;
+                System.out.println(rivAutomatico);
+                if (rivAutomatico.isAttivo()) {
+                    em.getTransaction().begin();
+                    if (utente.getTessera() == null) {
+                        System.out.println("Creazione tessera in corso...");
+                        Tessera tessera = new Tessera();
+                        tessera.setValidita(LocalDateTime.now().plusYears(1));
+                        utente.setTessera(tessera);
+                        tessera.setUtente(utente);
+                        em.persist(tessera);
+                        em.merge(utente);
+                    } else if (utente.getTessera().getValidita().isBefore(LocalDateTime.now())) {
+                        System.out.println("Tessera scaduta, necessita rinnovo");
+                    } else {
+                        System.out.println("Utente già in possesso di tessera valida");
+                    }
+                    em.getTransaction().commit();
+                } else {
+                    System.out.println("Rivenditore automatico fuori servizio");
+                }
+            }
 
             // Risposta al client
             exchange.sendResponseHeaders(201, -1); // Creato con successo
@@ -137,6 +193,8 @@ public class HandleTessere implements HttpHandler {
             em.close(); // Assicurati di chiudere l'EntityManager
         }
     }
+
+
 
 
     private void handlePut(HttpExchange exchange) throws IOException {

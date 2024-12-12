@@ -24,4 +24,6 @@ public abstract class Rivenditore {
     public List<Biglietto> getBiglietti() {
         return this.biglietti;
     }
+
+    private String tipo;
 }

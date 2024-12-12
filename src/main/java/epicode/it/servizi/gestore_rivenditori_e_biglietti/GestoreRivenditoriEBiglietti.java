@@ -32,6 +32,7 @@ public class GestoreRivenditoriEBiglietti {
         r.setGiornoChiusura(dayOfWeek);
         r.setOraApertura(apertura);
         r.setOraChiusura(chiusura);
+        r.setTipo("RivFisico");
         rivenditoreDAO.save(r);
         System.out.println("Rivenditore fisico creato!");
     }
@@ -39,6 +40,7 @@ public class GestoreRivenditoriEBiglietti {
     public void creaRivenditoreAutomatico() {
         RivAutomatico r = new RivAutomatico();
         r.setAttivo(true);
+        r.setTipo("RivAutomatico");
         rivenditoreDAO.save(r);
         System.out.println("Rivenditore automatico creato!");
     }

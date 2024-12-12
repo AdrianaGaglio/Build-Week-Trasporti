@@ -3,13 +3,17 @@ package insert_data;
 import com.github.javafaker.Faker;
 import epicode.it.dao.mezzo.MezzoDAO;
 import epicode.it.dao.percorrenza.PercorrenzaDAO;
+import epicode.it.dao.rivenditore.RivenditoreDAO;
+import epicode.it.dao.tessera.TesseraDAO;
 import epicode.it.dao.tratta.TrattaDAO;
 import epicode.it.dao.utente.UtenteDAO;
 import epicode.it.entities.mezzo.Autobus;
 import epicode.it.entities.mezzo.Stato;
 import epicode.it.entities.mezzo.Tram;
+import epicode.it.entities.rivenditore.Rivenditore;
 import epicode.it.entities.tratta.Tratta;
 import epicode.it.entities.utente.Utente;
+import epicode.it.servizi.gestire_tessera.GestioneTessera;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -28,6 +32,9 @@ public class Insert_Adriana {
         MezzoDAO mezzoDAO = new MezzoDAO(em);
 
         UtenteDAO utenteDAO = new UtenteDAO(em);
+
+        TesseraDAO tesseraDAO = new TesseraDAO(em);
+        GestioneTessera gestoreTessera = new GestioneTessera(em);
 
 //        for (int i = 0; i < 100; i++) {
 //            Tratta tratta = new Tratta();
@@ -76,6 +83,15 @@ public class Insert_Adriana {
 //            }
 //            utenteDAO.save(utente);
 //        }
+
+        RivenditoreDAO rivenditoreDAO = new RivenditoreDAO(em);
+
+        Rivenditore riv1 = rivenditoreDAO.findById(1L);
+        Rivenditore riv2 = rivenditoreDAO.findById(3L);
+        Rivenditore riv3 = rivenditoreDAO.findById(4L);
+
+        gestoreTessera.creaTessera(riv1, utenteDAO.getById(52L));
+        gestoreTessera.creaTessera(riv2, utenteDAO.getById(57L));
 
     }
 }
