@@ -12,6 +12,7 @@ import epicode.it.entities.utente.Utente;
 import epicode.it.servizi.gestore_rivenditori_e_biglietti.GestoreRivenditoriEBiglietti;
 import epicode.it.servizi.gestore_controllore.Controllore;
 import jakarta.persistence.EntityManager;
+
 import java.util.List;
 import java.util.Scanner;
 
@@ -21,18 +22,18 @@ public class UtenteMenu {
     private static TrattaDAO trattaDAO;
     private static UtenteDAO utenteDAO;
 
-    public static void showUtenteMenu(Scanner scanner, EntityManager em) {
+    public static void showUtenteMenu(Scanner scanner, EntityManager em, Utente utente) {
         rivenditoreDAO = new RivenditoreDAO(em);
         bigliettoDAO = new BigliettoDAO(em);
         trattaDAO = new TrattaDAO(em);
         utenteDAO = new UtenteDAO(em);
 
-        System.out.println("--- Menu utente ---");
+        System.out.println("--- Menu utente di" + utente.getNome() +   " " + utente.getCognome() + " ---");
         System.out.println("1. Compra biglietto giornaliero");
         System.out.println("2. Convalida biglietto");
         System.out.println("3. Compra abbonamento");
         System.out.println("=> Scegli un opzione valida: (0 per tornare indietro)");
-        switchOptions(scanner, em);
+        switchOptions(scanner, em,utente);
     }
 
     private static void mostraRivenditori() {
@@ -134,17 +135,8 @@ public class UtenteMenu {
         }
     }
 
-    private static void gestisciAbbonamento(Scanner scanner, EntityManager em, GestoreRivenditoriEBiglietti gestore) {
+    private static void gestisciAbbonamento(Scanner scanner, EntityManager em, GestoreRivenditoriEBiglietti gestore, Utente utente) {
         System.out.println("=> Acquisto abbonamento");
-        System.out.println("Inserisci l'ID utente:");
-        long utenteId = scanner.nextLong();
-        scanner.nextLine();
-
-        Utente utente = utenteDAO.getById(utenteId);
-        if (utente == null) {
-            System.out.println("Utente non trovato!");
-            return;
-        }
 
         if (utente.getTessera() == null) {
             System.out.println("L'utente non ha una tessera! Devi prima creare una tessera.");
@@ -193,7 +185,7 @@ public class UtenteMenu {
         }
     }
 
-    private static void switchOptions(Scanner scanner, EntityManager em) {
+    private static void switchOptions(Scanner scanner, EntityManager em, Utente utente) {
         GestoreRivenditoriEBiglietti gestore = new GestoreRivenditoriEBiglietti(em);
         Controllore controllore = new Controllore();
 
@@ -206,10 +198,10 @@ public class UtenteMenu {
             }
             case 1 -> gestisciBiglietto(scanner, em, gestore);
             case 2 -> gestisciConvalida(scanner, em, controllore);
-            case 3 -> gestisciAbbonamento(scanner, em, gestore);
+            case 3 -> gestisciAbbonamento(scanner, em, gestore, utente);
             default -> System.out.println("Opzione non valida");
         }
 
-        showUtenteMenu(scanner, em);
+        showUtenteMenu(scanner, em,utente);
     }
 }
