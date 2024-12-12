@@ -2,6 +2,8 @@ package epicode.it.utilities.menu;
 
 import epicode.it.dao.mezzo.MezzoDAO;
 import epicode.it.dao.rivenditore.RivenditoreDAO;
+import epicode.it.dao.stato_mezzo.ManutenzioneDAO;
+import epicode.it.dao.stato_mezzo.ServizioDAO;
 import epicode.it.dao.tratta.TrattaDAO;
 import epicode.it.entities.mezzo.Autobus;
 import epicode.it.entities.mezzo.Mezzo;
@@ -10,6 +12,8 @@ import epicode.it.entities.mezzo.Tram;
 import epicode.it.entities.rivenditore.RivAutomatico;
 import epicode.it.entities.rivenditore.RivFisico;
 import epicode.it.entities.rivenditore.Rivenditore;
+import epicode.it.entities.stato_mezzo.Manutenzione;
+import epicode.it.entities.stato_mezzo.Servizio;
 import epicode.it.entities.tratta.Tratta;
 import epicode.it.servizi.gestore_rivenditori_e_biglietti.GestoreRivenditoriEBiglietti;
 import epicode.it.servizi.gestore_stati_servizio.GestoreStatiServizio;
@@ -34,13 +38,13 @@ public class AdminMenu {
 
     public static void showAdminMenu(Scanner scanner, EntityManager em) {
         while (mainMenuRunning) {
-            System.out.println("--- Menu admin ---");
-            System.out.println("1.Gestisci rivenditori");
+            System.out.println("\n--- Menu admin ---");
+            System.out.println("1. Gestisci rivenditori");
             System.out.println("=========================");
             System.out.println("2. Gestisci mezzi");
             System.out.println("=========================");
             System.out.println("3. Gestisci tratte");
-            System.out.println("4. Elimina tratta");
+            System.out.println("=========================");
             System.out.println("=> Scegli un opzione valida: (0 per tornare indietro)");
             switchOptions(scanner, em);
 
@@ -75,12 +79,17 @@ public class AdminMenu {
         boolean running = true;
         while (running) {
 
-            System.out.println("=> Gestisti rivenditori");
+            System.out.println("\n=> Gestisti rivenditori");
+            System.out.println("=========================");
             System.out.println("1. Visualizza tutti i rivenditori");
+            System.out.println("=========================");
             System.out.println("2. Aggiungi un rivenditore");
+            System.out.println("=========================");
             System.out.println("3. Modifica un rivenditore");
+            System.out.println("=========================");
             System.out.println("4. Elimina un rivenditore");
-            System.out.println("=> Scegli un opzione valida: (0 per tornare indietro)");
+            System.out.println("=========================");
+            System.out.println("0. Torna indietro\n");
 
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -125,9 +134,12 @@ public class AdminMenu {
                             Matcher matcher = pattern.matcher(apertura);
 
                             if (matcher.matches()) {
-                                openHour = Integer.parseInt(apertura.substring(0, 2));
-                                openMinutes = Integer.parseInt(apertura.substring(3, 5));
+                                String[] parts = apertura.split("-");
+                                openHour = Integer.parseInt(parts[0]);
+                                openMinutes = Integer.parseInt(parts[1]);
+
                                 break;
+
                             } else {
                                 System.out.println("Orario non valido, riprova.");
                             }
@@ -138,9 +150,11 @@ public class AdminMenu {
                             String chiusura = scanner.nextLine();
                             Matcher matcher = pattern.matcher(chiusura);
                             if (matcher.matches()) {
-                                closeHour = parseInt(chiusura.substring(0, 2));
-                                closeMinutes = parseInt(chiusura.substring(3, 5));
+                                String[] parts = chiusura.split("-");
+                                closeHour = Integer.parseInt(parts[0]);
+                                closeMinutes = Integer.parseInt(parts[1]);
                                 break;
+
                             } else {
                                 System.out.println("Orario non valido, riprova.");
                             }
@@ -261,13 +275,19 @@ public class AdminMenu {
         TrattaDAO trattaDAO = new TrattaDAO(em);
         boolean running = true;
         while (running) {
-            System.out.println("=> Gestisti mezzi");
+            System.out.println("\n=> Gestisti mezzi");
+            System.out.println("=========================");
             System.out.println("1. Visualizza tutti i mezzi");
+            System.out.println("=========================");
             System.out.println("2. Aggiungi nuovo mezzo");
+            System.out.println("=========================");
             System.out.println("3. Assegna mezzo ad una tratta (metti in servizio)");
+            System.out.println("=========================");
             System.out.println("4. Metti  un mezzo in manutenzione");
+            System.out.println("=========================");
             System.out.println("5. Elimina mezzo");
-            System.out.println("0. Torna indietro");
+            System.out.println("=========================");
+            System.out.println("0. Torna indietro\n");
 
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -285,33 +305,69 @@ public class AdminMenu {
                 case 2 -> aggiungiNuovoMezzo(scanner, em);
                 case 3 -> {
                     GestoreStatiServizio gestoreStatiServizio = new GestoreStatiServizio(em);
+                    ServizioDAO servizioDAO = new ServizioDAO(em);
                     System.out.println("Seleziona il mezzo da mettere in servizio tramite id");
                     Mezzo mezzo = mezzoDAO.findById(scanner.nextLong());
-                    if (mezzo != null) {
-                    System.out.println("Seleziona tratta tramite id");
-                    List<Tratta> tratte = trattaDAO.getAll();
-                    if (tratte.isEmpty()){
-                        System.out.println("Non ci sono tratte!");
+                    Servizio mezzoInServizio = servizioDAO.cercaSeInServizio(mezzo, LocalDate.now());
+                    if (mezzoInServizio != null) {
+                        System.err.println("Mezzo già in servizio!");
                         break;
-                    } else {
-                        System.out.println();
-                        tratte.forEach(System.out::println);
-                        System.out.println();
                     }
+                    if (mezzo != null) {
+                        System.out.println("Seleziona tratta tramite id");
+                        List<Tratta> tratte = trattaDAO.getAll();
+                        if (tratte.isEmpty()) {
+                            System.err.println("Non ci sono tratte!");
+                            break;
+                        } else {
+                            System.out.println();
+                            tratte.forEach(System.out::println);
+                            System.out.println();
+                        }
 
-                    System.out.print("Digita qui: ");
-                    Tratta tratta = trattaDAO.getById(scanner.nextLong());
-                    if (tratta != null){
-                    gestoreStatiServizio.aggiungiServizio(mezzo, LocalDate.now(),tratta);
-                        System.out.println(mezzo.getClass().getSimpleName() + " messo in servizio nella tratta " + tratta.getId() + "!");
-                    } else {
-                        System.err.println("Tratta non trovata!");
-                    }
+                        System.out.print("Digita qui: ");
+                        Tratta tratta = trattaDAO.getById(scanner.nextLong());
+                        if (tratta != null) {
+                            gestoreStatiServizio.aggiungiServizio(mezzo, LocalDate.now(), tratta);
+                        } else {
+                            System.err.println("Tratta non trovata!");
+                        }
                     } else {
                         System.err.println("Mezzo non trovato!");
                     }
 
 
+                }
+                case 4 -> {
+                    GestoreStatiServizio gestoreStatiServizio = new GestoreStatiServizio(em);
+                    ManutenzioneDAO manutenzioneDAO = new ManutenzioneDAO(em);
+                    System.out.println("Seleziona il mezzo da mettere in manutezione tramite id");
+                    Mezzo mezzo = mezzoDAO.findById(scanner.nextLong());
+                    scanner.nextLine();
+                    Manutenzione mezzoInManutenzione = manutenzioneDAO.cercaSeInManutenzione(mezzo, LocalDate.now());
+                    if (mezzoInManutenzione != null) {
+                        System.err.println("Mezzo già in manutenzione!");
+                        break;
+                    }
+                    if (mezzo != null) {
+                        System.out.println("Scrivi i lavori da fare");
+                        String descrizione = scanner.nextLine();
+                        gestoreStatiServizio.aggiungiManutenzione(mezzo, LocalDate.now(), descrizione);
+                    } else {
+                        System.err.println("Mezzo non trovato!");
+                    }
+
+
+                }
+                case 5 -> {
+                    System.out.println("Inserisci l' id del mezzo da modificare");
+                    Mezzo mezzo = mezzoDAO.findById(scanner.nextLong());
+                    scanner.nextLine();
+                    if (mezzo != null) {
+                        mezzoDAO.delete(mezzo);
+                    } else {
+                        System.err.println("Mezzo non trovato!");
+                    }
                 }
                 case 0 -> running = false;
                 default -> System.err.println("Inserisci un valore valido");
@@ -351,20 +407,25 @@ public class AdminMenu {
         TrattaDAO trattaDAO = new TrattaDAO(em);
         boolean running = true;
         while (running) {
-            System.out.println("=> Gestisti tratte");
+            System.out.println("\n=> Gestisti tratte");
+            System.out.println("=========================");
             System.out.println("1. Visualizza tutte le tratte");
+            System.out.println("=========================");
             System.out.println("2. Aggiungi nuova tratta");
+            System.out.println("=========================");
             System.out.println("3. Modifica Tratta");
-            System.out.println("5. Elimina tratta");
-            System.out.println("0. Torna indietro");
+            System.out.println("=========================");
+            System.out.println("4. Elimina tratta");
+            System.out.println("=========================");
+            System.out.println("0. Torna indietro\n");
 
             int choice = scanner.nextInt();
             scanner.nextLine();
             switch (choice) {
                 case 1 -> {
                     List<Tratta> tratte = trattaDAO.getAll();
-                    if (tratte.isEmpty()){
-                        System.out.println("Non ci sono tratte!");
+                    if (tratte.isEmpty()) {
+                        System.err.println("Non ci sono tratte!");
                     } else {
                         System.out.println();
                         tratte.forEach(System.out::println);
@@ -373,35 +434,63 @@ public class AdminMenu {
                 }
                 case 2 -> {
                     Tratta tratta = new Tratta();
-                    System.out.println("Inserisci la via di partenza");
-                    tratta.setPartenza(scanner.nextLine());
-                    System.out.println("Inserisci il capolinea");
-                    tratta.setCapolinea(scanner.nextLine());
-                    System.out.println("Inserisci la durata prevista (hh:mm):");
-                    Pattern pattern = Pattern.compile("^(?:[01]?\\d|2[0-3]):[0-5]\\d$");
-                    LocalTime durata;
-
-                    while (true) {
-                        String input = scanner.nextLine();
-                        Matcher matcher = pattern.matcher(input);
-
-                        if (matcher.matches()) {
-                            int ore = Integer.parseInt(input.substring(0, 2));
-                            int minuti = Integer.parseInt(input.substring(3, 5));
-                            durata = LocalTime.of(ore, minuti);
-                            break;
-                        } else {
-                            System.err.println("Formato non valido, riprova (hh:mm):");
-                        }
-                    }
-                    tratta.setDurata(durata);
+                    modificaCreaTratta(tratta, scanner);
                     trattaDAO.save(tratta);
                     System.out.println("Tratta creata con successo!");
 
+                }
+                case 3 -> {
+                    System.out.println("Inserisci l' id della tratta da modificare");
+                    Tratta tratta = trattaDAO.getById(scanner.nextLong());
+                    scanner.nextLine();
+                    if (tratta != null) {
+                        modificaCreaTratta(tratta, scanner);
+                        trattaDAO.update(tratta);
+                        System.out.println("Tratta aggiornata!");
+                    } else {
+                        System.err.println("Tratta non trovata!");
+                    }
+                }
+                case 4 -> {
+                    System.out.println("Inserisci l' id della tratta da eliminare");
+                    Tratta tratta = trattaDAO.getById(scanner.nextLong());
+                    scanner.nextLine();
+                    if (tratta != null) {
+                        trattaDAO.delete(tratta);
+                        System.out.println("Tratta eliminata!");
+                    } else {
+                        System.err.println("Tratta non trovata!");
+                    }
                 }
                 case 0 -> running = false;
                 default -> System.err.println("Inserisci un valore valido");
             }
         }
+    }
+
+    private static void modificaCreaTratta(Tratta tratta, Scanner scanner) {
+        System.out.println("Inserisci la via di partenza");
+        tratta.setPartenza(scanner.nextLine());
+        System.out.println("Inserisci il capolinea");
+        tratta.setCapolinea(scanner.nextLine());
+        System.out.println("Inserisci la durata prevista (hh:mm):");
+        Pattern pattern = Pattern.compile("^(?:[01]?\\d|2[0-3]):[0-5]\\d$");
+        LocalTime durata;
+
+        while (true) {
+            String input = scanner.nextLine();
+            Matcher matcher = pattern.matcher(input);
+
+            if (matcher.matches()) {
+                String[] parts = input.split(":");
+                int ore = Integer.parseInt(parts[0]);
+                int minuti = Integer.parseInt(parts[1]);
+                durata = LocalTime.of(ore, minuti);
+                break;
+            } else {
+                System.err.println("Formato non valido, riprova (hh:mm):");
+            }
+        }
+        tratta.setDurata(durata);
     }
 }

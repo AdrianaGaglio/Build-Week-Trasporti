@@ -39,7 +39,7 @@ public class GestoreStatiServizio {
             em.persist(servizio);
             em.merge(m);
             em.getTransaction().commit();
-            System.out.println("Servizio assegnato correttamente per " + m);
+            System.out.println("Servizio assegnato correttamente per " + m + " nella " + tratta );
         } else {
             System.out.println("Il mezzo è già in servizio: " + m);
         }
