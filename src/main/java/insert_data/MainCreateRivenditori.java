@@ -71,7 +71,7 @@ public class MainCreateRivenditori {
         Mezzo mezzo = mezzoDAO.findById(2L);
         Mezzo mezzo2 = mezzoDAO.findById(1L);
 
-        System.out.println( statoMezzoDAO.cercaSeInServizio(mezzo, LocalDate.now()));
+        System.out.println( statoMezzoDAO.cercaSeInServizio(mezzo2, LocalDate.now()));
         gestoreStatiServizio.aggiungiManutenzione(mezzo,LocalDate.now(),"Lava cerchi");
         System.out.println( manutenzioneDAO.cercaSeInManutenzione(mezzo, LocalDate.now()));
 
