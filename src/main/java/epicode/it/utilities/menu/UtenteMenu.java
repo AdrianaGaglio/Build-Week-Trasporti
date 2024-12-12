@@ -141,7 +141,6 @@ public class UtenteMenu {
                         ConvalidaBiglietto convalida = new ConvalidaBiglietto(em);
                         convalida.convalida(biglietto, mezzo);
 
-                        System.out.println("Biglietto convalidato con successo!");
                     } else {
                         System.out.println("Il biglietto è già stato convalidato!");
                     }

@@ -22,7 +22,6 @@ public class ConvalidaBiglietto {
 
     // Metodo per convalidare un biglietto
     public void convalida(Giornaliero biglietto, Mezzo mezzo) {
-        System.out.println(mezzo);
         GiornalieroDAO bigliettoDAO = new GiornalieroDAO(em);
         MezzoDAO mezzoDAO = new MezzoDAO(em);
         if (biglietto != null && biglietto.isDaAttivare()) {
@@ -30,7 +29,6 @@ public class ConvalidaBiglietto {
             biglietto.setDaAttivare(false);
             biglietto.setScadenza(LocalDateTime.now().plusMinutes(90));
             biglietto.setMezzo(mezzo);
-            System.out.println(biglietto.getMezzo());
             mezzo.getBiglietti().add(biglietto);
 
             em.merge(mezzo);
