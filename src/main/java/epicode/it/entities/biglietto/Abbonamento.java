@@ -23,13 +23,5 @@ public class Abbonamento extends Biglietto {
     @JoinColumn(name = "tessera_id")
     private Tessera tessera;
 
-    // Getter aggiunto manualmente
-    public boolean isAttivo() {
-        return this.attivo;
-    }
 
-    @Override
-    public void setDaAttivare(boolean b) {
-        this.attivo = b;
-    }
 }

@@ -1,13 +1,16 @@
 package server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import epicode.it.dao.biglietto.AbbonamentoDAO;
 import epicode.it.dao.biglietto.BigliettoDAO;
 import epicode.it.dao.biglietto.GiornalieroDAO;
 import epicode.it.dao.rivenditore.RivenditoreDAO;
+import epicode.it.dao.tessera.TesseraDAO;
 import epicode.it.dao.tratta.TrattaDAO;
+import epicode.it.dao.utente.UtenteDAO;
 import epicode.it.entities.biglietto.Abbonamento;
 import epicode.it.entities.biglietto.Biglietto;
 import epicode.it.entities.biglietto.Giornaliero;
@@ -30,16 +33,23 @@ import java.io.OutputStream;
 import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HandleBiglietti implements HttpHandler {
 
+
+// Registrazione del modulo JavaTimeModule per supportare i tipi di data e ora di Java 8
+
+
     private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("unit-jpa");
     private static final ObjectMapper objectMapper = new ObjectMapper(); // Per il parsing JSON
 
     public void handle(HttpExchange exchange) throws IOException {
+
+
         exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
         exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
@@ -97,7 +107,7 @@ public class HandleBiglietti implements HttpHandler {
 
             // Elimina la Tratta
             em.getTransaction().begin();
-            bigliettoDAO.delete(biglietto);
+            em.remove(biglietto);
             em.getTransaction().commit();
 
             // Risposta al client
@@ -118,24 +128,129 @@ public class HandleBiglietti implements HttpHandler {
         GiornalieroDAO giornalieroDAO = new GiornalieroDAO(em);
         AbbonamentoDAO abbonamentoDAO = new AbbonamentoDAO(em);
         RivenditoreDAO rivenditoreDAO = new RivenditoreDAO(em);
+        UtenteDAO utenteDAO = new UtenteDAO(em);
 
-        // Leggi il corpo della richiesta come JSON
-        Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
-        String tipo = (String) requestData.get("tipo");
+        // Crea un nuovo ObjectMapper
+        ObjectMapper objectMapper2 = new ObjectMapper();
+        objectMapper2.registerModule(new JavaTimeModule());
 
-        GestoreRivenditoriEBiglietti gestore = new GestoreRivenditoriEBiglietti(em);
+        try {
+            // Leggi il corpo della richiesta come JSON
+            Map<String, Object> requestData = objectMapper2.readValue(exchange.getRequestBody(), Map.class);
+            String tipo = (String) requestData.get("tipo");
 
-        if ("giornaliero".equalsIgnoreCase(tipo)) {
-            gestore.creaGiornaliero((Rivenditore) requestData.get("rivenditore"), (Tratta) requestData.get("tratta"));
-        } else if ("abbonamento".equalsIgnoreCase(tipo)) {
-            gestore.creaAbbonamento((Rivenditore) requestData.get("rivenditore"), Periodicy.valueOf((String) requestData.get("periodicy")), (Utente) requestData.get("utente"));
-        } else {
-            exchange.sendResponseHeaders(400, -1); // Tipo non valido
-            em.close();
-            return;
+            // Parsing sicuro per rivenditoreId
+            Long rivenditoreId = null;
+            Object rivenditoreIdObj = requestData.get("rivenditoreId");
+
+            if (rivenditoreIdObj instanceof String) {
+                try {
+                    rivenditoreId = Long.parseLong((String) rivenditoreIdObj);
+                } catch (NumberFormatException e) {
+                    // Log dell'errore di parsing e restituzione errore 400
+                    exchange.sendResponseHeaders(400, -1); // ID rivenditore non valido
+                    return;
+                }
+            } else if (rivenditoreIdObj instanceof Integer) {
+                rivenditoreId = ((Integer) rivenditoreIdObj).longValue(); // Converte direttamente Integer a Long
+            }
+
+            // Deserializzazione in base al tipo di rivenditore
+            Rivenditore rivenditore = rivenditoreDAO.findById(rivenditoreId);
+            if ("rivFisico".equalsIgnoreCase((String) requestData.get("tipo"))) {
+                rivenditore = objectMapper.convertValue(requestData.get("rivenditore"), RivFisico.class);
+            } else if ("rivAutomatico".equalsIgnoreCase((String) requestData.get("tipo"))) {
+                rivenditore = objectMapper.convertValue(requestData.get("rivenditore"), RivAutomatico.class);
+            }
+
+            // Parsing sicuro per trattaId
+            Long trattaId = null;
+            Object trattaIdObj = requestData.get("trattaId");
+
+            if (trattaIdObj instanceof String) {
+                try {
+                    trattaId = Long.parseLong((String) trattaIdObj);
+                } catch (NumberFormatException e) {
+                    // Log dell'errore di parsing e restituzione errore 400
+                    exchange.sendResponseHeaders(400, -1); // ID tratta non valido
+                    return;
+                }
+            } else if (trattaIdObj instanceof Integer) {
+                trattaId = ((Integer) trattaIdObj).longValue(); // Converte direttamente Integer a Long
+            }
+
+            TrattaDAO trattaDAO = new TrattaDAO(em);
+
+            // Controllo per tipo "giornaliero"
+            if ("giornaliero".equalsIgnoreCase(tipo)) {
+                // Otteniamo la tratta dalla richiesta
+                Tratta tratta = trattaDAO.getById(trattaId);
+
+                // Crea un nuovo biglietto giornaliero
+                Giornaliero giornaliero = new Giornaliero();
+                giornaliero.setRivenditore(rivenditore);
+                giornaliero.setTratta(tratta);
+                giornaliero.setDaAttivare(true);  // Settiamo se il biglietto deve essere attivato
+
+                // Salviamo il biglietto giornaliero nel database
+                giornalieroDAO.save(giornaliero);
+            }
+            // Controllo per tipo "abbonamento"
+            else if ("abbonamento".equalsIgnoreCase(tipo)) {
+                // Otteniamo la periodicità e l'utente dalla richiesta
+                Periodicy periodicy = Periodicy.valueOf((String) requestData.get("periodicy"));
+                Utente utente = objectMapper.convertValue(requestData.get("utente"), Utente.class);
+
+                // Parsing sicuro per trattaId
+                Long tesseraId = null;
+                Object tesseraIdObj = requestData.get("tesseraId");
+
+                if (tesseraIdObj instanceof String) {
+                    try {
+                        tesseraId = Long.parseLong((String) tesseraIdObj);
+                    } catch (NumberFormatException e) {
+                        // Log dell'errore di parsing e restituzione errore 400
+                        exchange.sendResponseHeaders(400, -1); // ID tratta non valido
+                        return;
+                    }
+                } else if (tesseraIdObj instanceof Integer) {
+                    tesseraId = ((Integer) tesseraIdObj).longValue(); // Converte direttamente Integer a Long
+                }
+
+                TesseraDAO tesseraDAO = new TesseraDAO(em);
+                Tessera tessera = tesseraDAO.getById(tesseraId);
+
+                if (tessera == null) {
+                    // Log dell'errore di tessera non trovata e restituzione errore 404
+                    exchange.sendResponseHeaders(404, -1); // Tessera non trovata
+                    return;
+                }
+
+                // Crea un nuovo abbonamento
+                Abbonamento abbonamento = new Abbonamento();
+                abbonamento.setRivenditore(rivenditore);
+                abbonamento.setAttivo(true);  // Impostiamo l'abbonamento come attivo
+                abbonamento.setPeriodicy(periodicy);
+                abbonamento.setUtente(utente);  // Associa l'utente all'abbonamento
+                abbonamentoDAO.save(abbonamento);
+                tessera.getAbbonamenti().add(abbonamento);
+                tesseraDAO.update(tessera);
+            }
+            else {
+                // Tipo non valido, restituisci un errore 400
+                exchange.sendResponseHeaders(400, -1);
+                em.close();
+                return;
+            }
+
+            // Risposta di successo
+            exchange.sendResponseHeaders(201, -1); // Creato con successo
+        } catch (Exception e) {
+            e.printStackTrace(); // Log dell'errore
+            exchange.sendResponseHeaders(400, -1); // Errore nella richiesta
+        } finally {
+            em.close(); // Assicurati di chiudere l'EntityManager
         }
-        em.close();
-        exchange.sendResponseHeaders(201, -1); // Creato con successo
     }
 
     private void handlePut(HttpExchange exchange) throws IOException {
@@ -173,41 +288,82 @@ public class HandleBiglietti implements HttpHandler {
         GiornalieroDAO giornalieroDAO = new GiornalieroDAO(em);
         AbbonamentoDAO abbonamentoDAO = new AbbonamentoDAO(em);
 
-        // Recupera tutti i rivenditori
+        // Recupera l'ID della tessera dalla richiesta (esempio: query parameter o path parameter)
+        String query = exchange.getRequestURI().getQuery();
+        String tesseraIdStr = null;
+        if (query != null) {
+            tesseraIdStr = query.split("=")[1];  // supponendo una query del tipo "tesseraId=123"
+        }
+
+        Long tesseraId = (tesseraIdStr != null) ? Long.parseLong(tesseraIdStr) : null;
+
+        // Recupera la tessera dalla base di dati
+        Tessera tessera = null;
+        if (tesseraId != null) {
+            tessera = em.find(Tessera.class, tesseraId);
+        }
+
+        // Recupera i biglietti e gli abbonamenti associati alla tessera
         List<Biglietto> biglietti = bigliettoDAO.findAll();
+        List<Abbonamento> abbonamenti = new ArrayList<>();
+
+        if (tessera != null) {
+            abbonamenti = abbonamentoDAO.perTessera(tessera);  // Estrai gli abbonamenti associati alla tessera
+        }
+
+        final List<Abbonamento> finalAbbonamenti = abbonamenti;
+
         em.close();
 
-        // Converti la lista in JSON manualmente
+        // Costruisci la risposta JSON
         String jsonResponse = biglietti.stream()
                 .map(b -> {
+                    StringBuilder jsonBuilder = new StringBuilder();
                     if (b instanceof Giornaliero) {
                         Giornaliero giornaliero = (Giornaliero) b;
-                        return String.format(
+                        jsonBuilder.append(String.format(
                                 "{\"id\":%d,\"tipo\":\"%s\",\"daAttivare\":%b}",
                                 giornaliero.getId(),
                                 giornaliero.getClass().getSimpleName(),
                                 giornaliero.isDaAttivare()
-                        );
+                        ));
                     } else if (b instanceof Abbonamento) {
                         Abbonamento abbonamento = (Abbonamento) b;
-                        return String.format(
+                        jsonBuilder.append(String.format(
                                 "{\"id\":%d,\"tipo\":\"%s\",\"attivo\":%b,\"tariffa\":\"%s\",\"periodicy\":\"%s\"}",
                                 abbonamento.getId(),
                                 abbonamento.getClass().getSimpleName(),
                                 abbonamento.isAttivo(),
                                 abbonamento.getTariffa(),
                                 abbonamento.getPeriodicy()
-                        );
+                        ));
                     } else {
-                        return String.format(
+                        jsonBuilder.append(String.format(
                                 "{\"id\":%d,\"tipo\":\"%s\"}",
                                 b.getId(),
                                 b.getClass().getSimpleName()
-                        );
+                        ));
                     }
+
+                    // Aggiungi gli abbonamenti se presenti
+                    if (!finalAbbonamenti.isEmpty()) {
+                        jsonBuilder.append(",\"abbonamenti\":[");
+
+                        jsonBuilder.append(finalAbbonamenti.stream()
+                                .map(a -> String.format(
+                                        "{\"id\":%d,\"tipo\":\"%s\",\"attivo\":%b,\"tariffa\":\"%s\",\"periodicy\":\"%s\"}",
+                                        a.getId(),
+                                        a.getClass().getSimpleName(),
+                                        a.isAttivo(),
+                                        a.getTariffa(),
+                                        a.getPeriodicy()
+                                ))
+                                .collect(Collectors.joining(",", "", "]")));
+                    }
+
+                    return jsonBuilder.toString();
                 })
                 .collect(Collectors.joining(",", "[", "]"));
-
 
         // Restituisci la risposta
         exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
@@ -215,4 +371,5 @@ public class HandleBiglietti implements HttpHandler {
             os.write(jsonResponse.getBytes());
         }
     }
+
 }

@@ -38,38 +38,5 @@ public abstract class Biglietto {
     @ManyToOne
     private Utente utente;
 
-    // Getter e Setter per emissione (data di emissione)
-    public LocalDateTime getEmissione() {
-        return emissione;
-    }
 
-    public void setEmissione(LocalDateTime emissione) {
-        this.emissione = emissione;
-    }
-
-    // Getter e Setter per scadenza (data di scadenza)
-    public LocalDateTime getScadenza() {
-        return scadenza;
-    }
-
-    public void setScadenza(LocalDateTime scadenza) {
-        this.scadenza = scadenza;
-    }
-
-    // Getter e Setter per utente
-    public Utente getUtente() {
-        return utente;
-    }
-
-    public void setUtente(Utente utente) {
-        this.utente = utente;
-    }
-
-    public boolean isDaAttivare() {
-        return daAttivare;
-    }
-
-    public void setDaAttivare(boolean daAttivare) {
-        this.daAttivare = daAttivare;
-    }
 }
