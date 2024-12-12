@@ -76,6 +76,7 @@ public class HandleTessere implements HttpHandler {
     private void handleDelete(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
         TesseraDAO dao = new TesseraDAO(em);
+        UtenteDAO utenteDAO = new UtenteDAO(em);
 
         try {
             // Estrai l'ID dal percorso
@@ -96,9 +97,12 @@ public class HandleTessere implements HttpHandler {
                 return;
             }
 
-            // Elimina la Tratta
+            Utente utente = utenteDAO.getById(tessera.getUtente().getId());
+            utente.setTessera(null);
+
             em.getTransaction().begin();
-            dao.delete(tessera);
+            em.remove(tessera);
+            em.merge(utente);
             em.getTransaction().commit();
 
             // Risposta al client
@@ -194,14 +198,9 @@ public class HandleTessere implements HttpHandler {
         }
     }
 
-
-
-
     private void handlePut(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
         TesseraDAO dao = new TesseraDAO(em);
-
-        GestioneTessera gestore = new GestioneTessera(em);
 
         // Leggi il corpo della richiesta come JSON
         Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
@@ -213,8 +212,16 @@ public class HandleTessere implements HttpHandler {
             em.close();
             return;
         }
+        LocalDate validita = LocalDate.parse(requestData.get("validita").toString());
+        if (validita.isBefore(LocalDate.now())) {
+            tessera.setValidita(LocalDateTime.now().plusYears(1));
+            em.getTransaction().begin();
+            em.merge(tessera);
+            em.getTransaction().commit();
+        } else {
+            System.out.println("La tessera è già valida");
+        }
 
-        gestore.rinnovaTessera(tessera);
 
         em.close();
         exchange.sendResponseHeaders(200, -1); // Aggiornamento riuscito
