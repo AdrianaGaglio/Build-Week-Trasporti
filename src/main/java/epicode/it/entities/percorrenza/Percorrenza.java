@@ -30,7 +30,5 @@ public class Percorrenza {
 
     private LocalDateTime data;
 
-    public Object getId() {
-        return null;
-    }
+
 }
