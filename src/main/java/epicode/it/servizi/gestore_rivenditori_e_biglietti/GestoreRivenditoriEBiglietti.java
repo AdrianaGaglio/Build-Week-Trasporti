@@ -3,6 +3,7 @@ package epicode.it.servizi.gestore_rivenditori_e_biglietti;
 import epicode.it.dao.biglietto.BigliettoDAO;
 import epicode.it.dao.rivenditore.RivenditoreDAO;
 import epicode.it.dao.tessera.TesseraDAO;
+import epicode.it.dao.tratta.TrattaDAO;
 import epicode.it.entities.biglietto.Abbonamento;
 import epicode.it.entities.biglietto.Giornaliero;
 import epicode.it.entities.biglietto.Periodicy;
@@ -21,11 +22,15 @@ public class GestoreRivenditoriEBiglietti {
     private EntityManager em;
     private RivenditoreDAO rivenditoreDAO;
     private TesseraDAO tesseraDAO;
+    private TrattaDAO trattaDAO;
+    private BigliettoDAO bigliettoDAO;
 
     public GestoreRivenditoriEBiglietti(EntityManager em) {
         this.em = em;
         this.rivenditoreDAO = new RivenditoreDAO(em);
         this.tesseraDAO = new TesseraDAO(em);
+        this.trattaDAO = new TrattaDAO(em);
+        this.bigliettoDAO = new BigliettoDAO(em);
     }
 
     public List<Rivenditore> visualizzaRivenditori() {
@@ -74,7 +79,6 @@ public class GestoreRivenditoriEBiglietti {
                     case trimestrale -> 90;
                 }));
                 abbonamentoAttivo.setAttivo(true);
-                BigliettoDAO bigliettoDAO = new BigliettoDAO(em);
                 bigliettoDAO.update(abbonamentoAttivo);
                 System.out.println("Abbonamento rinnovato con successo!");
             } else {
@@ -83,6 +87,25 @@ public class GestoreRivenditoriEBiglietti {
         } else {
             System.err.println("Tessera non trovata per l'utente.");
         }
+    }
+
+    public void vendiBigliettoGiornaliero(Utente utente, Tratta tratta) {
+        Rivenditore rivenditore = rivenditoreDAO.findAll().stream().findFirst().orElse(null);
+        if (rivenditore == null) {
+            System.err.println("Nessun rivenditore disponibile.");
+            return;
+        }
+
+        Giornaliero biglietto = new Giornaliero();
+        biglietto.setUtente(utente);
+        biglietto.setTratta(tratta);
+        biglietto.setEmissione(LocalDateTime.now());
+        biglietto.setScadenza(LocalDateTime.now().plusHours(24));
+        biglietto.setDaAttivare(true);
+        biglietto.setCodice(generateUniqueBigliettoCode());
+
+        bigliettoDAO.save(biglietto);
+        System.out.println("Biglietto giornaliero venduto con successo! Codice: " + biglietto.getCodice());
     }
 
     public void creaGiornaliero(Rivenditore rivenditore, Tratta tratta) {
@@ -98,7 +121,6 @@ public class GestoreRivenditoriEBiglietti {
         biglietto.setDaAttivare(true);
         biglietto.setCodice(generateUniqueBigliettoCode());
 
-        BigliettoDAO bigliettoDAO = new BigliettoDAO(em);
         bigliettoDAO.save(biglietto);
         System.out.println("Biglietto giornaliero creato con successo! Codice: " + biglietto.getCodice());
     }
@@ -136,7 +158,6 @@ public class GestoreRivenditoriEBiglietti {
         abbonamento.setAttivo(true);
         abbonamento.setCodice(generateUniqueBigliettoCode());
 
-        BigliettoDAO bigliettoDAO = new BigliettoDAO(em);
         bigliettoDAO.save(abbonamento);
         System.out.println("Abbonamento creato con successo! Codice: " + abbonamento.getCodice());
     }
@@ -157,6 +178,50 @@ public class GestoreRivenditoriEBiglietti {
         r.setTipo("RivAutomatico");
         rivenditoreDAO.save(r);
         System.out.println("Rivenditore automatico creato!");
+    }
+
+    public Tratta trovaTratta(String nome) {
+        return em.createQuery("SELECT t FROM Tratta t WHERE t.partenza = :nome OR t.capolinea = :nome", Tratta.class)
+                .setParameter("nome", nome)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+    }
+
+    public void emettiAbbonamento(Utente utente, Periodicy periodicy) {
+        Rivenditore rivenditore = rivenditoreDAO.findAll().stream().findFirst().orElse(null);
+        if (rivenditore == null) {
+            System.err.println("Nessun rivenditore disponibile.");
+            return;
+        }
+        creaAbbonamento(rivenditore, periodicy, utente);
+    }
+
+    public void emettiTessera(Utente utente) {
+        Tessera tessera = new Tessera();
+        tessera.setUtente(utente);
+        tessera.setValidita(LocalDateTime.now().plusYears(1));
+        tessera.setCodice(generateUniqueBigliettoCode());
+        tesseraDAO.save(tessera);
+        System.out.println("Tessera emessa con successo! Codice: " + tessera.getCodice());
+    }
+
+    public void rinnovaAbbonamento(Utente utente, Periodicy periodicy) {
+        Rivenditore rivenditore = rivenditoreDAO.findAll().stream().findFirst().orElse(null);
+        if (rivenditore == null) {
+            System.err.println("Nessun rivenditore disponibile.");
+            return;
+        }
+        rinnovaAbbonamento(rivenditore, utente, periodicy);
+    }
+
+    public void rinnovaTessera(Utente utente) {
+        Rivenditore rivenditore = rivenditoreDAO.findAll().stream().findFirst().orElse(null);
+        if (rivenditore == null) {
+            System.err.println("Nessun rivenditore disponibile.");
+            return;
+        }
+        rinnovaTessera(rivenditore, utente);
     }
 
     private String generateUniqueBigliettoCode() {
