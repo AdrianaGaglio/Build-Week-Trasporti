@@ -3,12 +3,14 @@ package server;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import epicode.it.dao.biglietto.BigliettoDAO;
 import epicode.it.dao.mezzo.AutobusDAO;
 import epicode.it.dao.mezzo.MezzoDAO;
 import epicode.it.dao.mezzo.TramDAO;
 import epicode.it.dao.rivenditore.RivenditoreDAO;
 import epicode.it.dao.tessera.TesseraDAO;
 import epicode.it.dao.utente.UtenteDAO;
+import epicode.it.entities.biglietto.Biglietto;
 import epicode.it.entities.mezzo.Autobus;
 import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.mezzo.Tram;
@@ -69,7 +71,44 @@ public class HandleUtenti implements HttpHandler {
 
     }
 
-    private void handleDelete(HttpExchange exchange) {
+    private void handleDelete(HttpExchange exchange) throws IOException {
+        EntityManager em = emf.createEntityManager();
+        UtenteDAO dao = new UtenteDAO(em);
+
+        try {
+            // Estrai l'ID dal percorso
+            String path = exchange.getRequestURI().getPath();
+            String[] pathParts = path.split("/");
+            if (pathParts.length < 3) {
+                exchange.sendResponseHeaders(400, -1); // ID non fornito
+                return;
+            }
+
+            Long id = Long.parseLong(pathParts[2]);
+            System.out.println(id);
+
+            // Verifica se la Tratta esiste
+            Utente biglietto = dao.getById(id);
+            if (biglietto == null) {
+                exchange.sendResponseHeaders(404, -1); // Tratta non trovata
+                return;
+            }
+
+
+            dao.delete(biglietto);
+            
+
+            // Risposta al client
+            exchange.sendResponseHeaders(200, -1); // Eliminazione riuscita
+        } catch (Exception e) {
+            e.printStackTrace(); // Log dell'errore per debugging
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            exchange.sendResponseHeaders(500, -1); // Errore interno del server
+        } finally {
+            em.close(); // Assicurati di chiudere l'EntityManager
+        }
     }
 
     private void handlePost(HttpExchange exchange) throws IOException {
@@ -85,12 +124,12 @@ public class HandleUtenti implements HttpHandler {
             utente.setNome((String) requestData.get("nome"));
             utente.setCognome((String) requestData.get("cognome"));
             utente.setEmail((String) requestData.get("email"));
-
             // Parsing della data di nascita
             String dataNascitaString = (String) requestData.get("dataNascita");
             if (dataNascitaString != null) {
                 utente.setDataNascita(LocalDate.parse(dataNascitaString));
             }
+            utente.setRuolo((String) requestData.get("ruolo"));
 
             // Associa una tessera se fornita
             Map<String, Object> tesseraData = (Map<String, Object>) requestData.get("tessera");
@@ -120,7 +159,6 @@ public class HandleUtenti implements HttpHandler {
         }
     }
 
-
     private void handlePut(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
         UtenteDAO dao = new UtenteDAO(em);
@@ -140,6 +178,7 @@ public class HandleUtenti implements HttpHandler {
         utente.setCognome((String) requestData.get("cognome"));
         utente.setEmail((String) requestData.get("email"));
         utente.setDataNascita(Date.valueOf((String) requestData.get("dataNascita")).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+        utente.setRuolo((String) requestData.get("ruolo"));
         dao.update(utente);
 
         em.close();
@@ -163,13 +202,14 @@ public class HandleUtenti implements HttpHandler {
 
                     // Creazione del JSON completo dell'Utente
                     return String.format(
-                            "{\"id\":%d,\"nome\":\"%s\",\"cognome\":\"%s\",\"dataNascita\":\"%s\",\"email\":\"%s\",\"tessera\":%s}",
+                            "{\"id\":%d,\"nome\":\"%s\",\"cognome\":\"%s\",\"dataNascita\":\"%s\",\"email\":\"%s\",\"tessera\":%s,\"ruolo\":\"%s\"}",
                             u.getId(),
                             u.getNome(),
                             u.getCognome(),
                             u.getDataNascita() != null ? u.getDataNascita().toString() : null,
                             u.getEmail(),
-                            tesseraJson
+                            tesseraJson,
+                            u.getRuolo() // Aggiungi la proprietà ruolo
                     );
                 })
                 .collect(Collectors.joining(",", "[", "]"));
