@@ -56,4 +56,9 @@ public class MezzoDAO {
                 .setParameter("linea", num).getResultList();
     }
 
+    public List<Mezzo> mezziPerStato(Stato stato) {
+        return em.createNamedQuery("trovaMezzoPerStato", Mezzo.class)
+                .setParameter("stato", stato).getResultList();
+    }
+
 }

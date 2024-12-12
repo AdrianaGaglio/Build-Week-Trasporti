@@ -21,7 +21,7 @@ public class Servizio extends StatoMezzo {
                 ", tratta=" + tratta +
                 ", data_inizio=" + this.getDataInizio() +
                 ", data_fine=" + this.getDataFine() +
-                ", mezzo=" + this.getMezzo() +
+                ", mezzo=" + this.getMezzo().getClass().getSimpleName() + " " + this.getMezzo().getId() +
                 '}';
     }
 }

@@ -15,6 +15,7 @@ import epicode.it.entities.rivenditore.RivFisico;
 import epicode.it.entities.rivenditore.Rivenditore;
 import epicode.it.entities.stato_mezzo.Manutenzione;
 import epicode.it.entities.stato_mezzo.Servizio;
+import epicode.it.entities.stato_mezzo.StatoMezzo;
 import epicode.it.entities.tratta.Tratta;
 import epicode.it.servizi.gestore_rivenditori_e_biglietti.GestoreRivenditoriEBiglietti;
 import epicode.it.servizi.gestore_rivenditori_e_biglietti.StatisticheRivenditore;
@@ -27,6 +28,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -48,6 +50,8 @@ public class AdminMenu {
             System.out.println("2. Gestisci mezzi");
             System.out.println("=========================");
             System.out.println("3. Gestisci tratte");
+            System.out.println("=========================");
+            System.out.println("4. Gestisci percorrenze");
             System.out.println("=========================");
             System.out.println("=> Scegli un opzione valida: (0 per tornare indietro)");
             switchOptions(scanner, em);
@@ -72,6 +76,8 @@ public class AdminMenu {
                 gestisciTratte(scanner, em);
             }
             case 4 -> {
+                PercorrenzeMenu.mainMenuRunning = true;
+                PercorrenzeMenu.showPercorrenzeMenu(scanner,em);
             }
             case 0 -> mainMenuRunning = false;
             default -> System.err.println("opzione non valida");
@@ -300,20 +306,19 @@ public class AdminMenu {
                         Matcher matcherTo = patternData.matcher(inputDateTo);
 
                         if (matcherTo.matches()) {
-                                dateTo = LocalDate.parse(inputDateTo, formatter);
-                                if (!dateTo.isBefore(dateFrom)) { // Verifica che la data di fine sia successiva o uguale
-                                    break;
-                                } else {
-                                    System.err.println("La data di fine deve essere successiva o uguale alla data di inizio. Riprova.");
-                                }
+                            dateTo = LocalDate.parse(inputDateTo, formatter);
+                            if (!dateTo.isBefore(dateFrom)) { // Verifica che la data di fine sia successiva o uguale
+                                break;
+                            } else {
+                                System.err.println("La data di fine deve essere successiva o uguale alla data di inizio. Riprova.");
+                            }
                         } else {
                             System.err.println("Formato non valido, riprova (dd/MM/yyyy):");
                         }
                     }
 
 
-
-                    List<Biglietto> biglietti =  StatisticheRivenditore.bigliettiEmessiPerRivenditoreInUnDatoPeriodo(rivenditore,dateFrom,dateTo);
+                    List<Biglietto> biglietti = StatisticheRivenditore.bigliettiEmessiPerRivenditoreInUnDatoPeriodo(rivenditore, dateFrom, dateTo);
 
                     if (biglietti.isEmpty()) {
                         System.out.println("Nessun biglietto emesso nel periodo selezionato.");
@@ -350,6 +355,10 @@ public class AdminMenu {
             System.out.println("4. Metti  un mezzo in manutenzione");
             System.out.println("=========================");
             System.out.println("5. Elimina mezzo");
+            System.out.println("=========================");
+            System.out.println("6. Controlla i periodi di servizio e di manutenzione di un mezzo!");
+            System.out.println("=========================");
+            System.out.println("7. Controlla i biglietti vidimati su un mezzo!");
             System.out.println("=========================");
             System.out.println("0. Torna indietro\n");
 
@@ -429,6 +438,44 @@ public class AdminMenu {
                     scanner.nextLine();
                     if (mezzo != null) {
                         mezzoDAO.delete(mezzo);
+                    } else {
+                        System.err.println("Mezzo non trovato!");
+                    }
+                }
+                case 6 -> {
+                    System.out.println("Inserisci l' id del mezzo da verificare");
+                    Mezzo mezzo = mezzoDAO.findById(scanner.nextLong());
+                    scanner.nextLine();
+                    List<StatoMezzo> statimezzo = new ArrayList<>();
+                    List<Servizio> servizi = new ArrayList<>();
+                    List<Manutenzione> manutenzioni = new ArrayList<>();
+                    if (mezzo != null) {
+                       servizi = mezzo.getServizi();
+                       manutenzioni = mezzo.getManutenzioni();
+                       statimezzo.addAll(servizi);
+                       statimezzo.addAll(manutenzioni);
+                        System.out.println("Stati del mezzo " + mezzo);
+                        System.out.println("------------------------");
+                       statimezzo.forEach(System.out::println);
+                        System.out.println("------------------------");
+                    } else {
+                        System.err.println("Mezzo non trovato!");
+                    }
+                }
+                case 7 -> {
+                    System.out.println("Inserisci l'id del mezzo da controllare");
+                    Mezzo mezzo = mezzoDAO.findById(scanner.nextLong());
+                    scanner.nextLine();
+                    if (mezzo != null) {
+                        List<Biglietto> biglietti = mezzo.getBiglietti();
+                        if (biglietti.isEmpty()) {
+                            System.err.println("Non ci sono biglietti!");
+                        } else {
+                            System.out.println("Biglietti vidimati");
+                            System.out.println("\n------------------------");
+                            biglietti.forEach(System.out::println);
+                            System.out.println("------------------------\n");
+                        }
                     } else {
                         System.err.println("Mezzo non trovato!");
                     }

@@ -59,7 +59,7 @@ public class GestorePercorrenze {
         System.out.println("Percorrenza inserita correttamente: " + percorrenza);
     }
 
-    public StatisticheTratta mediaPercorrenzaPerTratta(Tratta tratta, Mezzo mezzo) {
+    public StatisticheTratta mediaPercorrenzaPerTrattaEMezzo(Tratta tratta, Mezzo mezzo) {
         PercorrenzaDAO percorrenzaDAO = new PercorrenzaDAO(em);
         List<Percorrenza> percorrenze = percorrenzaDAO.perMezzoTratta(tratta, mezzo);
         double sommaDurata = 0;

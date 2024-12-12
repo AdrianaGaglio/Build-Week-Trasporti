@@ -18,8 +18,8 @@ public class Manutenzione  extends  StatoMezzo{
                 "id=" + this.getId() +
                 ", data_inizio=" + this.getDataInizio() +
                 ", data_fine=" + this.getDataFine() +
-                "descrizione='" + descrizione + '\'' +
-                ", mezzo=" + this.getMezzo() +
+                ", descrizione='" + descrizione + '\'' +
+                ", mezzo=" + this.getMezzo().getClass().getSimpleName() + " " + this.getMezzo().getId() +
                 '}';
     }
 

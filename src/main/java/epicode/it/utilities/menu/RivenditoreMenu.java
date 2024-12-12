@@ -57,7 +57,7 @@ public class RivenditoreMenu {
                     String periodicita = scanner.next().toLowerCase();
 
                     try {
-                        gestore.rinnovaAbbonamento(rivenditore, utente, Periodicy.valueOf(periodicita));
+//                     gestore.rinnovaAbbonamento(rivenditore, utente, Periodicy.valueOf(periodicita));
                     } catch (IllegalArgumentException e) {
                         System.err.println("Periodicità non valida!");
                     }
@@ -77,7 +77,7 @@ public class RivenditoreMenu {
                         break;
                     }
 
-                    gestore.rinnovaTessera(rivenditore, utente);
+//                    gestore.rinnovaTessera(rivenditore, utente);
                 }
                 case 6 -> {
                     System.out.println("Uscita dal menu rivenditore.");

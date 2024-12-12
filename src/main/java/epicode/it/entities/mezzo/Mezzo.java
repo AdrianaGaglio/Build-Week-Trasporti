@@ -14,6 +14,7 @@ import java.util.List;
 @Entity
 @NamedQuery(name = "Trova_tutto_Mezzo", query = "SELECT a FROM Mezzo a")
 @NamedQuery(name="trovaPerNumeroLinea", query ="SELECT a FROM Mezzo a WHERE codice = :codice")
+@NamedQuery(name="trovaMezzoPerStato", query ="SELECT a FROM Mezzo a WHERE stato = :stato ")
 @Table(name = "mezzi")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo_mezzo")
