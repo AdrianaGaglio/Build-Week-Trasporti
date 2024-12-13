@@ -13,6 +13,7 @@ target/
 *.ipr
 
 src/main/resources/META-INF/persistence.xml
+src/main/resources/hibernate.cfg.xml
 
 ### Eclipse ###
 .apt_generated

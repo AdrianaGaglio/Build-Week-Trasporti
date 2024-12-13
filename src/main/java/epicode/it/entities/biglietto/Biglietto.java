@@ -1,5 +1,6 @@
 package epicode.it.entities.biglietto;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.rivenditore.Rivenditore;
 import epicode.it.entities.utente.Utente;
@@ -31,6 +32,7 @@ public abstract class Biglietto {
     private LocalDateTime emissione = LocalDateTime.now();
 
     @ManyToOne
+    @JsonBackReference
     private Rivenditore rivenditore;
 
     @ManyToOne

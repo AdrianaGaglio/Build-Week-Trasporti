@@ -1,6 +1,7 @@
 package server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import epicode.it.dao.biglietto.AbbonamentoDAO;
@@ -123,10 +124,12 @@ public class HandleTessere implements HttpHandler {
         RivenditoreDAO rivenditoreDAO = new RivenditoreDAO(em);
         UtenteDAO utenteDAO = new UtenteDAO(em);
 
+        // Registra il modulo JSR310 per gestire LocalDateTime
+        objectMapper.registerModule(new JavaTimeModule());
+
         try {
             // Leggi il corpo della richiesta come JSON
             Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
-
 
             long utenteId = Long.parseLong(requestData.get("utenteId").toString());
             // Deserializza l'utente
@@ -139,6 +142,8 @@ public class HandleTessere implements HttpHandler {
             RivFisico rivFisico = null;
             RivAutomatico rivAutomatico = null;
 
+            Tessera tesseraCreataOAggiornata = null; // Per restituire la tessera
+
             if (rivenditore.getTipo().toLowerCase().equals("rivfisico")) {
                 rivFisico = (RivFisico) rivenditore;
                 System.out.println(rivFisico);
@@ -149,7 +154,6 @@ public class HandleTessere implements HttpHandler {
                     // Inizia la transazione
 
                     if (utente.getTessera() == null) {
-
                         System.out.println("Creazione tessera in corso...");
                         Tessera tessera = new Tessera();
                         tessera.setValidita(LocalDateTime.now().plusYears(1));
@@ -159,10 +163,12 @@ public class HandleTessere implements HttpHandler {
                         em.persist(tessera);
                         em.merge(utente);
                         em.getTransaction().commit();
+                        tesseraCreataOAggiornata = tessera;
                     } else if (utente.getTessera().getValidita().isBefore(LocalDateTime.now())) {
                         System.out.println("Tessera scaduta, necessita rinnovo");
                     } else {
                         System.out.println("Utente già in possesso di tessera valida");
+                        tesseraCreataOAggiornata = utente.getTessera();
                     }
 
                 } else {
@@ -184,10 +190,12 @@ public class HandleTessere implements HttpHandler {
                         em.persist(tessera);
                         em.merge(utente);
                         em.getTransaction().commit();
+                        tesseraCreataOAggiornata = tessera;
                     } else if (utente.getTessera().getValidita().isBefore(LocalDateTime.now())) {
                         System.out.println("Tessera scaduta, necessita rinnovo");
                     } else {
                         System.out.println("Utente già in possesso di tessera valida");
+                        tesseraCreataOAggiornata = utente.getTessera();
                     }
 
                 } else {
@@ -195,8 +203,16 @@ public class HandleTessere implements HttpHandler {
                 }
             }
 
-            // Risposta al client
-            exchange.sendResponseHeaders(201, -1); // Creato con successo
+            // Serializza l'oggetto tessera come JSON e invialo come risposta
+            if (tesseraCreataOAggiornata != null) {
+                String jsonResponse = objectMapper.writeValueAsString(tesseraCreataOAggiornata);
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                exchange.sendResponseHeaders(201, jsonResponse.getBytes().length);
+                exchange.getResponseBody().write(jsonResponse.getBytes());
+            } else {
+                exchange.sendResponseHeaders(400, -1); // Nessuna tessera creata o aggiornata
+            }
+
         } catch (Exception e) {
             e.printStackTrace(); // Log dell'errore per debugging
             exchange.sendResponseHeaders(400, -1); // Errore nella richiesta
@@ -205,9 +221,13 @@ public class HandleTessere implements HttpHandler {
         }
     }
 
+
     private void handlePut(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
         TesseraDAO dao = new TesseraDAO(em);
+
+        // Registra il modulo JSR310 per gestire LocalDateTime
+        objectMapper.registerModule(new JavaTimeModule());
 
         // Leggi il corpo della richiesta come JSON
         Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
@@ -215,7 +235,7 @@ public class HandleTessere implements HttpHandler {
 
         Tessera tessera = dao.getById(id);
         if (tessera == null) {
-            exchange.sendResponseHeaders(404, -1); // Rivenditore non trovato
+            exchange.sendResponseHeaders(404, -1); // Tessera non trovata
             em.close();
             return;
         }
@@ -229,10 +249,21 @@ public class HandleTessere implements HttpHandler {
             System.out.println("La tessera è già valida");
         }
 
-
-        em.close();
-        exchange.sendResponseHeaders(200, -1); // Aggiornamento riuscito
+        // Serializza l'oggetto tessera come JSON e invialo come risposta
+        try {
+            String jsonResponse = objectMapper.writeValueAsString(tessera);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
+            exchange.getResponseBody().write(jsonResponse.getBytes());
+        } catch (Exception e) {
+            e.printStackTrace(); // Log dell'errore per debugging
+            exchange.sendResponseHeaders(500, -1); // Errore interno del server
+        } finally {
+            em.close(); // Assicurati di chiudere l'EntityManager
+        }
     }
+
+
 
     private void handleGet(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();

@@ -1,5 +1,6 @@
 package epicode.it.entities.rivenditore;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import epicode.it.entities.biglietto.Biglietto;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -19,6 +20,7 @@ public abstract class Rivenditore {
     private Long id;
 
     @OneToMany(mappedBy = "rivenditore", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Biglietto> biglietti = new ArrayList<>();
 
     public List<Biglietto> getBiglietti() {

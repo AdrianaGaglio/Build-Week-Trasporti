@@ -1,5 +1,7 @@
 package epicode.it.entities.tessera;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import epicode.it.entities.biglietto.Abbonamento;
 import epicode.it.entities.utente.Utente;
 import epicode.it.utilities.StringGenerator;
@@ -16,7 +18,7 @@ import java.util.List;
 @Entity
 @NamedQuery(name = "findAll_Tessera", query = "SELECT a FROM Tessera a")
 @NamedQuery(name = "findAll_UserCard", query = "SELECT t FROM Tessera t JOIN t.utente u WHERE u.tessera IS NOT NULL AND u.id = :id")
-@Table(name="tessere")
+@Table(name = "tessere")
 public class Tessera {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -24,16 +26,16 @@ public class Tessera {
 
     private String codice = "T-" + StringGenerator.random(10);
 
-
     private LocalDateTime validita;
 
     @OneToMany(mappedBy = "tessera")
+    @JsonIgnore
     private List<Abbonamento> abbonamenti = new ArrayList<>();
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "utente_id")
     @EqualsAndHashCode.Exclude
-    @ToString.Exclude
+    @JsonIgnore
     private Utente utente;
 
     @Override
@@ -46,5 +48,4 @@ public class Tessera {
                 '}';
     }
 
-    }
-
+}
