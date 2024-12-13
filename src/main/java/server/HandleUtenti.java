@@ -151,7 +151,7 @@ public class HandleUtenti implements HttpHandler {
 
             // Salva l'Utente
             Object createdObject;
-            utenteDAO.save(utente);
+           // utenteDAO.save(utente);
             createdObject = utente;
             if (createdObject != null) {
                 String jsonResponse = objectMapper2.writeValueAsString(createdObject);

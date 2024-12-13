@@ -1,6 +1,7 @@
 package server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import epicode.it.dao.biglietto.AbbonamentoDAO;
@@ -122,41 +123,71 @@ public class HandleStatiMezzo implements HttpHandler {
 
     private void handlePost(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
-        StatoMezzoDAO statoMezzoDAO = new StatoMezzoDAO(em);
-        ServizioDAO servizioDAO = new ServizioDAO(em);
-        ManutenzioneDAO manutenzioneDAO = new ManutenzioneDAO(em);
+        GestoreStatiServizio gestoreStatiServizio = new GestoreStatiServizio(em);
+        MezzoDAO mezzoDAO = new MezzoDAO(em);
+        TrattaDAO trattaDAO = new TrattaDAO(em);
+
+        Object createdObject;
 
         try {
             // Leggi il corpo della richiesta come JSON
             Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
             String tipo = (String) requestData.get("tipo");
 
-            GestoreStatiServizio gestore = new GestoreStatiServizio(em);
-
+            // Verifica del tipo di richiesta
             if ("servizio".equalsIgnoreCase(tipo)) {
-                // Creazione di un oggetto Servizio
-                gestore.aggiungiServizio((Mezzo) requestData.get("mezzo"),
-                        Date.valueOf((String) requestData.get("dataInizio")).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate(),
-                        (Tratta) requestData.get("tratta"));
+                Long mezzoId = Long.valueOf(requestData.get("mezzoId").toString());
+                Long trattaId = Long.valueOf(requestData.get("trattaId").toString());
+                Mezzo mezzo = mezzoDAO.findById(mezzoId);
+                Tratta tratta = trattaDAO.getById(trattaId);
+
+                if (mezzo == null || tratta == null) {
+                    exchange.sendResponseHeaders(404, -1); // Mezzo o tratta non trovati
+                    return;
+                }
+
+               createdObject = gestoreStatiServizio.aggiungiERitornaServizio(mezzo, LocalDate.now(), tratta);
 
             } else if ("manutenzione".equalsIgnoreCase(tipo)) {
-                gestore.aggiungiManutenzione((Mezzo) requestData.get("mezzo"),
-                        Date.valueOf((String) requestData.get("dataInizio")).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate(),
-                        (String) requestData.get("descrizione"));
+                Long mezzoId = Long.valueOf(requestData.get("mezzoId").toString());
+                Mezzo mezzo = mezzoDAO.findById(mezzoId);
+
+                if (mezzo == null) {
+                    exchange.sendResponseHeaders(404, -1); // Mezzo non trovato
+                    return;
+                }
+
+                String descrizione = (String) requestData.get("descrizione");
+                createdObject = gestoreStatiServizio.aggiungiERitornaManutenzione(mezzo, LocalDate.now(), descrizione);
 
             } else {
                 exchange.sendResponseHeaders(400, -1); // Tipo non valido
                 return;
             }
 
-            exchange.sendResponseHeaders(201, -1); // Creato con successo
+            // Crea un nuovo ObjectMapper
+            ObjectMapper objectMapper2 = new ObjectMapper();
+            objectMapper2.registerModule(new JavaTimeModule());
+
+            // Salva l'Utente
+            if (createdObject != null) {
+                String jsonResponse = objectMapper2.writeValueAsString(createdObject);
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                exchange.sendResponseHeaders(201, jsonResponse.getBytes().length);
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(jsonResponse.getBytes());
+                }
+            } else {
+                exchange.sendResponseHeaders(400, -1); // Errore generico
+            }
         } catch (Exception e) {
-            e.printStackTrace(); // Log dell'errore per debugging
-            exchange.sendResponseHeaders(400, -1); // Errore nella richiesta
+            e.printStackTrace(); // Log dell'errore
+            exchange.sendResponseHeaders(500, -1); // Errore interno del server
         } finally {
-            em.close(); // Assicurati di chiudere l'EntityManager
+            em.close(); // Chiudi l'EntityManager
         }
     }
+
 
 
     private void handlePut(HttpExchange exchange) throws IOException {
