@@ -1,5 +1,7 @@
 package epicode.it.entities.tessera;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import epicode.it.entities.biglietto.Abbonamento;
 import epicode.it.entities.utente.Utente;
 import epicode.it.utilities.StringGenerator;
@@ -27,10 +29,12 @@ public class Tessera {
     private LocalDateTime validita;
 
     @OneToMany(mappedBy = "tessera")
+    @JsonIgnore
     private List<Abbonamento> abbonamenti = new ArrayList<>();
 
     @OneToOne
     @JoinColumn(name = "utente_id")
     @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Utente utente;
 }

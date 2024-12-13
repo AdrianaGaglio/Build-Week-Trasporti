@@ -1,5 +1,7 @@
 package epicode.it.entities.biglietto;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import epicode.it.entities.tessera.Tessera;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -20,6 +22,7 @@ public class Abbonamento extends Biglietto {
     private String tariffa;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "tessera_id")
     private Tessera tessera;
 
