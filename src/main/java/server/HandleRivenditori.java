@@ -174,8 +174,6 @@ public class HandleRivenditori implements HttpHandler {
         }
     }
 
-
-
     private void handlePut(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
         RivenditoreDAO dao = new RivenditoreDAO(em);

@@ -267,6 +267,7 @@ public class HandleBiglietti implements HttpHandler {
                     case "annuale": abbonamento.setScadenza(LocalDateTime.now().plusDays(365)); break;
                 }
                 abbonamento.setUtente(utente);
+                abbonamento.setTessera(tessera);
                 utente.setTessera(tessera);
                 tessera.getAbbonamenti().add(abbonamento);
                 em.getTransaction().begin();
