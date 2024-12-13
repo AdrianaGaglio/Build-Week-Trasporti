@@ -130,7 +130,7 @@ public class HandleMezzi implements HttpHandler {
                 return;
             }
 
-            String jsonResponse;
+            Object createdObject;
 
             if ("autobus".equalsIgnoreCase(requestData.tipo)) {
                 Autobus autobus = new Autobus(requestData.codice);
@@ -138,27 +138,35 @@ public class HandleMezzi implements HttpHandler {
                 em.getTransaction().begin();
                 em.persist(autobus);
                 em.getTransaction().commit();
-                jsonResponse = objectMapper.writeValueAsString(autobus);
+                createdObject = autobus;
             } else if ("tram".equalsIgnoreCase(requestData.tipo)) {
                 Tram tram = new Tram(requestData.codice);
                 tram.setStato(Stato.DEPOSITO);
                 em.getTransaction().begin();
                 em.persist(tram);
                 em.getTransaction().commit();
-                jsonResponse = objectMapper.writeValueAsString(tram);
+                createdObject = tram;
             } else {
                 exchange.sendResponseHeaders(400, -1); // Tipo non valido
                 return;
             }
 
-            // Risposta positiva con lunghezza specificata
-            byte[] responseBytes = jsonResponse.getBytes();
-            exchange.getResponseHeaders().set("Content-Type", "application/json");
-            exchange.sendResponseHeaders(201, responseBytes.length);
+            // Crea un nuovo ObjectMapper
+            ObjectMapper objectMapper2 = new ObjectMapper();
+            objectMapper2.registerModule(new JavaTimeModule());
 
-            // Scrivi il JSON nel corpo della risposta
-            try (OutputStream os = exchange.getResponseBody()) {
-                os.write(responseBytes);
+            // Salva l'Utente
+
+
+            if (createdObject != null) {
+                String jsonResponse = objectMapper2.writeValueAsString(createdObject);
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                exchange.sendResponseHeaders(201, jsonResponse.getBytes().length);
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(jsonResponse.getBytes());
+                }
+            } else {
+                exchange.sendResponseHeaders(400, -1); // Errore generico
             }
         } catch (Exception e) {
             e.printStackTrace();
