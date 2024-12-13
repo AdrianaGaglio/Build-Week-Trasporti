@@ -2,6 +2,7 @@ package server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import epicode.it.dao.biglietto.AbbonamentoDAO;
@@ -39,7 +40,14 @@ import java.util.stream.Collectors;
 public class HandleTessere implements HttpHandler {
 
     private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("unit-jpa");
-    private static final ObjectMapper objectMapper = new ObjectMapper(); // Per il parsing JSON
+    private static final ObjectMapper objectMapper = configureObjectMapper();
+
+    private static ObjectMapper configureObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return mapper;
+    }
 
     public void handle(HttpExchange exchange) throws IOException {
         exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
@@ -112,7 +120,7 @@ public class HandleTessere implements HttpHandler {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
-            exchange.sendResponseHeaders(500, -1); // Errore interno del server
+            exchange.sendResponseHeaders(500, -1); // Errore interno
         } finally {
             em.close(); // Assicurati di chiudere l'EntityManager
         }
@@ -121,140 +129,96 @@ public class HandleTessere implements HttpHandler {
     private void handlePost(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
         TesseraDAO tesseraDAO = new TesseraDAO(em);
-        RivenditoreDAO rivenditoreDAO = new RivenditoreDAO(em);
         UtenteDAO utenteDAO = new UtenteDAO(em);
-
-        // Registra il modulo JSR310 per gestire LocalDateTime
-        objectMapper.registerModule(new JavaTimeModule());
 
         try {
             // Leggi il corpo della richiesta come JSON
             Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
 
             long utenteId = Long.parseLong(requestData.get("utenteId").toString());
-            // Deserializza l'utente
             Utente utente = utenteDAO.getById(utenteId);
 
-            // Deserializza il rivenditore in base al tipo
-            long rivId = Long.parseLong(requestData.get("rivenditoreId").toString());
-            Rivenditore rivenditore = rivenditoreDAO.findById(rivId);
+            if (utente.getTessera() == null || utente.getTessera().getValidita().isBefore(LocalDateTime.now())) {
+                Tessera tessera = new Tessera();
+                tessera.setValidita(LocalDateTime.now().plusYears(1));
+                utente.setTessera(tessera);
+                tessera.setUtente(utente);
 
-            RivFisico rivFisico = null;
-            RivAutomatico rivAutomatico = null;
+                em.getTransaction().begin();
+                em.persist(tessera);
+                em.merge(utente);
+                em.getTransaction().commit();
 
-            Tessera tesseraCreataOAggiornata = null; // Per restituire la tessera
-
-            if (rivenditore.getTipo().toLowerCase().equals("rivfisico")) {
-                rivFisico = (RivFisico) rivenditore;
-                System.out.println(rivFisico);
-                if (!LocalDate.now().getDayOfWeek().equals(rivFisico.getGiornoChiusura()) &&
-                        LocalTime.now().isAfter(rivFisico.getOraApertura()) &&
-                        LocalTime.now().isBefore(rivFisico.getOraChiusura())) {
-
-                    // Inizia la transazione
-
-                    if (utente.getTessera() == null) {
-                        System.out.println("Creazione tessera in corso...");
-                        Tessera tessera = new Tessera();
-                        tessera.setValidita(LocalDateTime.now().plusYears(1));
-                        utente.setTessera(tessera);
-                        tessera.setUtente(utente);
-                        em.getTransaction().begin();
-                        em.persist(tessera);
-                        em.merge(utente);
-                        em.getTransaction().commit();
-                        tesseraCreataOAggiornata = tessera;
-                    } else if (utente.getTessera().getValidita().isBefore(LocalDateTime.now())) {
-                        System.out.println("Tessera scaduta, necessita rinnovo");
-                    } else {
-                        System.out.println("Utente già in possesso di tessera valida");
-                        tesseraCreataOAggiornata = utente.getTessera();
-                    }
-
-                } else {
-                    System.out.println("Il rivenditore fisico è chiuso");
-                }
-            } else if (rivenditore.getTipo().toLowerCase().equals("rivautomatico")) {
-
-                rivAutomatico = (RivAutomatico) rivenditore;
-                System.out.println(rivAutomatico);
-                if (rivAutomatico.isAttivo()) {
-
-                    if (utente.getTessera() == null) {
-                        System.out.println("Creazione tessera in corso...");
-                        Tessera tessera = new Tessera();
-                        tessera.setValidita(LocalDateTime.now().plusYears(1));
-                        utente.setTessera(tessera);
-                        tessera.setUtente(utente);
-                        em.getTransaction().begin();
-                        em.persist(tessera);
-                        em.merge(utente);
-                        em.getTransaction().commit();
-                        tesseraCreataOAggiornata = tessera;
-                    } else if (utente.getTessera().getValidita().isBefore(LocalDateTime.now())) {
-                        System.out.println("Tessera scaduta, necessita rinnovo");
-                    } else {
-                        System.out.println("Utente già in possesso di tessera valida");
-                        tesseraCreataOAggiornata = utente.getTessera();
-                    }
-
-                } else {
-                    System.out.println("Rivenditore automatico fuori servizio");
-                }
-            }
-
-            // Serializza l'oggetto tessera come JSON e invialo come risposta
-            if (tesseraCreataOAggiornata != null) {
-                String jsonResponse = objectMapper.writeValueAsString(tesseraCreataOAggiornata);
+                // Serializza la tessera creata come JSON e invia la risposta
+                String jsonResponse = objectMapper.writeValueAsString(tessera);
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
                 exchange.sendResponseHeaders(201, jsonResponse.getBytes().length);
                 exchange.getResponseBody().write(jsonResponse.getBytes());
             } else {
                 exchange.sendResponseHeaders(400, -1); // Nessuna tessera creata o aggiornata
             }
-
         } catch (Exception e) {
-            e.printStackTrace(); // Log dell'errore per debugging
-            exchange.sendResponseHeaders(400, -1); // Errore nella richiesta
+            e.printStackTrace();
+            exchange.sendResponseHeaders(500, -1); // Errore interno del server
         } finally {
-            em.close(); // Assicurati di chiudere l'EntityManager
+            em.close();
         }
     }
+
 
 
     private void handlePut(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
         TesseraDAO dao = new TesseraDAO(em);
 
-        // Registra il modulo JSR310 per gestire LocalDateTime
-        objectMapper.registerModule(new JavaTimeModule());
-
-        // Leggi il corpo della richiesta come JSON
-        Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
-        Long id = Long.parseLong(requestData.get("id").toString());
-
-        Tessera tessera = dao.getById(id);
-        if (tessera == null) {
-            exchange.sendResponseHeaders(404, -1); // Tessera non trovata
-            em.close();
-            return;
-        }
-        LocalDate validita = LocalDate.parse(requestData.get("validita").toString());
-        if (validita.isBefore(LocalDate.now())) {
-            tessera.setValidita(LocalDateTime.now().plusYears(1));
-            em.getTransaction().begin();
-            em.merge(tessera);
-            em.getTransaction().commit();
-        } else {
-            System.out.println("La tessera è già valida");
-        }
-
-        // Serializza l'oggetto tessera come JSON e invialo come risposta
         try {
+            Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
+            Long id = Long.parseLong(requestData.get("id").toString());
+
+            Tessera tessera = dao.getById(id);
+            if (tessera == null) {
+                exchange.sendResponseHeaders(404, -1); // Tessera non trovata
+                em.close();
+                return;
+            }
+
+            LocalDate validita = LocalDate.parse(requestData.get("validita").toString());
+            if (validita.isBefore(LocalDate.now())) {
+                tessera.setValidita(LocalDateTime.now().plusYears(1));
+                em.getTransaction().begin();
+                em.merge(tessera);
+                em.getTransaction().commit();
+            }
+
             String jsonResponse = objectMapper.writeValueAsString(tessera);
             exchange.getResponseHeaders().set("Content-Type", "application/json");
             exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
             exchange.getResponseBody().write(jsonResponse.getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+            exchange.sendResponseHeaders(500, -1);
+        } finally {
+            em.close();
+        }
+    }
+
+    private void handleGet(HttpExchange exchange) throws IOException {
+        EntityManager em = emf.createEntityManager();
+        TesseraDAO dao = new TesseraDAO(em);
+
+        try {
+            // Recupera tutte le tessere
+            List<Tessera> tessere = dao.getAll();
+
+            // Serializza la lista delle tessere in JSON
+            String jsonResponse = objectMapper.writeValueAsString(tessere);
+
+            // Imposta gli header e restituisce la risposta
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(jsonResponse.getBytes());
+            }
         } catch (Exception e) {
             e.printStackTrace(); // Log dell'errore per debugging
             exchange.sendResponseHeaders(500, -1); // Errore interno del server
@@ -263,34 +227,4 @@ public class HandleTessere implements HttpHandler {
         }
     }
 
-
-
-    private void handleGet(HttpExchange exchange) throws IOException {
-        EntityManager em = emf.createEntityManager();
-        TesseraDAO dao = new TesseraDAO(em);
-
-        // Recupera tutti i rivenditori
-        List<Tessera> tessere = dao.getAll();
-        em.close();
-
-        // Converti la lista in JSON manualmente
-        String jsonResponse = tessere.stream()
-                .map(t -> {
-                    return String.format(
-                            "{\"id\":%d,\"codice\":\"%s\",\"validita\":\"%s\",\"utente\":%s}",
-                            t.getId(),
-                            t.getCodice(),
-                            t.getValidita() != null ? t.getValidita().toString() : null,
-                            t.getUtente() != null ? String.format("{\"id\":%d,\"nome\":\"%s\"}", t.getUtente().getId(), t.getUtente().getNome()) : null
-                    );
-                })
-                .collect(Collectors.joining(",", "[", "]"));
-
-
-        // Restituisci la risposta
-        exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(jsonResponse.getBytes());
-        }
-    }
 }

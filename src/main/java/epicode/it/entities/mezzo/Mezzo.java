@@ -28,6 +28,7 @@ public abstract class Mezzo {
     private Integer capienza;
 
     @OneToMany(mappedBy = "mezzo")
+    @JsonIgnore
     private List<Manutenzione> manutenzioni = new ArrayList<>();
 
     @OneToMany(mappedBy = "mezzo", cascade = CascadeType.ALL)

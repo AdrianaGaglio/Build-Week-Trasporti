@@ -15,6 +15,8 @@ import epicode.it.entities.biglietto.Periodicy;
 import epicode.it.entities.mezzo.Autobus;
 import epicode.it.entities.mezzo.Stato;
 import epicode.it.entities.mezzo.Tram;
+import epicode.it.entities.rivenditore.RivAutomatico;
+import epicode.it.entities.rivenditore.RivFisico;
 import epicode.it.entities.rivenditore.Rivenditore;
 import epicode.it.entities.tessera.Tessera;
 import epicode.it.entities.tratta.Tratta;
@@ -25,6 +27,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Locale;
@@ -44,7 +47,7 @@ public class Insert_Adriana {
         TesseraDAO tesseraDAO = new TesseraDAO(em);
         GestioneTessera gestoreTessera = new GestioneTessera(em);
 
-//        for (int i = 0; i < 100; i++) {
+//        for (int i = 0; i < 30; i++) {
 //            Tratta tratta = new Tratta();
 //            tratta.setPartenza(faker.address().streetAddress());
 //            tratta.setCapolinea(faker.address().streetAddress());
@@ -74,30 +77,21 @@ public class Insert_Adriana {
 //            percorrenzaDAO.save(percorrenza);
 //        }
 
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 10; i++) {
             Utente utente = new Utente();
             utente.setNome(faker.name().firstName());
             utente.setCognome(faker.name().lastName());
             utente.setEmail(faker.internet().emailAddress());
             utente.setDataNascita(faker.date().birthday().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
-//            int random = ((int) (Math.random() * 3)) + 1;
-//            switch (random) {
-//                case 1: utente.setRuolo("admin");
-//                    break;
-//                case 2: utente.setRuolo("utente");
-//                    break;
-//                case 3: utente.setRuolo("rivenditore");
-//                    break;
-//            }
             utente.setRuolo("utente");
             utenteDAO.save(utente);
         }
 
         RivenditoreDAO rivenditoreDAO = new RivenditoreDAO(em);
-//
-        Rivenditore riv1 = rivenditoreDAO.findById(1L);
-        Rivenditore riv2 = rivenditoreDAO.findById(3L);
-        Rivenditore riv3 = rivenditoreDAO.findById(4L);
+////
+//        Rivenditore riv1 = rivenditoreDAO.findById(1L);
+//        Rivenditore riv2 = rivenditoreDAO.findById(3L);
+//        Rivenditore riv3 = rivenditoreDAO.findById(4L);
 //
 //        gestoreTessera.creaTessera(riv1, utenteDAO.getById(52L));
 //        gestoreTessera.creaTessera(riv2, utenteDAO.getById(57L));
@@ -105,17 +99,17 @@ public class Insert_Adriana {
 
 //        GestoreRivenditoriEBiglietti gestore = new GestoreRivenditoriEBiglietti(em);
 //        GiornalieroDAO giornalieroDAO = new GiornalieroDAO(em);
-//        for (int i = 0; i < 10; i++) {
-//            Giornaliero giornaliero = new Giornaliero();
-//            giornaliero.setEmissione(LocalDateTime.now());
-//            Tratta tratta = trattaDAO.getById(faker.random().nextInt(1, 10).longValue());
-//            giornaliero.setTratta(tratta);
-//            Rivenditore rivenditore = rivenditoreDAO.findById(faker.random().nextInt(152, 171).longValue());
-//            giornaliero.setRivenditore(rivenditore);
-//            giornaliero.setScadenza(null);
-//            giornalieroDAO.save(giornaliero);
-//            rivenditore.getBiglietti().add(giornaliero);
-//            rivenditoreDAO.update(rivenditore);
+//        for (int i = 0; i < 5; i++) {
+//            RivFisico rivFisico = new RivFisico();
+//            rivFisico.setTipo("RivFisico");
+//            rivFisico.setGiornoChiusura(DayOfWeek.SUNDAY);
+//            rivFisico.setOraApertura(LocalTime.of(faker.random().nextInt(7,9), faker.random().nextInt(0,59)));
+//            rivFisico.setOraChiusura(LocalTime.of(faker.random().nextInt(7,9), faker.random().nextInt(0,59)));
+//            rivenditoreDAO.save(rivFisico);
+//            RivAutomatico rivAutomatico = new RivAutomatico();
+//            rivAutomatico.setAttivo(true);
+//            rivAutomatico.setTipo("RivAutomatico");
+//            rivenditoreDAO.save(rivAutomatico);
 //        }
 
 //        for (int i = 0; i < 10; i++) {
@@ -132,27 +126,27 @@ public class Insert_Adriana {
 //            rivenditoreDAO.update(rivenditore);
 //        }
 
-        AbbonamentoDAO abbonamentoDAO = new AbbonamentoDAO(em);
-
-
-        for (int i = 0; i < 10; i++) {
-            Abbonamento abbonamento = new Abbonamento();
-            abbonamento.setAttivo(true);
-            abbonamento.setTipo("abbonamento");
-            abbonamento.setPeriodicy(Periodicy.mensile);
-            Tessera tessera = tesseraDAO.getById(2L);
-            abbonamento.setTessera(tessera);
-            abbonamento.setScadenza(LocalDateTime.now().plusDays(30));
-            Rivenditore rivenditore = rivenditoreDAO.findById(faker.random().nextInt(152,171).longValue());
-            abbonamento.setRivenditore(rivenditore);
-            tessera.getAbbonamenti().add(abbonamento);
-            rivenditore.getBiglietti().add(abbonamento);
-            em.getTransaction().begin();
-            em.persist(abbonamento);
-            em.merge(tessera);
-            em.merge(rivenditore);
-            em.getTransaction().commit();
-        }
+//        AbbonamentoDAO abbonamentoDAO = new AbbonamentoDAO(em);
+//
+//
+//        for (int i = 0; i < 10; i++) {
+//            Abbonamento abbonamento = new Abbonamento();
+//            abbonamento.setAttivo(true);
+//            abbonamento.setTipo("abbonamento");
+//            abbonamento.setPeriodicy(Periodicy.mensile);
+//            Tessera tessera = tesseraDAO.getById(2L);
+//            abbonamento.setTessera(tessera);
+//            abbonamento.setScadenza(LocalDateTime.now().plusDays(30));
+//            Rivenditore rivenditore = rivenditoreDAO.findById(faker.random().nextInt(152,171).longValue());
+//            abbonamento.setRivenditore(rivenditore);
+//            tessera.getAbbonamenti().add(abbonamento);
+//            rivenditore.getBiglietti().add(abbonamento);
+//            em.getTransaction().begin();
+//            em.persist(abbonamento);
+//            em.merge(tessera);
+//            em.merge(rivenditore);
+//            em.getTransaction().commit();
+//        }
 
     }
 }
