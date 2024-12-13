@@ -8,6 +8,7 @@ import lombok.Data;
 @Entity
 @DiscriminatorValue("ABBONAMENTO")
 @NamedQuery(name = "perTessera", query = "SELECT a FROM Abbonamento a WHERE a.tessera = :tessera ORDER BY a.id ASC")
+@Table(name = "abbonamenti")
 public class Abbonamento extends Biglietto {
 
     @Enumerated(EnumType.STRING)
@@ -26,11 +27,13 @@ public class Abbonamento extends Biglietto {
     @Override
     public String toString() {
         return "Abbonamento{" +
-                "id=" + getId() +
-                ", periodicy=" + periodicy +
-                ", attivo=" + attivo +
-                ", tariffa='" + tariffa + '\'' +
-                ", tessera=" + tessera +
+                "id= " + getId() +
+                ", codice= " + getCodice() +
+                ", emissione= " + getEmissione() +
+                ", periodicy= " + periodicy +
+                ", attivo= " + attivo +
+                ", scadenza= " + getScadenza() +
+                ", utenteId= " + (getTessera().getUtente() != null ? getTessera().getUtente().getId() : null) +
                 '}';
     }
 }

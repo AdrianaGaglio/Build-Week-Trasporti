@@ -6,6 +6,7 @@ import epicode.it.utilities.StringGenerator;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,8 +30,21 @@ public class Tessera {
     @OneToMany(mappedBy = "tessera")
     private List<Abbonamento> abbonamenti = new ArrayList<>();
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "utente_id")
     @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Utente utente;
-}
+
+    @Override
+    public String toString() {
+        return "Tessera{" +
+                "id=" + id +
+                ", codice='" + codice + '\'' +
+                ", validita=" + validita +
+                ", utenteId=" + (utente != null ? utente.getId() : null) +
+                '}';
+    }
+
+    }
+

@@ -28,7 +28,7 @@ public class Utente {
 
     private String email;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tessera_id")
     @EqualsAndHashCode.Exclude
     private Tessera tessera;
@@ -43,7 +43,7 @@ public class Utente {
                 ", cognome='" + cognome + '\'' +
                 ", dataNascita=" + dataNascita +
                 ", email='" + email + '\'' +
-                ", tessera=" + tessera +
-                '}';
+                ", tessera=" + (tessera != null ? tessera.getId() : null) +
+        '}';
     }
 }
