@@ -1,6 +1,7 @@
 package epicode.it.entities.stato_mezzo;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import epicode.it.entities.tratta.Tratta;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -12,6 +13,7 @@ import lombok.Data;
 public class Servizio extends StatoMezzo {
     @ManyToOne
     @JoinColumn(name="tratta_id")
+    @JsonIgnore
     private Tratta tratta;
 
     @Override

@@ -1,5 +1,6 @@
 package epicode.it.entities.stato_mezzo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import epicode.it.entities.mezzo.Mezzo;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -23,6 +24,7 @@ public abstract class StatoMezzo {
     private LocalDate dataFine;
 
     @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+    @JsonIgnore
     private Mezzo mezzo;
 
 }

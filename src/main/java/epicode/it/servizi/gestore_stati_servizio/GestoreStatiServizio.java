@@ -92,4 +92,14 @@ public class GestoreStatiServizio {
 
         em.getTransaction().commit();
     }
+
+    public Manutenzione aggiungiERitornaManutenzione(Mezzo m, LocalDate inizio, String descrizione) {
+        aggiungiManutenzione(m,inizio,descrizione);
+        return m.getManutenzioni().getLast();
+    }
+
+    public Servizio aggiungiERitornaServizio(Mezzo m, LocalDate inizio, Tratta tratta) {
+        aggiungiServizio(m,inizio,tratta);
+        return m.getServizi().getLast();
+    }
 }

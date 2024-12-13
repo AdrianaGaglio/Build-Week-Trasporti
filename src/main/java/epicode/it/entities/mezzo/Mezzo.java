@@ -1,5 +1,6 @@
 package epicode.it.entities.mezzo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import epicode.it.entities.biglietto.Biglietto;
 import epicode.it.entities.percorrenza.Percorrenza;
 import epicode.it.entities.stato_mezzo.Manutenzione;
@@ -30,6 +31,7 @@ public abstract class Mezzo {
     private List<Manutenzione> manutenzioni = new ArrayList<>();
 
     @OneToMany(mappedBy = "mezzo", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Servizio> servizi = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
