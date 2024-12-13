@@ -52,7 +52,6 @@ public class HandleUtenti implements HttpHandler {
 
         switch (method) {
             case "GET":
-                System.out.println("arrivato fin qui");
                 handleGet(exchange);
                 break;
             case "POST":
