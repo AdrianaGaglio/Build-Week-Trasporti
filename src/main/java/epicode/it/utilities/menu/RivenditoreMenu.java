@@ -1,13 +1,16 @@
 package epicode.it.utilities.menu;
 
+import epicode.it.dao.tessera.TesseraDAO;
 import epicode.it.dao.utente.UtenteDAO;
 import epicode.it.entities.rivenditore.Rivenditore;
+import epicode.it.entities.tessera.Tessera;
 import epicode.it.entities.tratta.Tratta;
 import epicode.it.entities.utente.Utente;
 import epicode.it.servizi.gestore_rivenditori_e_biglietti.GestoreRivenditoriEBiglietti;
 import epicode.it.entities.biglietto.Periodicy;
 import jakarta.persistence.EntityManager;
 
+import java.time.LocalDateTime;
 import java.util.Scanner;
 
 public class RivenditoreMenu {
@@ -37,7 +40,7 @@ public class RivenditoreMenu {
 
             switch (scelta) {
                 case 1 -> emettiBiglietto(scanner, gestore, utenteDAO);
-                case 2 -> emettiAbbonamento(scanner, gestore, utenteDAO);
+                case 2 -> emettiAbbonamento(scanner, gestore, utenteDAO,em);
                 case 3 -> emettiTessera(scanner, gestore, utenteDAO);
                 case 4 -> rinnovaAbbonamento(scanner, gestore, utenteDAO);
                 case 5 -> rinnovaTessera(scanner, gestore, utenteDAO);
@@ -73,7 +76,8 @@ public class RivenditoreMenu {
         System.out.println("Biglietto emesso con successo!");
     }
 
-    private static void emettiAbbonamento(Scanner scanner, GestoreRivenditoriEBiglietti gestore, UtenteDAO utenteDAO) {
+    private static void emettiAbbonamento(Scanner scanner, GestoreRivenditoriEBiglietti gestore, UtenteDAO utenteDAO, EntityManager em) {
+        TesseraDAO tesseraDAO = new TesseraDAO(em);
         System.out.print("Inserisci l' id dell'utente: ");
         long idutente = scanner.nextLong();
         Utente utente = utenteDAO.getById(idutente);
@@ -82,13 +86,24 @@ public class RivenditoreMenu {
             System.err.println("Utente non trovato!");
             return;
         }
+        Tessera tessera = tesseraDAO.getTessera(utente);
+        if (tessera == null) {
+            System.err.println("Tessera non trovata per l'utente.");
+            return;
+        }
 
+        boolean hasActiveSubscription = tessera.getAbbonamenti().stream()
+                .anyMatch(abb -> abb.getScadenza().isAfter(LocalDateTime.now()));
+
+        if (hasActiveSubscription) {
+            System.err.println("L'utente ha già un abbonamento attivo.");
+            return;
+        }
         System.out.print("Inserisci periodicità dell'abbonamento (annuale, mensile, settimanale): ");
         String periodicita = scanner.next().toLowerCase();
 
         try {
             gestore.emettiAbbonamento(utente, Periodicy.valueOf(periodicita));
-            System.out.println("Abbonamento emesso con successo!");
         } catch (IllegalArgumentException e) {
             System.err.println("Periodicità non valida!");
         }
@@ -104,6 +119,11 @@ public class RivenditoreMenu {
             return;
         }
 
+        Tessera tessera = utente.getTessera();
+        if (tessera != null) {
+            System.err.println("L'utente ha gia' una tessera!");
+            return;
+        }
         gestore.emettiTessera(utente);
         System.out.println("Tessera emessa con successo!");
     }

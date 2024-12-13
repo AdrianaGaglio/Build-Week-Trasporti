@@ -141,7 +141,7 @@ public class GestoreRivenditoriEBiglietti {
         }
 
         boolean hasActiveSubscription = tessera.getAbbonamenti().stream()
-                .anyMatch(abb -> abb.isAttivo() && abb.getScadenza().isAfter(LocalDateTime.now()));
+                .anyMatch(abb -> abb.getScadenza().isAfter(LocalDateTime.now()));
 
         if (hasActiveSubscription) {
             System.err.println("L'utente ha già un abbonamento attivo.");
@@ -198,6 +198,7 @@ public class GestoreRivenditoriEBiglietti {
             System.err.println("Nessun rivenditore disponibile.");
             return;
         }
+
         creaAbbonamento(rivenditore, periodicy, utente);
     }
 
