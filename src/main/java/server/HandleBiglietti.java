@@ -303,30 +303,52 @@ public class HandleBiglietti implements HttpHandler {
         EntityManager em = emf.createEntityManager();
         BigliettoDAO dao = new BigliettoDAO(em);
 
-        // Leggi il corpo della richiesta come JSON
-        Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
-        Long id = Long.parseLong(requestData.get("id").toString());
+        // Configura l'ObjectMapper con il modulo JSR310
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-        Biglietto biglietto = dao.findById(id);
-        if (biglietto == null) {
-            exchange.sendResponseHeaders(404, -1); // Rivenditore non trovato
-            em.close();
-            return;
+        try {
+            // Leggi il corpo della richiesta come JSON
+            Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
+
+            // Verifica se l'id è presente e non nullo
+            if (!requestData.containsKey("bigliettoId") || requestData.get("bigliettoId") == null) {
+                exchange.sendResponseHeaders(400, -1); // Bad Request
+                return;
+            }
+
+            Long id = Long.parseLong(requestData.get("bigliettoId").toString());
+
+            Biglietto biglietto = dao.findById(id);
+            if (biglietto == null) {
+                exchange.sendResponseHeaders(404, -1); // Biglietto non trovato
+                return;
+            }
+
+            if (biglietto.getTipo().equalsIgnoreCase("giornaliero")) {
+                Giornaliero giornaliero = (Giornaliero) biglietto;
+                giornaliero.setScadenza(LocalDateTime.now().minusHours(1).plusMinutes(30));
+                giornaliero.setDaAttivare(false);
+                em.getTransaction().begin();
+                dao.update(giornaliero);
+                em.getTransaction().commit();
+            }
+
+            // Serializza l'oggetto aggiornato come JSON e invialo come risposta
+            String jsonResponse = objectMapper.writeValueAsString(biglietto);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
+            exchange.getResponseBody().write(jsonResponse.getBytes());
+        } catch (Exception e) {
+            e.printStackTrace(); // Log dell'errore per debugging
+            exchange.sendResponseHeaders(500, -1); // Errore interno del server
+        } finally {
+            em.close(); // Assicurati di chiudere l'EntityManager
         }
-
-        if (biglietto instanceof Giornaliero) {
-            Giornaliero giornaliero = (Giornaliero) biglietto;
-            ConvalidaBiglietto convalida = new ConvalidaBiglietto(em);
-//            convalida.convalida(giornaliero);
-        } else if (biglietto instanceof Abbonamento) {
-            Abbonamento abbonamento = (Abbonamento) biglietto;
-            RinnovoAbbonamento rinnovo = new RinnovoAbbonamento(em);
-            rinnovo.rinnova((Tessera) requestData.get("tessera"), Periodicy.valueOf((String) requestData.get("periodicy")));
-        }
-
-        em.close();
-        exchange.sendResponseHeaders(200, -1); // Aggiornamento riuscito
     }
+
+
 
     private void handleGet(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
