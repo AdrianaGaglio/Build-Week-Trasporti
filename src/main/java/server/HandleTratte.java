@@ -1,6 +1,8 @@
 package server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import epicode.it.dao.biglietto.AbbonamentoDAO;
@@ -90,9 +92,9 @@ public class HandleTratte implements HttpHandler {
             }
 
             // Elimina la Tratta
-            em.getTransaction().begin();
+
             trattaDAO.delete(tratta);
-            em.getTransaction().commit();
+
 
             // Risposta al client
             exchange.sendResponseHeaders(200, -1); // Eliminazione riuscita
@@ -111,6 +113,11 @@ public class HandleTratte implements HttpHandler {
         EntityManager em = emf.createEntityManager();
         TrattaDAO trattaDAO = new TrattaDAO(em);
 
+        // Configura l'ObjectMapper con il modulo JSR310
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
         try {
             // Leggi il corpo della richiesta come JSON
             Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
@@ -120,15 +127,26 @@ public class HandleTratte implements HttpHandler {
             tratta.setPartenza((String) requestData.get("partenza"));
             tratta.setCapolinea((String) requestData.get("capolinea"));
 
-            // Parsing della durata (in minuti o in formato compatibile con LocalTime)
+            // Parsing della durata
             String durataString = (String) requestData.get("durata");
             tratta.setDurata(LocalTime.parse(durataString));
 
             // Salva la nuova tratta nel database
+
             trattaDAO.save(tratta);
 
-            // Risposta al client
-            exchange.sendResponseHeaders(201, -1); // Creato con successo
+
+            // Converti l'oggetto Tratta in JSON
+            String jsonResponse = objectMapper.writeValueAsString(tratta);
+
+            // Imposta i headers della risposta
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(201, jsonResponse.getBytes().length);
+
+            // Scrivi il JSON nel corpo della risposta
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(jsonResponse.getBytes());
+            }
         } catch (Exception e) {
             e.printStackTrace(); // Log dell'errore per debugging
             exchange.sendResponseHeaders(400, -1); // Errore nella richiesta
@@ -138,9 +156,15 @@ public class HandleTratte implements HttpHandler {
     }
 
 
+
     private void handlePut(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
         TrattaDAO dao = new TrattaDAO(em);
+
+        // Configura l'ObjectMapper con il modulo JSR310
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         try {
             // Estrai l'ID dal percorso
@@ -164,19 +188,33 @@ public class HandleTratte implements HttpHandler {
             Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
 
             // Aggiorna i campi della Tratta
-            tratta.setPartenza((String) requestData.get("partenza"));
-            tratta.setCapolinea((String) requestData.get("capolinea"));
-
-            // Parsing della durata
-            String durataString = (String) requestData.get("durata");
-            tratta.setDurata(LocalTime.parse(durataString));
+            if (requestData.get("partenza") != null) {
+                tratta.setPartenza((String) requestData.get("partenza"));
+            }
+            if (requestData.get("capolinea") != null) {
+                tratta.setCapolinea((String) requestData.get("capolinea"));
+            }
+            if (requestData.get("durata") != null) {
+                String durataString = (String) requestData.get("durata");
+                tratta.setDurata(LocalTime.parse(durataString));
+            }
 
             // Salva le modifiche nel database
             em.getTransaction().begin();
             em.merge(tratta);
             em.getTransaction().commit();
 
-            exchange.sendResponseHeaders(200, -1); // Aggiornamento riuscito
+            // Converti l'oggetto aggiornato in JSON
+            String jsonResponse = objectMapper.writeValueAsString(tratta);
+
+            // Imposta i headers della risposta
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
+
+            // Scrivi il JSON nel corpo della risposta
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(jsonResponse.getBytes());
+            }
         } catch (Exception e) {
             e.printStackTrace(); // Log dell'errore per debugging
             if (em.getTransaction().isActive()) {
@@ -187,6 +225,7 @@ public class HandleTratte implements HttpHandler {
             em.close(); // Assicurati di chiudere l'EntityManager
         }
     }
+
 
 
     private void handleGet(HttpExchange exchange) throws IOException {

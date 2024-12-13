@@ -1,5 +1,7 @@
 package server;
 
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import epicode.it.dao.biglietto.BigliettoDAO;
@@ -103,14 +105,18 @@ public class HandleRivenditori implements HttpHandler {
         EntityManager em = emf.createEntityManager();
         RivenditoreDAO dao = new RivenditoreDAO(em);
 
-
-        // Leggi il corpo della richiesta come JSON
-        Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
-        String tipo = (String) requestData.get("tipo");
+        // Configura l'ObjectMapper con il modulo JSR310
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         try {
-            // Inizio della transazione
+            // Leggi il corpo della richiesta come JSON
+            Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
+            String tipo = (String) requestData.get("tipo");
 
+            // Variabile per memorizzare l'oggetto creato
+            Object rivenditoreCreato = null;
 
             // Logica per creare il rivenditore
             if ("rivfisico".equalsIgnoreCase(tipo)) {
@@ -121,19 +127,40 @@ public class HandleRivenditori implements HttpHandler {
                 r.setGiornoChiusura(dayOfWeek);
                 r.setOraApertura(LocalTime.parse((String) requestData.get("oraApertura")));
                 r.setOraChiusura(LocalTime.parse((String) requestData.get("oraChiusura")));
+                r.setTipo("RivFisico");
                 em.getTransaction().begin();
                 em.persist(r);
                 em.getTransaction().commit();
+                rivenditoreCreato = r;
+
             } else if ("rivautomatico".equalsIgnoreCase(tipo)) {
                 System.out.println("riv automatico request");
+
                 RivAutomatico rivAutomatico = new RivAutomatico();
                 rivAutomatico.setAttivo(true);
-                dao.save(rivAutomatico);
+                rivAutomatico.setTipo("RivAutomatico");
+                em.getTransaction().begin();
+                em.persist(rivAutomatico);
+                em.getTransaction().commit();
+                rivenditoreCreato = rivAutomatico;
+
             } else {
                 exchange.sendResponseHeaders(400, -1); // Tipo non valido
                 return;
             }
-            exchange.sendResponseHeaders(201, -1); // Creato con successo
+
+            // Converti l'oggetto creato in JSON
+            String jsonResponse = objectMapper.writeValueAsString(rivenditoreCreato);
+
+            // Risposta positiva con JSON
+            byte[] responseBytes = jsonResponse.getBytes();
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(201, responseBytes.length);
+
+            // Scrivi il JSON nel corpo della risposta
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(responseBytes);
+            }
         } catch (Exception e) {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback(); // Rollback in caso di errore
@@ -148,32 +175,39 @@ public class HandleRivenditori implements HttpHandler {
     }
 
 
+
     private void handlePut(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
         RivenditoreDAO dao = new RivenditoreDAO(em);
 
-        // Leggi il corpo della richiesta come JSON
-        Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
-        Long id = Long.parseLong(requestData.get("id").toString());
-        String tipo = (String) requestData.get("tipo");  // Legge il tipo dal corpo della richiesta
-
-        // Trova il rivenditore esistente
-        Rivenditore rivenditore = dao.findById(id);
-        if (rivenditore == null) {
-            exchange.sendResponseHeaders(404, -1); // Rivenditore non trovato
-            em.close();
-            return;
-        }
-
-        // Controlla il tipo di rivenditore
-        if (tipo == null || tipo.isEmpty()) {
-            exchange.sendResponseHeaders(400, -1); // Tipo non presente nella richiesta
-            em.close();
-            return;
-        }
+        // Configura l'ObjectMapper con il modulo JSR310
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         try {
+            // Leggi il corpo della richiesta come JSON
+            Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
+            Long id = Long.parseLong(requestData.get("id").toString());
+            String tipo = (String) requestData.get("tipo"); // Legge il tipo dal corpo della richiesta
+
+            // Trova il rivenditore esistente
+            Rivenditore rivenditore = dao.findById(id);
+            if (rivenditore == null) {
+                exchange.sendResponseHeaders(404, -1); // Rivenditore non trovato
+                return;
+            }
+
+            // Controlla il tipo di rivenditore
+            if (tipo == null || tipo.isEmpty()) {
+                exchange.sendResponseHeaders(400, -1); // Tipo non presente nella richiesta
+                return;
+            }
+
+            String jsonResponse;
+
             // Aggiorna solo se il tipo corrisponde al tipo dell'oggetto
+            em.getTransaction().begin();
             if (tipo.toLowerCase().equals("rivfisico") && rivenditore instanceof RivFisico) {
                 RivFisico rivFisico = (RivFisico) rivenditore;
                 if (requestData.containsKey("giornoChiusura")) {
@@ -185,29 +219,44 @@ public class HandleRivenditori implements HttpHandler {
                 if (requestData.containsKey("oraChiusura")) {
                     rivFisico.setOraChiusura(LocalTime.parse((String) requestData.get("oraChiusura")));
                 }
-                dao.update(rivFisico); // Salva le modifiche
+                dao.update(rivFisico);
+                jsonResponse = objectMapper.writeValueAsString(rivFisico);
             } else if (tipo.toLowerCase().equals("rivautomatico") && rivenditore instanceof RivAutomatico) {
                 RivAutomatico rivAutomatico = (RivAutomatico) rivenditore;
                 if (requestData.containsKey("attivo")) {
                     rivAutomatico.setAttivo((Boolean) requestData.get("attivo"));
                 }
-                dao.update(rivAutomatico); // Salva le modifiche
+                dao.update(rivAutomatico);
+                jsonResponse = objectMapper.writeValueAsString(rivAutomatico);
             } else {
                 // Tipo non corrisponde con il tipo del rivenditore trovato
                 exchange.sendResponseHeaders(400, -1); // Tipo non valido per l'entità trovata
-                em.close();
+                em.getTransaction().rollback();
                 return;
+            }
+            em.getTransaction().commit();
+
+            // Risposta positiva con JSON dell'oggetto aggiornato
+            byte[] responseBytes = jsonResponse.getBytes();
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, responseBytes.length);
+
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(responseBytes);
             }
         } catch (Exception e) {
             e.printStackTrace();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             exchange.sendResponseHeaders(500, -1); // Errore interno
-            em.close();
-            return;
+        } finally {
+            if (em.isOpen()) {
+                em.close();
+            }
         }
-
-        em.close();
-        exchange.sendResponseHeaders(200, -1); // Aggiornamento riuscito
     }
+
 
 
     private void handleGet(HttpExchange exchange) throws IOException {

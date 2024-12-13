@@ -1,6 +1,8 @@
 package server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import epicode.it.dao.biglietto.AbbonamentoDAO;
@@ -128,27 +130,41 @@ public class HandleMezzi implements HttpHandler {
                 return;
             }
 
+            String jsonResponse;
+
             if ("autobus".equalsIgnoreCase(requestData.tipo)) {
                 Autobus autobus = new Autobus(requestData.codice);
                 autobus.setStato(Stato.DEPOSITO);
-                autobusDAO.save(autobus);
-
+                em.getTransaction().begin();
+                em.persist(autobus);
+                em.getTransaction().commit();
+                jsonResponse = objectMapper.writeValueAsString(autobus);
             } else if ("tram".equalsIgnoreCase(requestData.tipo)) {
                 Tram tram = new Tram(requestData.codice);
                 tram.setStato(Stato.DEPOSITO);
-                tramDAO.save(tram);
-
+                em.getTransaction().begin();
+                em.persist(tram);
+                em.getTransaction().commit();
+                jsonResponse = objectMapper.writeValueAsString(tram);
             } else {
                 exchange.sendResponseHeaders(400, -1); // Tipo non valido
                 return;
             }
 
-            // Risposta positiva
+            // Risposta positiva con lunghezza specificata
+            byte[] responseBytes = jsonResponse.getBytes();
             exchange.getResponseHeaders().set("Content-Type", "application/json");
-            exchange.sendResponseHeaders(201, -1);
+            exchange.sendResponseHeaders(201, responseBytes.length);
 
+            // Scrivi il JSON nel corpo della risposta
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(responseBytes);
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
             exchange.sendResponseHeaders(500, -1);
         } finally {
             em.close();
@@ -161,37 +177,69 @@ public class HandleMezzi implements HttpHandler {
     }
 
 
-
     private void handlePut(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
         MezzoDAO mezzoDAO = new MezzoDAO(em);
         AutobusDAO autobusDAO = new AutobusDAO(em);
         TramDAO tramDAO = new TramDAO(em);
 
-        // Leggi il corpo della richiesta come JSON
-        Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
-        Long id = Long.parseLong(requestData.get("id").toString());
+        // Configura l'ObjectMapper con il modulo JSR310
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-        Mezzo mezzo = mezzoDAO.findById(id);
-        if (mezzo == null) {
-            exchange.sendResponseHeaders(404, -1); // Rivenditore non trovato
+        try {
+            // Leggi il corpo della richiesta come JSON
+            Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
+            Long id = Long.parseLong(requestData.get("id").toString());
+
+            // Recupera il mezzo dal database
+            Mezzo mezzo = mezzoDAO.findById(id);
+            if (mezzo == null) {
+                exchange.sendResponseHeaders(404, -1); // Mezzo non trovato
+                return;
+            }
+
+            String jsonResponse;
+
+            // Aggiorna i campi in base al tipo di mezzo
+            em.getTransaction().begin();
+            if (mezzo instanceof Autobus) {
+                Autobus autobus = (Autobus) mezzo;
+                autobus.setCodice((Integer) requestData.get("codice"));
+                autobusDAO.update(autobus);
+                jsonResponse = objectMapper.writeValueAsString(autobus);
+            } else if (mezzo instanceof Tram) {
+                Tram tram = (Tram) mezzo;
+                tram.setCodice((Integer) requestData.get("codice"));
+                tramDAO.update(tram);
+                jsonResponse = objectMapper.writeValueAsString(tram);
+            } else {
+                exchange.sendResponseHeaders(400, -1); // Tipo di mezzo non supportato
+                em.getTransaction().rollback();
+                return;
+            }
+            em.getTransaction().commit();
+
+            // Risposta positiva con JSON dell'oggetto aggiornato
+            byte[] responseBytes = jsonResponse.getBytes();
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, responseBytes.length);
+
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(responseBytes);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            exchange.sendResponseHeaders(500, -1); // Errore interno del server
+        } finally {
             em.close();
-            return;
         }
-
-        if (mezzo instanceof Autobus) {
-            Autobus autobus = (Autobus) mezzo;
-            autobus.setCodice((Integer) requestData.get("codice"));
-            autobusDAO.update(autobus);
-        } else if (mezzo instanceof Tram) {
-            Tram tram = (Tram) mezzo;
-            tram.setCodice((Integer) requestData.get("codice"));
-            tramDAO.update(tram);
-        }
-
-        em.close();
-        exchange.sendResponseHeaders(200, -1); // Aggiornamento riuscito
     }
+
 
     private void handleGet(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
