@@ -1,6 +1,7 @@
 package server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import epicode.it.dao.biglietto.BigliettoDAO;
@@ -95,7 +96,7 @@ public class HandleUtenti implements HttpHandler {
 
 
             dao.delete(biglietto);
-            
+
 
             // Risposta al client
             exchange.sendResponseHeaders(200, -1); // Eliminazione riuscita
@@ -144,13 +145,29 @@ public class HandleUtenti implements HttpHandler {
                     return;
                 }
             }
+            // Crea un nuovo ObjectMapper
+            ObjectMapper objectMapper2 = new ObjectMapper();
+            objectMapper2.registerModule(new JavaTimeModule());
 
             // Salva l'Utente
+            Object createdObject;
             utenteDAO.save(utente);
+            createdObject = utente;
+            if (createdObject != null) {
+                String jsonResponse = objectMapper2.writeValueAsString(createdObject);
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                exchange.sendResponseHeaders(201, jsonResponse.getBytes().length);
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(jsonResponse.getBytes());
+                }
+            } else {
+                exchange.sendResponseHeaders(400, -1); // Errore generico
+            }
 
-            // Risposta al client
-            exchange.sendResponseHeaders(201, -1); // Creato con successo
         } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback(); // Rollback in caso di errore
+            }
             e.printStackTrace(); // Log dell'errore per debugging
             exchange.sendResponseHeaders(400, -1); // Errore nella richiesta
         } finally {
@@ -184,44 +201,72 @@ public class HandleUtenti implements HttpHandler {
         utente.setRuolo((String) requestData.get("ruolo"));
         dao.update(utente);
 
-        em.close();
-        exchange.sendResponseHeaders(200, -1); // Aggiornamento riuscito
+
+        // Crea un nuovo ObjectMapper
+        ObjectMapper objectMapper2 = new ObjectMapper();
+        objectMapper2.registerModule(new JavaTimeModule());
+        Object createdObject;
+        createdObject = utente;
+        if (createdObject != null) {
+            String jsonResponse = objectMapper2.writeValueAsString(createdObject);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(201, jsonResponse.getBytes().length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(jsonResponse.getBytes());
+            }
+            em.close();
+//            exchange.sendResponseHeaders(200, -1); // Aggiornamento riuscito
+        }
     }
 
     private void handleGet(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
         UtenteDAO dao = new UtenteDAO(em);
 
-        // Recupera tutti i rivenditori
-        List<Utente> utenti = dao.getAll();
-        em.close();
+        try {
+            // Recupera tutti gli utenti
+            List<Utente> utenti = dao.getAll();
 
-        String jsonResponse = utenti.stream()
-                .map(u -> {
-                    // Controllo se Tessera è presente
-                    String tesseraJson = u.getTessera() != null
-                            ? String.format("{\"id\":%d,\"codice\":\"%s\"}", u.getTessera().getId(), u.getTessera().getCodice())
-                            : null;
+            // Serializza la lista degli utenti in JSON
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule()); // Per supportare le date
 
-                    // Creazione del JSON completo dell'Utente
-                    return String.format(
-                            "{\"id\":%d,\"nome\":\"%s\",\"cognome\":\"%s\",\"dataNascita\":\"%s\",\"email\":\"%s\",\"tessera\":%s,\"ruolo\":\"%s\"}",
-                            u.getId(),
-                            u.getNome(),
-                            u.getCognome(),
-                            u.getDataNascita() != null ? u.getDataNascita().toString() : null,
-                            u.getEmail(),
-                            tesseraJson,
-                            u.getRuolo() // Aggiungi la proprietà ruolo
-                    );
-                })
-                .collect(Collectors.joining(",", "[", "]"));
+            // Converti in DTO
+            String jsonResponse = objectMapper.writeValueAsString(
+                    utenti.stream().map(u -> {
+                        // Usa valori di default per evitare NullPointerException
+                        return Map.of(
+                                "id", u.getId(),
+                                "nome", u.getNome() != null ? u.getNome() : "",
+                                "cognome", u.getCognome() != null ? u.getCognome() : "",
+                                "dataNascita", u.getDataNascita() != null ? u.getDataNascita().toString() : "",
+                                "email", u.getEmail() != null ? u.getEmail() : "",
+                                "tessera", u.getTessera() != null
+                                        ? Map.of(
+                                        "id", u.getTessera().getId(),
+                                        "codice", u.getTessera().getCodice() != null ? u.getTessera().getCodice() : ""
+                                )
+                                        : "",
+                                "ruolo", u.getRuolo() != null ? u.getRuolo() : ""
+                        );
+                    }).collect(Collectors.toList())
+            );
 
+            // Imposta l'header della risposta
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
 
-        // Restituisci la risposta
-        exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(jsonResponse.getBytes());
+            // Scrivi la risposta nel body
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(jsonResponse.getBytes());
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // Log dell'errore per debugging
+            exchange.sendResponseHeaders(500, -1); // Risposta con errore interno del server
+        } finally {
+            em.close(); // Chiudi l'EntityManager
         }
     }
+
+
 }
