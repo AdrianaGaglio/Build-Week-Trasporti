@@ -1,6 +1,7 @@
 package server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -34,6 +35,7 @@ import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -63,7 +65,6 @@ public class HandleBiglietti implements HttpHandler {
 
         switch (method) {
             case "GET":
-                System.out.println("arrivato fin qui");
                 handleGet(exchange);
                 break;
             case "POST":
@@ -188,6 +189,7 @@ public class HandleBiglietti implements HttpHandler {
 
                 // Crea un nuovo biglietto giornaliero
                 Giornaliero giornaliero = new Giornaliero();
+                giornaliero.setTipo("giornaliero");
                 giornaliero.setRivenditore(rivenditore);
                 giornaliero.setTratta(tratta);
                 giornaliero.setDaAttivare(true);  // Settiamo se il biglietto deve essere attivato
@@ -229,14 +231,14 @@ public class HandleBiglietti implements HttpHandler {
                 // Crea un nuovo abbonamento
                 Abbonamento abbonamento = new Abbonamento();
                 abbonamento.setRivenditore(rivenditore);
+                abbonamento.setTipo("abbonamento");
                 abbonamento.setAttivo(true);  // Impostiamo l'abbonamento come attivo
                 abbonamento.setPeriodicy(periodicy);
                 abbonamento.setUtente(utente);  // Associa l'utente all'abbonamento
                 abbonamentoDAO.save(abbonamento);
                 tessera.getAbbonamenti().add(abbonamento);
                 tesseraDAO.update(tessera);
-            }
-            else {
+            } else {
                 // Tipo non valido, restituisci un errore 400
                 exchange.sendResponseHeaders(400, -1);
                 em.close();
@@ -273,7 +275,7 @@ public class HandleBiglietti implements HttpHandler {
             ConvalidaBiglietto convalida = new ConvalidaBiglietto(em);
 //            convalida.convalida(giornaliero);
         } else if (biglietto instanceof Abbonamento) {
-           Abbonamento abbonamento = (Abbonamento) biglietto;
+            Abbonamento abbonamento = (Abbonamento) biglietto;
             RinnovoAbbonamento rinnovo = new RinnovoAbbonamento(em);
             rinnovo.rinnova((Tessera) requestData.get("tessera"), Periodicy.valueOf((String) requestData.get("periodicy")));
         }
@@ -288,88 +290,59 @@ public class HandleBiglietti implements HttpHandler {
         GiornalieroDAO giornalieroDAO = new GiornalieroDAO(em);
         AbbonamentoDAO abbonamentoDAO = new AbbonamentoDAO(em);
 
-        // Recupera l'ID della tessera dalla richiesta (esempio: query parameter o path parameter)
-        String query = exchange.getRequestURI().getQuery();
-        String tesseraIdStr = null;
-        if (query != null) {
-            tesseraIdStr = query.split("=")[1];  // supponendo una query del tipo "tesseraId=123"
-        }
+        try {
+            // Recupera i biglietti e gli abbonamenti associati alla tessera
+            List<Biglietto> biglietti = bigliettoDAO.findAll();
 
-        Long tesseraId = (tesseraIdStr != null) ? Long.parseLong(tesseraIdStr) : null;
 
-        // Recupera la tessera dalla base di dati
-        Tessera tessera = null;
-        if (tesseraId != null) {
-            tessera = em.find(Tessera.class, tesseraId);
-        }
+            // Costruisci la risposta JSON
+            String jsonResponse = biglietti.stream()
+                    .map(b -> {
+                        StringBuilder jsonBuilder = new StringBuilder();
+                        if (b.getTipo().equalsIgnoreCase("giornaliero")) {
+                            Giornaliero giornaliero = (Giornaliero) b;
+                            jsonBuilder.append(String.format(
+                                    "{\"id\":%d,\"tipo\":\"%s\",\"daAttivare\":%b}",
+                                    giornaliero.getId(),
+                                    giornaliero.getClass().getSimpleName(),
+                                    giornaliero.isDaAttivare()
+                            ));
+                        } else if (b.getTipo().equalsIgnoreCase("abbonamento")) {
+                            Abbonamento abbonamento = (Abbonamento) b;
+                            jsonBuilder.append(String.format(
+                                    "{\"id\":%d,\"tipo\":\"%s\",\"attivo\":%b,\"tariffa\":\"%s\",\"periodicy\":\"%s\"}",
+                                    abbonamento.getId(),
+                                    abbonamento.getClass().getSimpleName(),
+                                    abbonamento.isAttivo(),
+                                    abbonamento.getTariffa(),
+                                    abbonamento.getPeriodicy()
+                            ));
+                        }
 
-        // Recupera i biglietti e gli abbonamenti associati alla tessera
-        List<Biglietto> biglietti = bigliettoDAO.findAll();
-        List<Abbonamento> abbonamenti = new ArrayList<>();
+                        return jsonBuilder.toString();
+                    })
+                    .collect(Collectors.joining(",", "[", "]"));
 
-        if (tessera != null) {
-            abbonamenti = abbonamentoDAO.perTessera(tessera);  // Estrai gli abbonamenti associati alla tessera
-        }
-
-        final List<Abbonamento> finalAbbonamenti = abbonamenti;
-
-        em.close();
-
-        // Costruisci la risposta JSON
-        String jsonResponse = biglietti.stream()
-                .map(b -> {
-                    StringBuilder jsonBuilder = new StringBuilder();
-                    if (b instanceof Giornaliero) {
-                        Giornaliero giornaliero = (Giornaliero) b;
-                        jsonBuilder.append(String.format(
-                                "{\"id\":%d,\"tipo\":\"%s\",\"daAttivare\":%b}",
-                                giornaliero.getId(),
-                                giornaliero.getClass().getSimpleName(),
-                                giornaliero.isDaAttivare()
-                        ));
-                    } else if (b instanceof Abbonamento) {
-                        Abbonamento abbonamento = (Abbonamento) b;
-                        jsonBuilder.append(String.format(
-                                "{\"id\":%d,\"tipo\":\"%s\",\"attivo\":%b,\"tariffa\":\"%s\",\"periodicy\":\"%s\"}",
-                                abbonamento.getId(),
-                                abbonamento.getClass().getSimpleName(),
-                                abbonamento.isAttivo(),
-                                abbonamento.getTariffa(),
-                                abbonamento.getPeriodicy()
-                        ));
-                    } else {
-                        jsonBuilder.append(String.format(
-                                "{\"id\":%d,\"tipo\":\"%s\"}",
-                                b.getId(),
-                                b.getClass().getSimpleName()
-                        ));
-                    }
-
-                    // Aggiungi gli abbonamenti se presenti
-                    if (!finalAbbonamenti.isEmpty()) {
-                        jsonBuilder.append(",\"abbonamenti\":[");
-
-                        jsonBuilder.append(finalAbbonamenti.stream()
-                                .map(a -> String.format(
-                                        "{\"id\":%d,\"tipo\":\"%s\",\"attivo\":%b,\"tariffa\":\"%s\",\"periodicy\":\"%s\"}",
-                                        a.getId(),
-                                        a.getClass().getSimpleName(),
-                                        a.isAttivo(),
-                                        a.getTariffa(),
-                                        a.getPeriodicy()
-                                ))
-                                .collect(Collectors.joining(",", "", "]")));
-                    }
-
-                    return jsonBuilder.toString();
-                })
-                .collect(Collectors.joining(",", "[", "]"));
-
-        // Restituisci la risposta
-        exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(jsonResponse.getBytes());
+            // Restituisci la risposta
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(jsonResponse.getBytes());
+            }
+        } catch (Exception e) {
+            // Rollback in caso di errore
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            e.printStackTrace();
+            exchange.sendResponseHeaders(500, -1); // Errore interno
+        } finally {
+            // Assicurati che l'EntityManager venga chiuso
+            if (em.isOpen()) {
+                em.close();
+            }
         }
     }
+
 
 }

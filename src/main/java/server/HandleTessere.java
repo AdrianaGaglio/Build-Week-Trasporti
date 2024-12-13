@@ -135,9 +135,11 @@ public class HandleTessere implements HttpHandler {
             // Deserializza il rivenditore in base al tipo
             long rivId = Long.parseLong(requestData.get("rivenditoreId").toString());
             Rivenditore rivenditore = rivenditoreDAO.findById(rivId);
+
             RivFisico rivFisico = null;
             RivAutomatico rivAutomatico = null;
-            if(rivenditore.getTipo().toLowerCase().equals("rivfisico")) {
+
+            if (rivenditore.getTipo().toLowerCase().equals("rivfisico")) {
                 rivFisico = (RivFisico) rivenditore;
                 System.out.println(rivFisico);
                 if (!LocalDate.now().getDayOfWeek().equals(rivFisico.getGiornoChiusura()) &&
@@ -145,43 +147,49 @@ public class HandleTessere implements HttpHandler {
                         LocalTime.now().isBefore(rivFisico.getOraChiusura())) {
 
                     // Inizia la transazione
-                    em.getTransaction().begin();
+
                     if (utente.getTessera() == null) {
+
                         System.out.println("Creazione tessera in corso...");
                         Tessera tessera = new Tessera();
                         tessera.setValidita(LocalDateTime.now().plusYears(1));
                         utente.setTessera(tessera);
                         tessera.setUtente(utente);
+                        em.getTransaction().begin();
                         em.persist(tessera);
                         em.merge(utente);
+                        em.getTransaction().commit();
                     } else if (utente.getTessera().getValidita().isBefore(LocalDateTime.now())) {
                         System.out.println("Tessera scaduta, necessita rinnovo");
                     } else {
                         System.out.println("Utente già in possesso di tessera valida");
                     }
-                    em.getTransaction().commit();
+
                 } else {
                     System.out.println("Il rivenditore fisico è chiuso");
                 }
-            } else if(rivenditore.getTipo().toLowerCase().equals("rivautomatico")){
+            } else if (rivenditore.getTipo().toLowerCase().equals("rivautomatico")) {
+
                 rivAutomatico = (RivAutomatico) rivenditore;
                 System.out.println(rivAutomatico);
                 if (rivAutomatico.isAttivo()) {
-                    em.getTransaction().begin();
+
                     if (utente.getTessera() == null) {
                         System.out.println("Creazione tessera in corso...");
                         Tessera tessera = new Tessera();
                         tessera.setValidita(LocalDateTime.now().plusYears(1));
                         utente.setTessera(tessera);
                         tessera.setUtente(utente);
+                        em.getTransaction().begin();
                         em.persist(tessera);
                         em.merge(utente);
+                        em.getTransaction().commit();
                     } else if (utente.getTessera().getValidita().isBefore(LocalDateTime.now())) {
                         System.out.println("Tessera scaduta, necessita rinnovo");
                     } else {
                         System.out.println("Utente già in possesso di tessera valida");
                     }
-                    em.getTransaction().commit();
+
                 } else {
                     System.out.println("Rivenditore automatico fuori servizio");
                 }
@@ -246,7 +254,6 @@ public class HandleTessere implements HttpHandler {
                     );
                 })
                 .collect(Collectors.joining(",", "[", "]"));
-
 
 
         // Restituisci la risposta

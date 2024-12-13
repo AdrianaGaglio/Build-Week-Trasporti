@@ -6,12 +6,14 @@ import epicode.it.entities.utente.Utente;
 import epicode.it.utilities.StringGenerator;
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Data
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@NamedQuery(name="Trova_tutto_Biglietto", query="SELECT a FROM Biglietto a")
+@NamedQuery(name = "Trova_tutto_Biglietto", query = "SELECT a FROM Biglietto a")
+
 @Table(name = "biglietti")
 public abstract class Biglietto {
 
@@ -25,6 +27,7 @@ public abstract class Biglietto {
     @Column
     private LocalDateTime scadenza;
 
+    @Column(nullable = false)
     private LocalDateTime emissione = LocalDateTime.now();
 
     @ManyToOne
@@ -33,10 +36,11 @@ public abstract class Biglietto {
     @ManyToOne
     private Mezzo mezzo;
 
+    @Column(nullable = false)
     private boolean daAttivare = true;
 
     @ManyToOne
     private Utente utente;
 
-
+    private String tipo;
 }
