@@ -8,8 +8,8 @@ import lombok.Data;
 
 @Data
 @Entity
-@NamedQuery(name="perTessera", query ="SELECT a FROM Abbonamento a WHERE a.tessera = :tessera ORDER BY a.id ASC")
-@Table(name="abbonamenti")
+@NamedQuery(name = "perTessera", query = "SELECT a FROM Abbonamento a WHERE a.tessera = :tessera ORDER BY a.id ASC")
+@Table(name = "abbonamenti")
 public class Abbonamento extends Biglietto {
 
     @Enumerated(EnumType.STRING)
@@ -23,5 +23,16 @@ public class Abbonamento extends Biglietto {
     @JoinColumn(name = "tessera_id")
     private Tessera tessera;
 
-
+    @Override
+    public String toString() {
+        return "Abbonamento{" +
+                "id= " + getId() +
+                ", codice= " + getCodice() +
+                ", emissione= " + getEmissione() +
+                ", periodicy= " + periodicy +
+                ", attivo= " + attivo +
+                ", scadenza= " + getScadenza() +
+                ", utenteId= " + (getTessera().getUtente() != null ? getTessera().getUtente().getId() : null) +
+                '}';
+    }
 }

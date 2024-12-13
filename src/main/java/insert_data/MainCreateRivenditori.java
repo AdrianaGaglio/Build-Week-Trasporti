@@ -13,6 +13,7 @@ import epicode.it.entities.biglietto.Periodicy;
 import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.rivenditore.Rivenditore;
 import epicode.it.entities.stato_mezzo.StatoMezzo;
+import epicode.it.entities.tessera.Tessera;
 import epicode.it.entities.utente.Utente;
 import epicode.it.servizi.gestire_tessera.GestoreTessera;
 import epicode.it.servizi.gestore_rivenditori_e_biglietti.GestoreRivenditoriEBiglietti;
@@ -45,10 +46,17 @@ public class MainCreateRivenditori {
 //                    LocalTime.of(faker.random().nextInt(17,20), faker.random().nextInt(0,59)));
 //            gestoreRivenditori.creaRivenditoreAutomatico();
 //        }
-        GiornalieroDAO giornalieroDAO = new GiornalieroDAO(em);
-        List<Giornaliero> biglietti = giornalieroDAO.findAll();
-        biglietti.forEach(System.out::println);
+//        GiornalieroDAO giornalieroDAO = new GiornalieroDAO(em);
+//        List<Giornaliero> biglietti = giornalieroDAO.findAll();
+//        biglietti.forEach(System.out::println);
 
 
+        UtenteDAO utenteDAO = new UtenteDAO(em);
+        Utente utente = utenteDAO.getById(1L);
+        System.out.println(utente.getTessera());
+
+        Tessera tessera = utente.getTessera();
+        System.out.println(tessera);
+        tessera.getAbbonamenti().forEach(System.out::println);
     }
 }

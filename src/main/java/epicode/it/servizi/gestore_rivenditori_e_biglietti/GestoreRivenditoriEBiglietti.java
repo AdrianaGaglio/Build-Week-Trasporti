@@ -4,6 +4,7 @@ import epicode.it.dao.biglietto.BigliettoDAO;
 import epicode.it.dao.rivenditore.RivenditoreDAO;
 import epicode.it.dao.tessera.TesseraDAO;
 import epicode.it.dao.tratta.TrattaDAO;
+import epicode.it.dao.utente.UtenteDAO;
 import epicode.it.entities.biglietto.Abbonamento;
 import epicode.it.entities.biglietto.Giornaliero;
 import epicode.it.entities.biglietto.Periodicy;
@@ -66,7 +67,7 @@ public class GestoreRivenditoriEBiglietti {
         Tessera tessera = tesseraDAO.getTessera(utente);
         if (tessera != null) {
             Abbonamento abbonamentoAttivo = tessera.getAbbonamenti().stream()
-                    .filter(abbonamento -> abbonamento.isAttivo() && abbonamento.getScadenza().isAfter(LocalDateTime.now()))
+                    .filter(abbonamento ->  abbonamento.getScadenza().isAfter(LocalDateTime.now()))
                     .findFirst()
                     .orElse(null);
 
@@ -78,7 +79,9 @@ public class GestoreRivenditoriEBiglietti {
                     case settimanale -> 7;
                     case trimestrale -> 90;
                 }));
+                abbonamentoAttivo.setPeriodicy(periodicy);
                 abbonamentoAttivo.setAttivo(true);
+                abbonamentoAttivo.setDaAttivare(true);
                 bigliettoDAO.update(abbonamentoAttivo);
                 System.out.println("Abbonamento rinnovato con successo!");
             } else {
@@ -156,6 +159,7 @@ public class GestoreRivenditoriEBiglietti {
             case trimestrale -> 90;
         }));
         abbonamento.setAttivo(true);
+        abbonamento.setPeriodicy(periodicy);
         abbonamento.setCodice(generateUniqueBigliettoCode());
 
         bigliettoDAO.save(abbonamento);
@@ -203,6 +207,9 @@ public class GestoreRivenditoriEBiglietti {
         tessera.setValidita(LocalDateTime.now().plusYears(1));
         tessera.setCodice(generateUniqueBigliettoCode());
         tesseraDAO.save(tessera);
+        utente.setTessera(tessera);
+        UtenteDAO utenteDAO = new UtenteDAO(em);
+        utenteDAO.update(utente);
         System.out.println("Tessera emessa con successo! Codice: " + tessera.getCodice());
     }
 

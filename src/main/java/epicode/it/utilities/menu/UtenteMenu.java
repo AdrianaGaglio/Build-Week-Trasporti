@@ -13,6 +13,7 @@ import epicode.it.entities.mezzo.Mezzo;
 import epicode.it.entities.mezzo.Stato;
 import epicode.it.entities.rivenditore.Rivenditore;
 import epicode.it.entities.stato_mezzo.Servizio;
+import epicode.it.entities.tessera.Tessera;
 import epicode.it.entities.tratta.Tratta;
 import epicode.it.entities.utente.Utente;
 import epicode.it.servizi.gestore_rivenditori_e_biglietti.ConvalidaBiglietto;
@@ -40,9 +41,15 @@ public class UtenteMenu {
         utenteDAO = new UtenteDAO(em);
 
         System.out.println("--- Menu utente di " + utente.getNome() + " " + utente.getCognome() + " ---");
+        System.out.println("=========================");
         System.out.println("1. Compra biglietto giornaliero");
+        System.out.println("=========================");
         System.out.println("2. Convalida biglietto");
+        System.out.println("=========================");
         System.out.println("3. Compra abbonamento");
+        System.out.println("=========================");
+        System.out.println("4. Lista abbonamenti");
+        System.out.println("=========================");
         System.out.println("=> Scegli un opzione valida: (0 per tornare indietro)");
         switchOptions(scanner, em, utente);
     }
@@ -117,11 +124,26 @@ public class UtenteMenu {
             return;
         }
 
+        Tratta tratta = biglietto.getTratta();
+
+        MezzoDAO mezzoDAO = new MezzoDAO(em);
+       List<Mezzo> mezziInServizioSuQuellaTratta = mezzoDAO.findMezziInServizioPerTratta(tratta);
+
+       if(mezziInServizioSuQuellaTratta.isEmpty()){
+           System.err.println("Non ci sono mezzi in servizio su questa tratta\n");
+           return;
+       } else {
+           System.out.println("Mezzi in servizio su questa tratta:");
+           System.out.println("\n------------------------");
+           mezziInServizioSuQuellaTratta.forEach(System.out::println);
+           System.out.println("------------------------\n");
+       }
+
         System.out.println("Inserisci l'ID del mezzo:");
         long mezzoId = scanner.nextLong();
         scanner.nextLine();
 
-        try {
+
             Mezzo mezzo = mezzoDAO.findById(mezzoId);
             if (mezzo == null) {
                 System.out.println("Mezzo non trovato!");
@@ -147,14 +169,12 @@ public class UtenteMenu {
                 } else {
                     System.out.println("La tratta del biglietto non corrisponde alla tratta del mezzo!");
                 }
+            } else {
+                System.err.println("Il mezzo non è in servizio");
             }
 
 
-        } catch (IllegalStateException e) {
-            System.out.println("Errore di validazione: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Errore durante la convalida: " + e.getMessage());
-        }
+
     }
 
     private static void gestisciAbbonamento(Scanner scanner, EntityManager em, GestoreRivenditoriEBiglietti gestore, Utente utente) {
@@ -221,9 +241,19 @@ public class UtenteMenu {
             case 1 -> gestisciBiglietto(scanner, em, gestore);
             case 2 -> gestisciConvalida(scanner, em, controllore);
             case 3 -> gestisciAbbonamento(scanner, em, gestore, utente);
+            case 4 -> listaAbbonamenti(em,utente);
             default -> System.out.println("Opzione non valida");
         }
 
         showUtenteMenu(scanner, em, utente);
+    }
+
+    private static void listaAbbonamenti(EntityManager em, Utente utente) {
+        Tessera tessera = utente.getTessera();
+        System.out.println(tessera);
+        System.out.println("Abbonamenti:");
+        System.out.println("------------------------");
+        tessera.getAbbonamenti().forEach(System.out::println);
+        System.out.println("------------------------");
     }
 }

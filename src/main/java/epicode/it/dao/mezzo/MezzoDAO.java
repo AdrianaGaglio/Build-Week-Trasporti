@@ -61,4 +61,17 @@ public class MezzoDAO {
                 .setParameter("stato", stato).getResultList();
     }
 
+    public List<Mezzo> findMezziInServizioPerTratta(Tratta tratta) {
+        String query = "SELECT DISTINCT s.mezzo " +
+                "FROM Servizio s " +
+                "WHERE s.tratta = :tratta " +
+                "AND (s.dataFine IS NULL OR s.dataFine > :dataCorrente)";
+
+        return em.createQuery(query, Mezzo.class)
+                .setParameter("tratta", tratta)
+                .setParameter("dataCorrente", LocalDate.now()) // Filtra per servizi ancora attivi
+                .getResultList();
+    }
+
+
 }

@@ -19,11 +19,17 @@ public class RivenditoreMenu {
         while (true) {
             System.out.println("\n--- Menu rivenditore ---");
             System.out.println("1. Emetti biglietto");
+            System.out.println("=========================");
             System.out.println("2. Emetti nuovo abbonamento");
+            System.out.println("=========================");
             System.out.println("3. Emetti nuova tessera");
+            System.out.println("=========================");
             System.out.println("4. Rinnova abbonamento");
+            System.out.println("=========================");
             System.out.println("5. Rinnova tessera");
-            System.out.println("6. Esci");
+            System.out.println("=========================");
+            System.out.println("0. Torna indietro");
+            System.out.println("=========================");
             System.out.print("Scegli un'opzione: ");
 
             int scelta = scanner.nextInt();
@@ -35,7 +41,7 @@ public class RivenditoreMenu {
                 case 3 -> emettiTessera(scanner, gestore, utenteDAO);
                 case 4 -> rinnovaAbbonamento(scanner, gestore, utenteDAO);
                 case 5 -> rinnovaTessera(scanner, gestore, utenteDAO);
-                case 6 -> {
+                case 0 -> {
                     System.out.println("Uscita dal menu rivenditore.");
                     return;
                 }
@@ -45,9 +51,9 @@ public class RivenditoreMenu {
     }
 
     private static void emettiBiglietto(Scanner scanner, GestoreRivenditoriEBiglietti gestore, UtenteDAO utenteDAO) {
-        System.out.print("Inserisci email dell'utente: ");
-        String email = scanner.next();
-        Utente utente = utenteDAO.findByEmail(email);
+        System.out.print("Inserisci l' id dell'utente: ");
+        long idutente = scanner.nextLong();
+        Utente utente = utenteDAO.getById(idutente);
 
         if (utente == null) {
             System.err.println("Utente non trovato!");
@@ -68,9 +74,9 @@ public class RivenditoreMenu {
     }
 
     private static void emettiAbbonamento(Scanner scanner, GestoreRivenditoriEBiglietti gestore, UtenteDAO utenteDAO) {
-        System.out.print("Inserisci email dell'utente: ");
-        String email = scanner.next();
-        Utente utente = utenteDAO.findByEmail(email);
+        System.out.print("Inserisci l' id dell'utente: ");
+        long idutente = scanner.nextLong();
+        Utente utente = utenteDAO.getById(idutente);
 
         if (utente == null) {
             System.err.println("Utente non trovato!");
@@ -89,9 +95,9 @@ public class RivenditoreMenu {
     }
 
     private static void emettiTessera(Scanner scanner, GestoreRivenditoriEBiglietti gestore, UtenteDAO utenteDAO) {
-        System.out.print("Inserisci email dell'utente: ");
-        String email = scanner.next();
-        Utente utente = utenteDAO.findByEmail(email);
+        System.out.print("Inserisci l' id dell'utente: ");
+        long idutente = scanner.nextLong();
+        Utente utente = utenteDAO.getById(idutente);
 
         if (utente == null) {
             System.err.println("Utente non trovato!");
@@ -103,9 +109,9 @@ public class RivenditoreMenu {
     }
 
     private static void rinnovaAbbonamento(Scanner scanner, GestoreRivenditoriEBiglietti gestore, UtenteDAO utenteDAO) {
-        System.out.print("Inserisci email dell'utente: ");
-        String email = scanner.next();
-        Utente utente = utenteDAO.findByEmail(email);
+        System.out.print("Inserisci l' id dell'utente: ");
+        long idutente = scanner.nextLong();
+        Utente utente = utenteDAO.getById(idutente);
 
         if (utente == null) {
             System.err.println("Utente non trovato!");
@@ -117,16 +123,16 @@ public class RivenditoreMenu {
 
         try {
             gestore.rinnovaAbbonamento(utente, Periodicy.valueOf(periodicita));
-            System.out.println("Abbonamento rinnovato con successo!");
+
         } catch (IllegalArgumentException e) {
             System.err.println("Periodicità non valida!");
         }
     }
 
     private static void rinnovaTessera(Scanner scanner, GestoreRivenditoriEBiglietti gestore, UtenteDAO utenteDAO) {
-        System.out.print("Inserisci email dell'utente: ");
-        String email = scanner.next();
-        Utente utente = utenteDAO.findByEmail(email);
+        System.out.print("Inserisci l' id dell'utente: ");
+        long idutente = scanner.nextLong();
+        Utente utente = utenteDAO.getById(idutente);
 
         if (utente == null) {
             System.err.println("Utente non trovato!");
