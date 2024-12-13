@@ -52,6 +52,4 @@ public class GiornalieroDAO {
                 .setParameter("mezzoId", mezzoId)
                 .getResultList();
     }
-
-
 }

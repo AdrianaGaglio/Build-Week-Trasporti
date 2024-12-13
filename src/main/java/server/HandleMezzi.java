@@ -116,40 +116,50 @@ public class HandleMezzi implements HttpHandler {
 
     private void handlePost(HttpExchange exchange) throws IOException {
         EntityManager em = emf.createEntityManager();
-
-        MezzoDAO mezzoDAO = new MezzoDAO(em);
-        AutobusDAO autobusDAO = new AutobusDAO(em);
-        TramDAO tramDAO = new TramDAO(em);
-
-
         try {
-            // Leggi il corpo della richiesta come JSON
-            Map<String, Object> requestData = objectMapper.readValue(exchange.getRequestBody(), Map.class);
-            String tipo = (String) requestData.get("tipo");
+            MezzoDAO mezzoDAO = new MezzoDAO(em);
+            AutobusDAO autobusDAO = new AutobusDAO(em);
+            TramDAO tramDAO = new TramDAO(em);
 
-            if ("autobus".equalsIgnoreCase(tipo)) {
-                // Creazione di un autobus
-                Autobus autobus = new Autobus();
-                autobus.setCodice((Integer) requestData.get("codice"));
-                autobus.setStato(Stato.DEPOSITO);
-                autobusDAO.save(autobus);
-            } else if ("tram".equalsIgnoreCase(tipo)) {
-                // Creazione di un tram
-                Tram tram = new Tram();
-                tram.setCodice((Integer) requestData.get("codice"));
-                tram.setStato(Stato.DEPOSITO);
-                tramDAO.save(tram);
-            } else {
-                exchange.sendResponseHeaders(400, -1); // Tipo non valido
-                em.close();
+            // Leggi il corpo della richiesta
+            MezzoRequest requestData = objectMapper.readValue(exchange.getRequestBody(), MezzoRequest.class);
+            if (requestData.tipo == null || requestData.codice == null) {
+                exchange.sendResponseHeaders(400, -1); // Richiesta non valida
                 return;
             }
-            exchange.sendResponseHeaders(201, -1); // Creato con successo
 
+            if ("autobus".equalsIgnoreCase(requestData.tipo)) {
+                Autobus autobus = new Autobus(requestData.codice);
+                autobus.setStato(Stato.DEPOSITO);
+                autobusDAO.save(autobus);
+
+            } else if ("tram".equalsIgnoreCase(requestData.tipo)) {
+                Tram tram = new Tram(requestData.codice);
+                tram.setStato(Stato.DEPOSITO);
+                tramDAO.save(tram);
+
+            } else {
+                exchange.sendResponseHeaders(400, -1); // Tipo non valido
+                return;
+            }
+
+            // Risposta positiva
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(201, -1);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            exchange.sendResponseHeaders(500, -1);
         } finally {
-            em.close(); // Chiudi l'EntityManager
+            em.close();
         }
     }
+
+    static class MezzoRequest {
+        public String tipo;
+        public Integer codice;
+    }
+
 
 
     private void handlePut(HttpExchange exchange) throws IOException {
